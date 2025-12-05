@@ -1,0 +1,6 @@
+{
+    "SigningCommand":
+    {
+        "--signing-mode": "TEST"
+    }
+}

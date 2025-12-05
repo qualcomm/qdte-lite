@@ -1,0 +1,12 @@
+{
+    "SigningCommand":
+    {
+        "--signing-mode": "LOCAL",
+        "--oem-id": "0x1234",
+        "--oem-product-id": "0x0",
+        "--anti-rollback-version": "0x0",
+        "--root-certificate": "./OEM-KEYS/qpsa_rootca.cer",
+        "--ca-certificate": "./OEM-KEYS/qpsa_attestca.cer",
+        "--ca-key": "./OEM-KEYS/qpsa_attestca.key"
+    }
+}

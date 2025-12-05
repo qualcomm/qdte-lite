@@ -1,0 +1,10 @@
+{
+    "SigningCommand":
+    {
+        "--signing-mode": "PLUGIN",
+        "--oem-id": "0x1234",
+        "--oem-product-id": "0x0",
+        "--anti-rollback-version": "0x0",
+        "--plug-in-signer": "/path/to/sectools_v2_plug_in_signer_samplecode.py"
+    }
+}

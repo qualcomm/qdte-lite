@@ -1,0 +1,10 @@
+# Core dependencies for DTGUI (Qualcomm Device Tree Editor)
+pyfdt>=0.3
+pyfatfs>=1.0.5
+fs>=2.4.16
+six>=1.16.0
+
+# Optional dependencies for development and testing
+# Uncomment the following lines if needed:
+# pympler>=1.0.1  # For memory profiling
+# coverage>=7.0.0  # For code coverage testing

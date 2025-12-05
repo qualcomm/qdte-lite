@@ -1,16 +1,8 @@
-**After repository creation:**
-- [ ] Update this `README.md`. Update the Project Name, description, and all sections. Remove this checklist.
-- [ ] If required, update `LICENSE.txt` and the License section with your project's approved license
-- [ ] Search this repo for "REPLACE-ME" and update all instances accordingly
-- [ ] Update `CONTRIBUTING.md` as needed
-- [ ] Review the workflows in `.github/workflows`, updating as needed. See https://docs.github.com/en/actions for information on what these files do and how they work.
-- [ ] Review and update the suggested Issue and PR templates as needed in `.github/ISSUE_TEMPLATE` and `.github/PULL_REQUEST_TEMPLATE`
+# DTGUI (Device Tree Editor)
 
-# Project Name
+*Welcome to the DT GUI project*
 
-*\<update with your project name and a short description\>*
-
-Project that does ... implemented in ... runs on Qualcomm® *\<processor\>*
+DTGUI is a graphical user interface application for editing Device Trees and modifying DTB (Device Tree Blob) and ELF files. It runs on host machines (Linux/Windows) and is designed to work with Qualcomm® platforms.
 
 ## Branches
 
@@ -18,30 +10,54 @@ Project that does ... implemented in ... runs on Qualcomm® *\<processor\>*
 
 ## Requirements
 
-List requirements to run the project, how to install them, instructions to use docker container, etc...
+To run this project, you need:
+
+*   Python 3
+*   Tkinter (usually included with Python)
+*   Dependencies listed in `requirements.txt`
 
 ## Installation Instructions
 
-How to install the software itself.
+1.  Clone the repository:
+    ```bash
+    git clone https://github.com/qualcomm/DTGUI-for-Qualcomm-DTB-ELF-Modification.git
+    cd DTGUI-for-Qualcomm-DTB-ELF-Modification
+    ```
+
+2.  Install the required Python packages:
+    ```bash
+    pip install -r requirements.txt
+    ```
 
 ## Usage
 
-Describe how to use the project.
+To launch the application, run the `run.py` script:
+
+```bash
+python3 run.py
+```
+
+You can also pass a file to open directly:
+
+```bash
+python3 run.py lahaina.dtb
+```
+
+For a list of available options and flags:
+
+```bash
+python3 run.py --help
+```
 
 ## Development
 
-How to develop new features/fixes for the software. Maybe different than "usage". Also provide details on how to contribute via a [CONTRIBUTING.md file](CONTRIBUTING.md).
+For information on how to contribute to this project, please refer to the [CONTRIBUTING.md](CONTRIBUTING.md) file.
 
 ## Getting in Contact
 
-How to contact maintainers. E.g. GitHub Issues, GitHub Discussions could be indicated for many cases. However a mail list or list of Maintainer e-mails could be shared for other types of discussions. E.g.
-
-* [Report an Issue on GitHub](../../issues)
-* [Open a Discussion on GitHub](../../discussions)
-* [E-mail us](mailto:REPLACE-ME@qti.qualcomm.com) for general questions
+*   [Report an Issue on GitHub](../../issues)
+*   [Open a Discussion on GitHub](../../discussions)
 
 ## License
 
-*\<update with your project name and license\>*
-
-*\<REPLACE-ME\>* is licensed under the [BSD-3-clause License](https://spdx.org/licenses/BSD-3-Clause.html). See [LICENSE.txt](LICENSE.txt) for the full license text.
+DTGUI is licensed under the [BSD-3-clause License](https://spdx.org/licenses/BSD-3-Clause.html). See [LICENSE.txt](LICENSE.txt) for the full license text.
