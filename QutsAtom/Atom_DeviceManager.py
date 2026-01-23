@@ -1,5 +1,5 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 from QutsAtom.Atom_AtomUtilityModule import *
 from QutsAtom.Atom_DeviceManager_init import DeviceManagerList
 from QutsAtom.Atom_QutsClient_init import QutsClientList

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 from flags import flags as gf
 from flags import global_info as gl_info
 import subprocess

@@ -1,5 +1,5 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file findview.py
 This file contains a helper window class called FindWindow that talks with the DTGUIController to get user options for

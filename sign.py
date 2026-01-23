@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file sign.py
 This file contains the interface of signature. it will call sectools v2 for signing. 

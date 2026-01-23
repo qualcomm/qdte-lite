@@ -1,5 +1,5 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file memory_bank.py
 This file implements a workspace memory system for the QDTE application.

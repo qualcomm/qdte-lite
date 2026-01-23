@@ -1,5 +1,5 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file dbgutil.py
 This file contains some debugging utilities.

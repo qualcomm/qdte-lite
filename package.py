@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file package.py
 This file packages the DTGUI application into a single executable (pyz file) and also provides a helper function to

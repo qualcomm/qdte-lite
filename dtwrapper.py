@@ -1,5 +1,5 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file dtwrapper.py
 This file is a wrapper that consolidates all functions that interface with the device tree.

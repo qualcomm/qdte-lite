@@ -1,5 +1,5 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
-# SPDX-License-Identifier: BSD-3-Clause
+# SPDX-License-Identifier: BSD-3-Clause-Clear
 ###########################################################################################################################################################
 # This script generates Meta data tables and outputs them as .bin files for Loader and Core Config, from a given input JSON file.
 # Script also supports disassembling XBL-config option: 
