@@ -1,8 +1,8 @@
-# DTGUI (Device Tree Editor)
+# DTE (Device Tree Editor)
 
-*Welcome to the DT GUI project*
+*Welcome to the DTE project*
 
-DTGUI is a graphical user interface application for editing Device Trees and modifying DTB (Device Tree Blob) and ELF files. It runs on host machines (Linux/Windows) and is designed to work with Qualcomm® platforms.
+DTE is a graphical user interface application for editing Device Trees and modifying DTB (Device Tree Blob) and ELF files. It runs on host machines (Linux/Windows) and is designed to work with Qualcomm® platforms.
 
 ## Branches
 
@@ -12,22 +12,23 @@ DTGUI is a graphical user interface application for editing Device Trees and mod
 
 To run this project, you need:
 
-*   Python 3
-*   Tkinter (usually included with Python)
-*   Dependencies listed in `requirements.txt`
+* Python 3
+* Tkinter (usually included with Python)
+* Dependencies listed in `requirements.txt`
 
 ## Installation Instructions
 
-1.  Clone the repository:
-    ```bash
-    git clone https://github.com/qualcomm/DTGUI-for-Qualcomm-DTB-ELF-Modification.git
-    cd DTGUI-for-Qualcomm-DTB-ELF-Modification
-    ```
+1. Clone the repository:
 
-2.  Install the required Python packages:
-    ```bash
-    pip install -r requirements.txt
-    ```
+   ```bash
+   git clone https://github.com/qualcomm/DTE.git
+   cd DTE
+   ```
+2. Install the required Python packages:
+
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 ## Usage
 
@@ -40,7 +41,7 @@ python3 run.py
 You can also pass a file to open directly:
 
 ```bash
-python3 run.py lahaina.dtb
+python3 run.py <filename>.dtb
 ```
 
 For a list of available options and flags:
@@ -55,8 +56,8 @@ For information on how to contribute to this project, please refer to the [CONTR
 
 ## Getting in Contact
 
-*   [Report an Issue on GitHub](../../issues)
-*   [Open a Discussion on GitHub](../../discussions)
+* [Report an Issue on GitHub](../../issues)
+* [Open a Discussion on GitHub](../../discussions)
 
 ## License
 
