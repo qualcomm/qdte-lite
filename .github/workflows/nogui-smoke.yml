@@ -1,0 +1,136 @@
+# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: BSD-3-Clause-Clear
+#
+# Headless (--nogui) integration smoke tests.
+#
+# These exercise the command-line contract that downstream automation
+# (Yocto, signing pipelines) relies on, by invoking run.py externally on
+# real Qualcomm boot binaries and checking the produced ELF actually
+# contains the edited property:
+#
+#   run.py --nogui --allow_unsigned --input_file <elf>
+#          --output_path <dir> --output_file <name>
+#          --modify "<dtb>/<path>=<value>"
+#
+# Two containers are covered:
+#   * xbl_config.elf  - reassembled via the unsigned GenXBLConfig path
+#   * uefi_dtbs.elf   - a pure-DTB (.dtbs) ELF whose wrapper is rebuilt
+#                       natively under --allow_unsigned
+#
+# Neither path needs the external sectools binary.
+#
+# All binaries are public "test-device" boot images fetched from Qualcomm
+# Software Center; nothing proprietary is committed.
+
+name: QDTE nogui smoke
+
+on:
+  pull_request:
+    branches: [ main, dev ]
+  push:
+    branches: [ main, dev ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  # Public boot-binary / tools archives. Bump the build numbers here to
+  # refresh the fixtures; the embedded DTB names below are tied to them.
+  XBL_ZIP_URL: "https://softwarecenter.qualcomm.com/nexus/generic/product/chip/tech-package/QCM6490_bootbinaries.1.0/qcm6490_bootbinaries.1.0-test-device-public/00126/QCM6490_bootbinaries_00126.zip"
+  XBL_ELF_IN_ZIP: "QCM6490_bootbinaries/xbl_config.elf"
+  # The first DTB embedded in the reassembled ELF (by file offset); this is
+  # the one `fdtdump --scan` decodes, so the verified edit targets it.
+  XBL_DTB_NAME: "pre-ddr-kodiak-1.0.dtb"
+
+  UEFI_ZIP_URL: "https://softwarecenter.qualcomm.com/nexus/generic/product/chip/tech-package/QRB2210_bootbinaries.1.0/qrb2210_bootbinaries.1.0-test-device-public/00010/Agatti_bootbinaries.zip"
+  UEFI_ELF_IN_ZIP: "Agatti_bootbinaries/uefi_dtbs.elf"
+  UEFI_DTB_NAME: "qcom,uefi-agatti-1.0.dtb"
+
+  FIXTURES_DIR: "${{ github.workspace }}/.smoke-fixtures"
+
+jobs:
+  nogui-smoke:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Install dependencies
+        run: |
+          # QDTE headless runtime deps only. With the headless import guards
+          # in place, --nogui needs neither tkinter nor fs/pyfatfs.
+          python -m pip install --upgrade pip
+          python -m pip install pyfdt six
+          # fdtdump (verification) lives in device-tree-compiler.
+          sudo apt-get update
+          sudo apt-get install -y device-tree-compiler
+
+      - name: Cache test binaries
+        id: cache-fixtures
+        uses: actions/cache@v4
+        with:
+          path: ${{ env.FIXTURES_DIR }}
+          key: smoke-fixtures-${{ hashFiles('.github/workflows/qcom-nogui-smoke.yml') }}
+
+      - name: Fetch test binaries
+        if: steps.cache-fixtures.outputs.cache-hit != 'true'
+        run: |
+          set -euo pipefail
+          mkdir -p "$FIXTURES_DIR"
+          tmp="$(mktemp -d)"
+
+          echo "::group::xbl_config.elf"
+          curl -fsSL -o "$tmp/xbl.zip" "$XBL_ZIP_URL"
+          unzip -o -j "$tmp/xbl.zip" "$XBL_ELF_IN_ZIP" -d "$FIXTURES_DIR"
+          echo "::endgroup::"
+
+          echo "::group::uefi_dtbs.elf"
+          curl -fsSL -o "$tmp/uefi.zip" "$UEFI_ZIP_URL"
+          unzip -o -j "$tmp/uefi.zip" "$UEFI_ELF_IN_ZIP" -d "$FIXTURES_DIR"
+          echo "::endgroup::"
+
+          rm -rf "$tmp"
+          ls -l "$FIXTURES_DIR"
+
+      # Each smoke test runs run.py --nogui to edit one property, then reads
+      # it back from the produced ELF with `fdtdump --scan`, which locates and
+      # decodes the embedded DTB. The expected value is matched as the 8-digit
+      # hex word fdtdump prints (e.g. <0x00000007>).
+
+      - name: nogui smoke - xbl_config.elf
+        run: |
+          set -euo pipefail
+          # xbl_config.elf reassembles via the unsigned GenXBLConfig path.
+          # The hex literal also exercises the int(val, 0) fix.
+          out="$(mktemp -d)"
+          python run.py --nogui --allow_unsigned \
+            --input_file "$FIXTURES_DIR/xbl_config.elf" \
+            --output_path "$out" --output_file xbl_config.elf \
+            --modify "$XBL_DTB_NAME/soc/ddr_common_dt/ddr_log_level_dt=0x7"
+          test -f "$out/xbl_config.elf"
+          fdtdump --scan "$out/xbl_config.elf" 2>/dev/null \
+            | grep -q "ddr_log_level_dt = <0x00000007>"
+          echo "PASS: xbl_config.elf ddr_log_level_dt == 0x7"
+
+      - name: nogui smoke - uefi_dtbs.elf
+        run: |
+          set -euo pipefail
+          # uefi_dtbs.elf is a pure-DTB (.dtbs) ELF; under --allow_unsigned
+          # its wrapper is rebuilt natively, with no sectools involved.
+          out="$(mktemp -d)"
+          python run.py --nogui --allow_unsigned \
+            --input_file "$FIXTURES_DIR/uefi_dtbs.elf" \
+            --output_path "$out" --output_file uefi_dtbs.elf \
+            --modify "$UEFI_DTB_NAME/soc/quantum_dt/enter_quantum=0x1"
+          test -f "$out/uefi_dtbs.elf"
+          fdtdump --scan "$out/uefi_dtbs.elf" 2>/dev/null \
+            | grep -q "enter_quantum = <0x00000001>"
+          echo "PASS: uefi_dtbs.elf enter_quantum == 0x1"
+
+          echo "All nogui smoke tests passed."
