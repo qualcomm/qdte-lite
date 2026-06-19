@@ -1712,7 +1712,11 @@ def run(root, **kwargs):
             return """
     else:
         import ctypes
-        ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
+        # ctypes.windll exists only on Windows; this call hides the console
+        # window behind the GUI there.  Guard it so the GUI also launches on
+        # Linux/macOS, where windll is absent (AttributeError otherwise).
+        if hasattr(ctypes, "windll"):
+            ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
         DTGUIController(root, **kwargs)
         # start processing events
 
