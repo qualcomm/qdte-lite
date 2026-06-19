@@ -66,7 +66,20 @@ from pyfdt import pyfdt
 import Autocmd as cmd
 
 #nhlos parser lib
-import non_hlos_parser
+#
+# The NON-HLOS.bin parser is only used by the GUI's FAT image browser
+# (DTGUIController instantiated via the `else` branch in run()).  Its
+# transitive deps (`fs`, `pyfatfs`) are unnecessary for headless
+# --nogui usage such as xbl_config.elf modification, so import lazily
+# and fall back to a stub when those packages are not installed.  The
+# stub satisfies the DTGUIController class-definition contract without
+# ever being instantiated under --nogui.
+try:
+    import non_hlos_parser
+except ImportError:
+    class non_hlos_parser:  # type: ignore
+        class nhlos_Operator:
+            pass
 
 import get_qsahara_files
 
