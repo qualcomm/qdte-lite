@@ -86,9 +86,12 @@ import get_qsahara_files
 
 QUTS_STATE = None
 quts_path = None
+# The "quts2" key is only present in the Windows branch of
+# flags.py:global_info (see the platform check there).  Guard the
+# lookup so the Linux startup path does not raise KeyError.
 if os.path.exists(gl_info["quts"]):
     quts_path = gl_info["quts"]
-elif os.path.exists(gl_info["quts2"]):
+elif "quts2" in gl_info and os.path.exists(gl_info["quts2"]):
     quts_path = gl_info["quts2"]
 if quts_path and os.path.exists(os.path.join(quts_path,'Common','ttypes.py'))\
     and os.path.exists(os.path.join(quts_path,'ImageManagementService','ImageManagementService.py'))\
