@@ -14,6 +14,45 @@ An example of when this file could come in use is when profiling application per
 decide upon an appropriate tool to use and set up the output profile file, etc.
 """
 import sys
+
+# When invoked in --nogui mode, QDTE never instantiates any tkinter
+# widgets -- the controller.run() nogui branch only uses DTWrapper and
+# Autocmd. Install a permissive stub for `tkinter` (and its submodules)
+# before anything else loads so that the pervasive top-level
+# `import tkinter` / `from tkinter import E` / `class X(tk.Frame)`
+# statements throughout QDTE succeed in environments where Tcl/Tk is
+# not available, such as minimal Yocto native sysroots.
+if '--nogui' in sys.argv:
+    import types
+
+    class _TkStub:
+        """Pretends to be any tkinter symbol -- class, constant, callable.
+        Subclassable (so `class Foo(tk.Frame)` works), callable (so
+        `tk.Tk()` works if it ever runs), attribute-polymorphic."""
+        def __init__(self, *args, **kwargs):
+            pass
+        def __getattr__(self, name):
+            return _TkStub
+        def __call__(self, *args, **kwargs):
+            return _TkStub()
+        def __class_getitem__(cls, item):
+            return _TkStub
+
+    def _make_stub_module(name):
+        mod = types.ModuleType(name)
+        mod.__path__ = []  # mark as package so submodule imports resolve
+        # PEP 562: __getattr__ on a module handles `from <mod> import X`
+        # for unknown names by returning the stub class.
+        mod.__getattr__ = lambda n: _TkStub
+        return mod
+
+    sys.modules['tkinter'] = _make_stub_module('tkinter')
+    for _sub in ('font', 'ttk', 'colorchooser', 'messagebox',
+                 'filedialog', 'simpledialog', 'scrolledtext'):
+        _stub = _make_stub_module('tkinter.' + _sub)
+        sys.modules['tkinter.' + _sub] = _stub
+        setattr(sys.modules['tkinter'], _sub, _stub)
+
 import argparse
 import tkinter as tk
 import flags as gflags
