@@ -592,7 +592,12 @@ class DTOperationEditPropVal(DTOperation):
             for val in self.val_new:
                 #dtlogger.debug(type(val))
                 if isinstance(val,type('')):
-                   vals.append(int(val))
+                   # int(val, 0) auto-detects the base from a literal
+                   # prefix ('0x' hex, '0o' octal, '0b' binary, else
+                   # decimal).  Plain int(val) only accepts decimal and
+                   # rejects '0x...' tokens that callers naturally
+                   # supply when mirroring fdtdump output.
+                   vals.append(int(val, 0))
                 else:
                    vals.append(val)
             #dtlogger.debug("new list is %s"%vals)
