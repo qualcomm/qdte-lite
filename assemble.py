@@ -210,7 +210,8 @@ class assemble:
             sectool_name = "sectools"
         # Check to see whether the legacy version of reassembly should be invoked
         if not "create_xbl_config.json" in os.listdir(self.outdir):
-            if os.path.exists(os.path.join(gf['sectoolsDir'], sectool_name)):
+            sectool_path = ''
+            if gf['sectoolsDir'] and os.path.exists(os.path.join(gf['sectoolsDir'], sectool_name)):
                 sectool_path = os.path.join(gf['sectoolsDir'], sectool_name)
 
             dtlogger.info(self.outdir)

@@ -317,20 +317,103 @@ def reassemble_dtbs_elf(dtbs_path, reassemble_dir, disassemble_dir, sectools_pat
         dtlogger.info(error)
         return None
         
-    # Call sectools to generate an ELF from the DTBS segment
-    dtlogger.info("\nentering sectools...")
-    dtlogger.info(reassemble_dir)
-    call_os_system(sectools_path + " elf-tool generate" +
-                   " --elf-class " + str(elf_class_int) +
-                   " --elf-entry " + elf_address +
-                   " --elf-machine-type " + target_arch +
-                   " --vaddr " + elf_address +
-                   " --paddr " + elf_address +
-                   " --align " + disassembled_elf_info_json['alignment'] +
-                   " --data " + dtbs_path +
-                   " --outfile " + os.path.abspath(reassemble_dir) + os.path.sep + desired_name + ".elf")
+    outfile = os.path.abspath(reassemble_dir) + os.path.sep + desired_name + ".elf"
+
+    # Reassemble the DTBS into an ELF.  When a sectools path is available we
+    # use it (unchanged behaviour for signed flows); otherwise -- e.g. the
+    # --allow_unsigned path on minimal sysroots where sectools is not present
+    # -- generate the ELF natively with the bundled elf_gen_tools packers.
+    # Both produce a single PT_LOAD segment wrapping the (already aligned)
+    # DTBS data at the original entry/load address, which is what the
+    # "sectools elf-tool generate" invocation below emitted.
+    if sectools_path and os.path.exists(sectools_path):
+        dtlogger.info("\nentering sectools...")
+        dtlogger.info(reassemble_dir)
+        call_os_system(sectools_path + " elf-tool generate" +
+                       " --elf-class " + str(elf_class_int) +
+                       " --elf-entry " + elf_address +
+                       " --elf-machine-type " + target_arch +
+                       " --vaddr " + elf_address +
+                       " --paddr " + elf_address +
+                       " --align " + disassembled_elf_info_json['alignment'] +
+                       " --data " + dtbs_path +
+                       " --outfile " + outfile)
+    else:
+        dtlogger.info("\nentering native elf reassembly (no sectools)...")
+        dtlogger.info(reassemble_dir)
+        generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int,
+                                 int(elf_address, 16),
+                                 int(disassembled_elf_info_json['alignment'], 16))
 
     return desired_name
+
+
+def generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int, load_addr, alignment):
+    """
+    Wrap a (page-aligned) DTBS blob in a minimal single PT_LOAD ELF, without
+    relying on the external sectools binary.  Reproduces the output of
+    "sectools elf-tool generate --data <dtbs> ..." using the ELF header/program
+    header packers already bundled in elf_gen_tools.
+
+    :param dtbs_path:     path to the raw DTBS data to embed
+    :param outfile:       path of the ELF file to write
+    :param elf_class_int: 64 or 32
+    :param load_addr:     entry / vaddr / paddr for the LOAD segment
+    :param alignment:     segment alignment in bytes (also the data file offset)
+    """
+    import XBLConfig.elf_gen_tools as egt
+
+    data = Path(dtbs_path).read_bytes()
+    is64 = (elf_class_int == 64)
+
+    ehdr_size = 64 if is64 else 52
+    phdr_size = 56 if is64 else 32
+    if alignment > 1:
+        # Place the payload at the first alignment boundary past the headers so
+        # the LOAD segment's file offset is congruent to its vaddr modulo
+        # alignment.
+        data_off = ((ehdr_size + phdr_size + alignment - 1) // alignment) * alignment
+    else:
+        # p_align of 0 or 1 means no alignment constraint (seen in real
+        # uefi_dtbs.elf images, e.g. QRB2210); the payload goes straight
+        # after the headers.
+        data_off = ehdr_size + phdr_size
+
+    Ehdr = egt.Elf64_Ehdr if is64 else egt.Elf32_Ehdr
+    Phdr = egt.Elf64_Phdr if is64 else egt.Elf32_Phdr
+
+    ehdr = Ehdr(bytes(ehdr_size))
+    ehdr.e_ident = (b'\x7fELF' + (b'\x02' if is64 else b'\x01') +
+                    b'\x01\x01' + b'\x00' * 9)
+    ehdr.e_type = 2                                   # ET_EXEC
+    ehdr.e_machine = 0xB7 if is64 else 0x28           # EM_AARCH64 / EM_ARM
+    ehdr.e_version = 1
+    ehdr.e_entry = load_addr
+    ehdr.e_phoff = ehdr_size
+    ehdr.e_shoff = 0
+    ehdr.e_flags = 0
+    ehdr.e_ehsize = ehdr_size
+    ehdr.e_phentsize = phdr_size
+    ehdr.e_phnum = 1
+    ehdr.e_shentsize = 0
+    ehdr.e_shnum = 0
+    ehdr.e_shstrndx = 0
+
+    phdr = Phdr(bytes(phdr_size))
+    phdr.p_type = egt.LOAD_TYPE
+    phdr.p_flags = 0x7                                # RWX
+    phdr.p_offset = data_off
+    phdr.p_vaddr = load_addr
+    phdr.p_paddr = load_addr
+    phdr.p_filesz = len(data)
+    phdr.p_memsz = len(data)
+    phdr.p_align = alignment
+
+    with open(outfile, 'wb') as fp:
+        fp.write(ehdr.getPackedData())
+        fp.write(phdr.getPackedData())
+        fp.write(b'\x00' * (data_off - ehdr_size - phdr_size))
+        fp.write(data)
 
 def reassemble_version_2_elf(dtb_directory, reassemble_dir, sectools_path, desired_name, verbose):
     """
