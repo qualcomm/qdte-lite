@@ -9,8 +9,23 @@ heavier GUI-only dependencies) is imported lazily, only when a GUI run
 was actually requested.
 """
 import importlib.util
+import sys
 
 from qdte.core import flags as gflags
+
+# Optional-dependency roots the GUIs may legitimately be missing. An
+# ImportError for anything else is a real bug and must not be swallowed.
+_OPTIONAL_GUI_MODULES = ('tkinter', 'fs', 'pyfatfs', 'PySide6')
+
+_GUI_DEPS_HINT = """\
+QDTE's GUI needs optional dependencies that are not installed (missing: {name}).
+
+  Qt frontend:      pip install "qdte-lite[qt]"
+  tkinter frontend: pip install "qdte-lite[gui]", plus the Tcl/Tk bindings
+                    from your Python distribution (Debian/Ubuntu:
+                    python3-tk; Fedora/Yocto: python3-tkinter)
+
+Headless mode needs neither:  qdte --nogui --help"""
 
 
 def _dispatch(args):
@@ -24,10 +39,16 @@ def _dispatch(args):
     # legacy tkinter GUI. The find_spec probe (rather than try/except around
     # the import) keeps real qdte.gui_qt bugs from being masked as a silent
     # fallback to tk.
-    if not gflags.flags['tk'] and importlib.util.find_spec('PySide6') is not None:
-        from qdte.gui_qt.app import launch
-    else:
-        from qdte.gui.app import launch
+    try:
+        if not gflags.flags['tk'] and importlib.util.find_spec('PySide6') is not None:
+            from qdte.gui_qt.app import launch
+        else:
+            from qdte.gui.app import launch
+    except ImportError as ex:
+        root = (getattr(ex, 'name', None) or '').split('.')[0]
+        if root in _OPTIONAL_GUI_MODULES:
+            sys.exit(_GUI_DEPS_HINT.format(name=root))
+        raise
     launch(initial_file=args.file)
 
 
