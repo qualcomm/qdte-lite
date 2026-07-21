@@ -213,6 +213,12 @@ class assemble:
             sectool_path = ''
             if gf['sectoolsDir'] and os.path.exists(os.path.join(gf['sectoolsDir'], sectool_name)):
                 sectool_path = os.path.join(gf['sectoolsDir'], sectool_name)
+            elif not gf['allowUnsigned']:
+                # Only unsigned flows may fall back to the native (sectools-free)
+                # reassembly; a signed flow without a usable sectools binary must
+                # fail here rather than silently emit an unsigned ELF.
+                raise Exception("sectools binary not found under --sectools_dir; "
+                                "it is required unless --allow_unsigned is set")
 
             dtlogger.info(self.outdir)
             # Make directories if needed
