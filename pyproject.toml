@@ -17,11 +17,18 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
-# The NON-HLOS.bin FAT browser in the GUI needs a FAT filesystem backend;
-# the headless (--nogui) flow does not.
+# The NON-HLOS.bin FAT browser in the tkinter GUI needs a FAT filesystem
+# backend; the headless (--nogui) flow does not.
 gui = [
     "fs",
     "pyfatfs",
+]
+# The Qt (PySide6) frontend. Preferred over tkinter when installed.
+qt = [
+    "PySide6>=6.6",
+]
+all = [
+    "qdte-lite[gui,qt]",
 ]
 
 [project.urls]
