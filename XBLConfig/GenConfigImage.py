@@ -34,7 +34,7 @@ def get_python_path(version):
   if platform.system() == "Windows":
     python_paths = subprocess.check_output('where python', stderr=subprocess.STDOUT , shell=True)
     python_list=python_paths.split(b'\r\n')
-    
+
     python_version_match=b'Python '+str(version).encode()
     for python_exe in python_list:
       python_version = b''
@@ -46,7 +46,7 @@ def get_python_path(version):
           continue
         if re.match(python_version_match,python_version):
            python_path=python_exe
-  
+
     if python_path==b'':
       print('[Buildex.py] Error Can not find python',str(version))
       sys.exit(1)
@@ -55,9 +55,9 @@ def get_python_path(version):
 
   return python_path.decode()+' '
 
-def disassemble_xbl_config_file(config_file_to_be_disassembled, 
-                                format, 
-                                output_xbl_config_directory, 
+def disassemble_xbl_config_file(config_file_to_be_disassembled,
+                                format,
+                                output_xbl_config_directory,
                                 autogen_directory,
                                 tools_path):
   # Create output based on format
@@ -71,12 +71,12 @@ def disassemble_xbl_config_file(config_file_to_be_disassembled,
     print("\nBinary output is currently not supported.")
 
 def generate_xbl_config_file(json_config_path,
-                             format, 
-                             elf_address, 
+                             format,
+                             elf_address,
                              output_xbl_config_filename,
-                             base_directory, 
+                             base_directory,
                              output_xbl_config_directory,
-                             sectools_directory, 
+                             sectools_directory,
                              autogen_directory,
                              tools_path,
                              soc_hw_version,
@@ -92,10 +92,10 @@ def generate_xbl_config_file(json_config_path,
                              integrity_image_generation,
                              integrity_image_no_metadata,
                              store_original_size=False):
-  storeoriginalsize=''                      
+  storeoriginalsize=''
   # Read JSON config data
   try:
-    with open(json_config_path) as json_file:    
+    with open(json_config_path) as json_file:
       json_data = json.load(json_file, object_pairs_hook=OrderedDict)
   except:
     print("\nERROR: An error occurred while reading JSON config file.  " + \
@@ -119,7 +119,7 @@ def generate_xbl_config_file(json_config_path,
       print("\nERROR: XBLconfig_metadata_generator.py did not generate " + \
             "expected binary files: " + autogen_directory + "/" + current_CFG + ".bin")
       exit(-1)
-    # if elf_address is 0 and if ELF_ADDRESS is captured in 
+    # if elf_address is 0 and if ELF_ADDRESS is captured in
     # first cfg_meta item's first item then use that as elf_address
     if (elf_address=="0x0") and (FIRST_CFG_FILE_KEY in json_data[current_CFG]) \
                          and (ELF_ADDRESS in json_data[current_CFG][FIRST_CFG_FILE_KEY]):
@@ -145,7 +145,7 @@ def generate_xbl_config_file(json_config_path,
 
     #sign generated xbl_config if sectools directory is provided
     if sectools_directory:
-      if sectools_version == 'v1': 
+      if sectools_version == 'v1':
           sign_elf_v1(sectools_directory,
                   autogen_directory,
                   output_xbl_config_filename,
@@ -175,7 +175,7 @@ def generate_xbl_config_file(json_config_path,
 
           shutil.copy(file_to_be_copied, output_raw_path)
           print("\nRaw", output_xbl_config_filename, "copied to", output_raw_path, "\n")
-      
+
   else:
     print("\nBinary output is currently not supported.")
 
@@ -203,30 +203,30 @@ def sign_elf_v1(sectools_directory,
                              + " -i " + filepath_to_be_signed
                              + " -o " + autogen_directory + UNSIGNED_FOLDER
                              + " -ta "
-                             + " -g " + SIGN_ID 
+                             + " -g " + SIGN_ID
                              + " -c " + sectools_directory + SECTOOLS_CONFIG_XML ), shell=True )
 
-      shutil.copy((autogen_directory + UNSIGNED_FOLDER + DEFAULT_SIGN_DIR_ROOT + SIGN_ID 
+      shutil.copy((autogen_directory + UNSIGNED_FOLDER + DEFAULT_SIGN_DIR_ROOT + SIGN_ID
                    + "/" + output_xbl_config_filename)
                   ,output_unsigned_path)
-      
+
       subprocess.check_call(('python '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
                              + " -i " + filepath_to_be_signed
                              + " -o " + autogen_directory + SIGNED_FOLDER
                              + " -sa "
-                             + " -g " + SIGN_ID 
+                             + " -g " + SIGN_ID
                              +" -c " + sectools_directory + SECTOOLS_CONFIG_XML
                              +" --cfg_segment_hash_algorithm " + "sha384"
                              +" --cfg_soc_hw_version " + soc_hw_version
                              +" --cfg_in_use_soc_hw_version " + SECTOOLS_IN_USE_SOC_HW_VERSION
                              +" --cfg_soc_vers " + "\"" + soc_vers + "\""),  shell=True )
 
-      shutil.copy((autogen_directory + SIGNED_FOLDER + DEFAULT_SIGN_DIR_ROOT + SIGN_ID 
+      shutil.copy((autogen_directory + SIGNED_FOLDER + DEFAULT_SIGN_DIR_ROOT + SIGN_ID
                    + "/" + output_xbl_config_filename)
                   ,output_xbl_config_directory)
-      
+
       print("\n Signed image: " + (output_xbl_config_directory + "/" + output_xbl_config_filename + "\n"))
-                      
+
       print("*************  Signing Successful   ************")
     else:
       print("\n\n    !!!!! No Sectools Folder provided. SKIPPING IMAGE SIGNING !!!!!")
@@ -235,7 +235,7 @@ def sign_elf_v1(sectools_directory,
     print(error)
     print("\nERROR: An error occurred while Signing the ELF file.")
     exit(-1)
-    
+
 def sign_elf_v2(sectools_directory,
              autogen_directory,
              output_xbl_config_filename,
@@ -253,14 +253,14 @@ def sign_elf_v2(sectools_directory,
                               output_xbl_config_filename
 
       if integrity_image_generation:
-        print("*************  Generating Unsigned/Integrity Elf  ************\n")      
+        print("*************  Generating Unsigned/Integrity Elf  ************\n")
         if os.path.isfile(filepath_to_be_signed):
           out_file = os.path.join(autogen_directory, "unsigned", output_xbl_config_filename)
           CMD = (os.path.join(sectools_directory, V2_SECTOOLS_SCRIPT)
-            + " secure-image " + filepath_to_be_signed 
-            + " --outfile " + out_file 
+            + " secure-image " + filepath_to_be_signed
+            + " --outfile " + out_file
             + " --image-id " + sign_id
-            + " --security-profile " + security_profile 
+            + " --security-profile " + security_profile
             + " --hash")
 
           if integrity_image_no_metadata:
@@ -270,21 +270,21 @@ def sign_elf_v2(sectools_directory,
           os.system(CMD)
           os.makedirs(os.path.join(output_xbl_config_directory, "unsigned"), exist_ok=True)
           shutil.copy(out_file, os.path.join(output_xbl_config_directory, "unsigned"))
-          print("\n Unsigned/Integrity image: " + os.path.join(output_xbl_config_directory, "unsigned", output_xbl_config_filename) + "\n")    
+          print("\n Unsigned/Integrity image: " + os.path.join(output_xbl_config_directory, "unsigned", output_xbl_config_filename) + "\n")
         print("*************  Unsigned/Integrity Generation Successful  ************")
 
-      print("************* Sign generated Elf ************\n")      
+      print("************* Sign generated Elf ************\n")
       if os.path.isfile(filepath_to_be_signed):
         if integrity_image_generation:
           out_file = os.path.join(autogen_directory, "sign", output_xbl_config_filename)
         else:
           out_file = os.path.join(autogen_directory, output_xbl_config_filename)
         CMD = (os.path.join(sectools_directory, V2_SECTOOLS_SCRIPT)
-          + " secure-image " + filepath_to_be_signed 
-          + " --outfile " + out_file 
+          + " secure-image " + filepath_to_be_signed
+          + " --outfile " + out_file
           + " --image-id " + sign_id
-          + " --security-profile " + security_profile 
-          + " --sign " 
+          + " --security-profile " + security_profile
+          + " --sign "
           + " --signing-mode " + signing_mode
           + " " + signing_params)
         print(CMD)
@@ -292,10 +292,10 @@ def sign_elf_v2(sectools_directory,
         if integrity_image_generation:
           os.makedirs(os.path.join(output_xbl_config_directory, "sign"), exist_ok=True)
           shutil.copy(out_file, os.path.join(output_xbl_config_directory, "sign"))
-          print("\n Signed image: " + os.path.join(output_xbl_config_directory, "sign", output_xbl_config_filename) + "\n")    
+          print("\n Signed image: " + os.path.join(output_xbl_config_directory, "sign", output_xbl_config_filename) + "\n")
         else:
           shutil.copy(out_file  ,output_xbl_config_directory)
-          print("\n Signed image: " + os.path.join(output_xbl_config_directory, output_xbl_config_filename) + "\n")    
+          print("\n Signed image: " + os.path.join(output_xbl_config_directory, output_xbl_config_filename) + "\n")
         print("*************  Signing Successful   ************")
 
     else:
@@ -304,7 +304,7 @@ def sign_elf_v2(sectools_directory,
   except Exception as error:
     print(error)
     print("\nERROR: An error occurred while Signing the ELF file.")
-    exit(-1)         
+    exit(-1)
 
 ###############################################################################
 # disassemble_elf
@@ -323,7 +323,7 @@ def disassemble_elf(config_file_to_be_disassembled,
 
   out_create_xcfg_json = os.path.join(output_xbl_config_directory, OUT_CREATE_XCFG_JSON)
   # Call XBL config metadata generator to locate and parse xbl-config-metadata from
-  #    disassembled elf segments, generate out_create_xcfg_json with 
+  #    disassembled elf segments, generate out_create_xcfg_json with
   #    xbl-config-items' file-name, config_name etc details
   call_os_system("python \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\"" +\
                  " -d " + disassembled_elf_info_json + \
@@ -335,7 +335,7 @@ def disassemble_elf(config_file_to_be_disassembled,
   elf_address = "0x[elf_entry_point]" #default
   if not os.path.isfile(disassembled_elf_info_json):
     print_error_exit("\nError: Disassembled elf info " + str(disassembled_elf_info_json) + " file must be valid and exist.")
-  with open(disassembled_elf_info_json) as disassembled_elf_info_json_file:    
+  with open(disassembled_elf_info_json) as disassembled_elf_info_json_file:
     disassembled_bins_info = json.load(disassembled_elf_info_json_file, object_pairs_hook=OrderedDict)
     if E_ENTRY in disassembled_bins_info:
       elf_address = str(disassembled_bins_info[E_ENTRY])
@@ -350,7 +350,7 @@ def disassemble_elf(config_file_to_be_disassembled,
                  " --signing_mode TEST" + \
                  " --sign_id XBL-CONFIG" + \
                  " --security_profile " + str(os.path.join(tools_path,"tme_security_profile.xml"))
-  
+
   print("\nDisassembled XBL config items and .json can be found in directory:\"" + \
          output_xbl_config_directory + "\"." + \
         "\n\nTo create xbl_config.elf from disassembled items, please execute below command:\n" + \
@@ -360,7 +360,7 @@ def disassemble_elf(config_file_to_be_disassembled,
 # align_to_size(data,alignment)
 ###############################################################################
 def align_to_size(original_size,align_bytes):
-  return (int(original_size,16)+int(align_bytes,16)-1)//int(align_bytes,16)*int(align_bytes,16) 
+  return (int(original_size,16)+int(align_bytes,16)-1)//int(align_bytes,16)*int(align_bytes,16)
 ###############################################################################
 # merge_segments
 ###############################################################################
@@ -374,7 +374,7 @@ def merge_segments(base_directory,
   segments_combination_bin = os.path.join(output_directory,SEGMENTS_COMBINATION_FILE_NAME)
   if os.path.exists(segments_combination_bin):
     os.remove(segments_combination_bin)
-  
+
   segments_combination_bin_fp = open(segments_combination_bin, mode='ab')
   for CFG_section in json_data:
     CFG_section_file = os.path.join(output_directory,correct_path(CFG_section + ".bin"))
@@ -400,7 +400,7 @@ def merge_segments(base_directory,
       segments_combination_bin_fp.write(section_file_fp.read())
       section_file_fp.close()
       segments_combination_size +=os.path.getsize(current_section_file)
-      
+
   segments_combination_bin_fp.close()
   print(segments_combination_bin," write done. size is ",segments_combination_size)
   return segments_combination_size
@@ -435,19 +435,19 @@ def create_elf(base_directory,
     for CFG_section in json_data:
       # Add one for metadata segment
       segment_count += 1
-  
+
       # Add ubjson segments
       segment_count += len(json_data[CFG_section])
   else:
     segment_count = 1
-  
+
     print("segment count",segment_count)
   # Construct initial JSON for elf generator
   elf_json = {}
-  
+
   elf_json.update({"config_output_path" : output_directory})
   elf_json.update({"config_output_file" : output_filename})
-  
+
   elf_json.update({"elf_header" : {"e_ident" : {"ei_class" : "0x2",
                                                 "ei_version" : "0x0"},
                                    "ph_num" : str(hex(segment_count).rstrip("L")),
@@ -490,11 +490,11 @@ def create_elf(base_directory,
                                 "relocatable" : str(hex(physically_relocatable_flag).rstrip("L"))})
       if (format == "ELF32"):
         elf_json["program_header"]["segment"][0]["binary_class"] = "0x1"
-      
+
       # Update the current_offset and address
       current_offset += (align_to_size(hex(os.path.getsize(os.path.join(output_directory, correct_path(CFG_section + ".bin")))),alignment))
       current_address += os.path.getsize(os.path.join(output_directory, correct_path(CFG_section + ".bin")))
-      
+
       # Add all files/segments
       segment_count = 1
       for current_file in json_data[CFG_section]:
@@ -521,10 +521,10 @@ def create_elf(base_directory,
         if (format == "ELF32"):
           elf_json["program_header"]["segment"][segment_count]["binary_class"] = "0x1"
         segment_count += 1
-        
+
         # Update the current_offset
         current_offset += (align_to_size(hex(os.path.getsize(current_file_path)),alignment))
-        
+
         current_address += \
           os.path.getsize(current_file_path)
   else:
@@ -545,10 +545,10 @@ def create_elf(base_directory,
                               "relocatable" : str(hex(physically_relocatable_flag).rstrip("L"))})
     if (format == "ELF32"):
       elf_json["program_header"]["segment"][0]["binary_class"] = "0x1"
-    
+
 
   ELF_Generator_JSON_File = output_directory + "/" + ELF_GENERATOR_JSON_FILE_NAME
-  
+
   # Write ELF JSON file out
   with open(ELF_Generator_JSON_File, "w") as elf_json_file:
     json.dump(elf_json, elf_json_file, separators=(',', ':'), indent=4)
@@ -564,7 +564,7 @@ def create_elf(base_directory,
 # main
 ##############################################################################
 if __name__ == "__main__":
-  error_count = 0  
+  error_count = 0
   parser = OptionParser()
 
   parser.add_option("-a", "--autogen_directory",
@@ -578,12 +578,12 @@ if __name__ == "__main__":
   parser.add_option("-s", "--sectools_directory",
                       action="store", type="string", dest="sectools_directory",
                       help="Needs to point to sectools folder used for signing." + \
-                      "signing will be skipped if this option is not provided")        
-          
+                      "signing will be skipped if this option is not provided")
+
   parser.add_option("-t", "--tools_path",
                       action="store", type="string", dest="tools_path",
                       help="Path to tools directory containing dependent *.py scripts.")
-          
+
   parser.add_option("-f", "--format",
                       action="store", type="string", dest="format",
                       help="Output Format: ELF, ELF32, or BIN")
@@ -610,16 +610,16 @@ if __name__ == "__main__":
                       action="store", dest="soc_hw_version", default="0x60000000",
                       help="soc hw version for xblconfig image signing. " + \
                            "Default is 0x60000000.")
-                           
+
   parser.add_option("-k", "--soc-vers",
                       action="store", dest="soc_vers", default="0x6000 0x6001",
                       help="soc vers for xblconfig image signing " + \
-                           "Default is 0x6000 0x6001.")                         
+                           "Default is 0x6000 0x6001.")
 
   parser.add_option("-c", "--clean",
                       action="store_true", dest="clean", default=False,
                       help="cleans previously generated binaries. ")
-                      
+
   parser.add_option("-p", "--security_profile",
                       action="store", type="string", dest="security_profile",
                       help="Path to security profile xml")
@@ -627,10 +627,10 @@ if __name__ == "__main__":
   parser.add_option("-z", "--sign_id",
                       action="store", type="string", dest="sign_id",
                       help="sign_id for Sectools V2")
-  
+
   parser.add_option("-v", "--sectools_version",
                       action="store", type="string", dest="sectools_version",
-                      help="Sectools v1 or v2", default="v1")                         
+                      help="Sectools v1 or v2", default="v1")
 
   parser.add_option("-m", "--signing_mode",
                       action="store", type="string", dest="signing_mode",
@@ -639,11 +639,11 @@ if __name__ == "__main__":
   parser.add_option("--single_segment",
                       action="store_true", dest="single_segment", default=False,
                       help="combine all the config sections into one segment")
-  
+
   parser.add_option("-r", "--signing_params",
                       action="store", type="string", dest="signing_params",
                       help="provide additional pass-through arguments to signing tool", default="")
-  
+
   parser.add_option("-x", "--align",
                       action="store", dest="align", default="0x4",
                       help="alignment requirement config items in hex")
@@ -655,7 +655,7 @@ if __name__ == "__main__":
   parser.add_option("--integrity-image-no-metadata",
                       action="store_true", dest="integrity_image_no_metadata", default=False,
                       help="Generate unsigned/integrity image without metadata in addition to signed image")
-  
+
   parser.add_option("-l", "--relocatable",
                       action="store_true", dest="relocatable", default=False,
                       help="Generate relocatable elf")
@@ -687,7 +687,7 @@ if __name__ == "__main__":
     autogen_directory = os.path.join(output_xbl_config_directory, AUTO_GEN_ITEM_FOLDER)
   remove(autogen_directory)
   create_directory(autogen_directory)
-  # Dependent Tools (XBLconfig_metadata_generator, elf_gen etc.) path directory 
+  # Dependent Tools (XBLconfig_metadata_generator, elf_gen etc.) path directory
   if (not options.tools_path) or (not os.path.isdir(options.tools_path)):
     options.tools_path = os.getcwd()
   options.tools_path = os.path.abspath(options.tools_path)
@@ -697,7 +697,7 @@ if __name__ == "__main__":
   if options.integrity_image_no_metadata:
     options.integrity_image_generation = True
 
-  
+
   # if XBL config disassemble option is not passed.
   if not options.config_file_to_be_disassembled:
     # Base directory must be supplied and exist
@@ -708,22 +708,22 @@ if __name__ == "__main__":
       parser.error("Output file name without extension must be valid and exist.")
     # Set Paths
     output_xbl_config_directory = os.path.split(os.path.abspath(options.output_file))[0]
-    output_xbl_config_filename = os.path.split(os.path.abspath(options.output_file))[1]  
-    output_xbl_config_filename = output_xbl_config_filename + ".elf"  
+    output_xbl_config_filename = os.path.split(os.path.abspath(options.output_file))[1]
+    output_xbl_config_filename = output_xbl_config_filename + ".elf"
     remove(os.path.join(output_xbl_config_directory, output_xbl_config_filename))
-  
+
     # Input JSON path must be supplied and exist
     options.json_config_path = get_abspath_if_exist(options.json_config_path, parser, "JSON config file must be supplied and exist.")
-   
+
     #generate XBL config file only when clean is false
     if not options.clean:
       generate_xbl_config_file(options.json_config_path,
                                options.format,
-                               options.elf_address, 
+                               options.elf_address,
                                output_xbl_config_filename,
                                options.base_directory,
-                               output_xbl_config_directory, 
-                               options.sectools_directory, 
+                               output_xbl_config_directory,
+                               options.sectools_directory,
                                autogen_directory,
                                options.tools_path,
                                options.soc_hw_version,
@@ -742,13 +742,13 @@ if __name__ == "__main__":
                                )
   else:
     if not os.path.isfile(options.config_file_to_be_disassembled):
-      parser.error("XBL config file must be supplied and exist.")        
-    
+      parser.error("XBL config file must be supplied and exist.")
+
 	# Disassemble XBL config file only when clean is false
     if not options.clean:
-      disassemble_xbl_config_file(options.config_file_to_be_disassembled,  
+      disassemble_xbl_config_file(options.config_file_to_be_disassembled,
                                   options.format,
-                                  output_xbl_config_directory, 
+                                  output_xbl_config_directory,
                                   autogen_directory,
                                   options.tools_path)
 

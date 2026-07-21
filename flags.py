@@ -50,7 +50,7 @@ config = {
                                             #    'confusing to regular users, but useful when testing functionality and '
                                             #    'code coverage.'
                                             #    },
-    
+
     '--verify_hash': {'action': 'store_true',   'help':argparse.SUPPRESS},
                                                     # 'help': 'Verify the stored hash of every item in the journal when '
                                                     #   'performing a re-do operation. Automatically enabled in test '
@@ -66,39 +66,39 @@ config = {
     '--dry_run': {'action': 'store_true', 'help':argparse.SUPPRESS},
                                                 #'help': 'Do not actually write to any output file, but instead write out a '
                                                 #'JSON change report that can be used in --nogui mode.'},
-   
+
     '--sectools_dir': {'nargs': '?', 'const': None,  'metavar': 'SECTOOLS_LOCATION',
                        'help': 'Path of the sectools v2 signature tools, for signing config elfs. \n'
                                'Only avaiable when --allow_unsigned disable'},
 
     '--allow_unsigned': {'action': 'store_true', 'help': 'allow to generate unsigned config ELF.'},
-    '--input_file': {'nargs': '?', 'const': None, 'default': '', 'metavar': 'DTB_ELF_FILE', 
+    '--input_file': {'nargs': '?', 'const': None, 'default': '', 'metavar': 'DTB_ELF_FILE',
                      'help': 'input DTB elf file.\n'
                      'Like xbl_config.elf, qdsp6sw_dtbs.elf'
                                                                                                             },
-    '--modify': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'MODIFY_LOCATION', 
+    '--modify': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'MODIFY_LOCATION',
                  'help': 'input the property and nodes which needs to be modified.\n'
-                         'For multi properties,input by &.\n' 
+                         'For multi properties,input by &.\n'
                          'For multi values, input by ;\n'
                          'Format:\n'
                          '    Singal property: --modify \"platform.dtb/sw/boot/vibration=0\"\n'
                          '    Multi properties: --modify \"platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp&platform.dtb/model=Qualcomm Technologies, Inc. Kailua cdp\"\n'
                          '    Multi values: --modify  \"platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp\"'},
-    '--sign_json': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SIGN_PARAMETER_JSON_LOCATION', 
+    '--sign_json': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SIGN_PARAMETER_JSON_LOCATION',
                  'help': r'Please choose sign parameters json file from C:\Program Files (x86)\Qualcomm\QDTE\\n'
                          'For internal sign, please choose test_signing_mode.json\n'
-                         'Only avaiable when --allow_unsigned disable'}, 
-    '--output_path': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_LOCATION', 
+                         'Only avaiable when --allow_unsigned disable'},
+    '--output_path': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_LOCATION',
                  'help': 'output path for storing dissamble files and re-assemble file \n'},
-    '--output_file': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_FILENAME', 
+    '--output_file': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_FILENAME',
                  'help': 'output file name.\nLike xbl_config.elf, qdsp6sw_dtbs.elf\n'},
-    '--profileXml': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SECTOOL_PROFILEXML', 
+    '--profileXml': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SECTOOL_PROFILEXML',
                  'help': 'sectool profile xml file for signature!!\n'
                          'Only avaiable when --allow_unsigned disable\n'
                          r'Example: Kailua boot profile file kailua_tme_security_profile.xml comes from boot_images\ssg_tmefw\profiles\kailua\n'},
-    
- 
-                   
+
+
+
 
 }
 

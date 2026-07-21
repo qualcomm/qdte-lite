@@ -256,7 +256,7 @@ class TreeView(tk.Frame):
         path_parent = path.rsplit('/', 1)[0]
         parent = self.treeMappings.get(path_parent if len(path_parent) > 0 else '/', None)
         parents = {path_parent: parent}
-  
+
         if item is None:
             # the path no longer exists in the DeviceTree, so we want to delete this item
             row = self.treeMappings.pop(path, None)
@@ -299,9 +299,9 @@ class TreeView(tk.Frame):
                     self.max_column_length = item_text_length
             self.traverse_tree(tree,item,column)
 
-    
+
     def update_last_column_width(self,event=None):
-        """Update last column width when visible item was changed 
+        """Update last column width when visible item was changed
         When the visible item changed (like expand/collapse/modify))
 
         """

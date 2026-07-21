@@ -35,7 +35,7 @@ class nhlos_Operator:
 
     def get_dtb_elf_names(self,nhlos_image):
         try:
-            with open_fs("fat://"+nhlos_image.replace("\\","//")) as self.nhlos_handler: 
+            with open_fs("fat://"+nhlos_image.replace("\\","//")) as self.nhlos_handler:
                 #files_tree =  self.nhlos_handler.tree()
                 #dtlogger.info("Files in nonhlos binary:{}".format(files_tree))
                 for path in self.nhlos_handler.walk.files(filter=['*dtb.*','*DTB.*','*dtbs.*','*xbl_config.*']):
@@ -59,7 +59,7 @@ class nhlos_Operator:
                 dtlogger.debug("this is not FAT partition")
                 return None
         return self.dtb_files_name
-    
+
     def extract_dtb_elf_file(self, dtb_elf_name, nhlos_image, output_path):
         split_b00_file_name = None
         elf_header = {}
@@ -104,7 +104,7 @@ class nhlos_Operator:
                                 [elf_header, phdr_table] = \
                                         elf_gen_tools.preprocess_elf_file(os.path.join(output_path,"{}.elf".format(dtb_elf_name)))
                                 phdr_num =  elf_header.e_phnum
-                            
+
                             dtlogger.debug("end read file:.{}".format(dtb_file_path))
                             i = i + 1
                     else:
@@ -135,9 +135,9 @@ class nhlos_Operator:
 
             #rename segment name and create mdt file
             mdt_fp =  open(os.path.join(output_path,"{}.mdt".format(dtb_elf_name)),"wb+")
-  
+
             nhlos_handler = open_fs("fat://"+nhlos_image.replace("\\","//"))
-            for i in range (phdr_num):          
+            for i in range (phdr_num):
                 dtb_file_full_name = "{}.{}{:0>2d}".format(dtb_elf_name,Lb,i)
                 dtlogger.debug(dtb_file_full_name)
                 dtb_file_path = None
@@ -165,7 +165,7 @@ class nhlos_Operator:
 
                 else:
                     break
-            #write mdt 
+            #write mdt
             dtb_mdt_name = ''
             if Lb == 'B':
                 dtb_mdt_name = "{}.MDT".format(dtb_elf_name)
@@ -173,7 +173,7 @@ class nhlos_Operator:
                 dtb_mdt_name = "{}.mdt".format(dtb_elf_name)
 
             dtb_mdt_path = self.dtb_files[dtb_elf_name][dtb_mdt_name]
-            
+
             mdt_fp.seek(0)
             mdt_data=mdt_fp.read()
             mdt_fp.close()

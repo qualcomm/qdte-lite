@@ -168,11 +168,11 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
         screenwidth = self.winfo_screenwidth()
         screenheight = self.winfo_screenheight()
         self._root.geometry("+%d+%d" % ((screenwidth-1100)/2, (screenheight-700)/2))
-        
+
         # qdte logger initialization
         logger_file = os.path.join(gl_info['log'],"log.txt")
         dtlogger.logger_init(log_file=logger_file)
-        
+
         # DTWrapper initialization
         self.dtw = dt.DTWrapper()
 
@@ -408,14 +408,14 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
 
     def check_python(self):
         try:
-            proc = subprocess.Popen(["python",                                 
+            proc = subprocess.Popen(["python",
                                  '--version'
                                  ],
                                  stdout=subprocess.PIPE,
                                  stderr=subprocess.PIPE)
                                  #universal_newlines=True,
                                  #shell=True)
-        
+
             while True:
                 outs, errs = proc.communicate()
                 output=None
@@ -597,7 +597,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
             xbl.XblDirGUI(self._root)
             while(gf['XBLConfigFlag'] == 0):
                 time.sleep(0.2)
-        
+
         if (gf['XBLConfigFlag'] == 1 and gf['inputFile']) or (self.readDeviceDtbElf == True):
             xbl_fn = gf['inputFile']
         elif gf['XBLConfigFlag'] == 255:
@@ -668,13 +668,13 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
         # write subsystem DTB elfs into non-hlos.bin
         #if partition_postfix in BACKUP_POSTFIX:
         if self.dt_dict[gf['PartitionName']]["container"] !=None:
-            self.write_dtb_elf_into_nhlos_file(self.dt_dict[gf['PartitionName']]["name"], 
+            self.write_dtb_elf_into_nhlos_file(self.dt_dict[gf['PartitionName']]["name"],
                                              os.path.join(gl_info["tmp_xblcfg"],self.dt_dict[gf['PartitionName']]["container"]+".bin"),
                                              gf['PartitionImage'],
                                              gl_info["tmp_xblcfg"])
 
 
-        #write dtb elfs or non-hlos.bin into corresponding paritons. 
+        #write dtb elfs or non-hlos.bin into corresponding paritons.
         flash_partition_list = [gf['PartitionName']]
         # check if needs to write into A&B partition.
         if gf['PartitionABCheck'] == 1:
@@ -682,7 +682,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
             partition_root_name = self.dt_dict[gf['PartitionName']]["name"].rstrip(partition_postfix)
             flash_partition_list = [x for x in partition_list if (partition_root_name in x)]
 
-        #write dtb elfs or non-hlos.bin into paritons. 
+        #write dtb elfs or non-hlos.bin into paritons.
         for Partition_name in flash_partition_list:
             if Partition_name not in self.dt_dict:
                 dtlogger.debug("partition can't be found!")
@@ -697,7 +697,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
             flash_info["lun"] = self.dt_dict[Partition_name]["lun"]
             flash_info["s_lba"] = self.dt_dict[Partition_name]["s_lba"]
             flash_info["cnt"] = self.dt_dict[Partition_name]["cnt"]
-            
+
             resu = self.write_parition(flash_info)
             if resu:
                 prog_win.call_popup_close()
@@ -717,7 +717,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
             return False
         if self.check_quts() == False:
             return False
-        
+
         self.tmp_thread = threading.Thread(target=self.call_device_dtb_elf_thread, name="Dev XblCfg Thread")
         self.tmp_thread.setDaemon(True)
         self.tmp_thread.start()
@@ -773,7 +773,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
                 return False
         else:
             self.extract_dtb_elf_file(self.dt_dict[parti_name]["name"],os.path.join(gl_info["tmp_xblcfg"],self.dt_dict[parti_name]["container"]+".bin"),readDir)
-       
+
         gf["inputFile"] = os.path.join(readDir, image_name)
         self.jsonx = Json_Operate()
         self.jsonx.update_json_cfg_data()
@@ -824,7 +824,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
                 return 2
             else:
                 return False
-        
+
         buildOption = None
         Qsahara_files = get_qsahara_files.get_all_sahara_files(gf["devprg"],storage=gf['flashtype'].lower())
         devprg_file = None
@@ -850,7 +850,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
                 Qsahara_files_list[int(key)]=Qsahara_files[key][0]
             buildOption = ImageManagementService.ttypes.DownloadBuildOptions(
                 memoryType=memoryTypes[gf['flashtype']], saharaImageList=Qsahara_files_list)
-    
+
         buildOption.partitionIndexList = []
         buildOption.readImages = True
         buildOption.readImagesPath = gl_info["tmp_xblcfg"]
@@ -867,7 +867,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
         if not partitionTable:
             dtlogger.debug("Can't get the partition table. Please boot to EDL mode, select correct flash type and try again.")
             prog_win.call_popup_close()
- 
+
             rst = tkinter.messagebox.askretrycancel(
                 title="Retry or Cancel", message="Can't get the partition table.\n\nPlease boot to EDL mode and retry.")
             if rst:
@@ -910,7 +910,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
                 # fetch DTB_elf files name from nhlos binary file
                 self.get_dtb_elf_names(os.path.join(gl_info["tmp_xblcfg"],partition.name+".bin"))
 
-                # get partition postfix, like _A/_B or _BACKUP  
+                # get partition postfix, like _A/_B or _BACKUP
                 parition_index = ""
                 if m.group(2):
                     parition_index = m.group(2)
@@ -923,7 +923,7 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
                         self.dt_dict[q6_dtb]["name"] = q6_dtb_name
                         self.dt_dict[q6_dtb]["lun"] = partition.lun
                         self.dt_dict[q6_dtb]["s_lba"] = str(partition.startingLba)
-                        self.dt_dict[q6_dtb]["cnt"] = str(partition.endingLba-partition.startingLba+1)  
+                        self.dt_dict[q6_dtb]["cnt"] = str(partition.endingLba-partition.startingLba+1)
                         self.dt_dict[q6_dtb]["container"] = partition.name
 
             dt_list = dt_pattern.findall(partition.name)
@@ -1678,7 +1678,7 @@ def run(root, **kwargs):
         autocmd.execute()
 
         # comment below features
-        """ 
+        """
         if 'cr' in kwargs:
             dtw.import_report(kwargs['cr'])
         else:

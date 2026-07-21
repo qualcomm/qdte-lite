@@ -77,7 +77,7 @@ def _get_path(fdt, parent_path, name=None, err_if_absent=True):
     # join the two paths if necessary
     fullpath = _join_path(parent_path, name)
 
-    
+
     item = fdt.resolve_path(fullpath)
     if err_if_absent:
       if isinstance(item, type(None)):

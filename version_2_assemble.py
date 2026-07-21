@@ -257,7 +257,7 @@ def reassemble_output_dtb_dtbs(dtb_directory, reassemble_dir):
             new_dtbs_file.write(data)
 
     new_dtbs_file.close()
- 
+
     # Create a temporary .dtbs file to pass into `reassemble_dtbs_elf`
     return absolute_reassemble_path + os.path.sep +"reassembled.dtbs"
 
@@ -316,7 +316,7 @@ def reassemble_dtbs_elf(dtbs_path, reassemble_dir, disassemble_dir, sectools_pat
     except Exception as error:
         dtlogger.info(error)
         return None
-        
+
     outfile = os.path.abspath(reassemble_dir) + os.path.sep + desired_name + ".elf"
 
     # Reassemble the DTBS into an ELF.  When a sectools path is available we

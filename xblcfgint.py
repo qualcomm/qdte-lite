@@ -188,7 +188,7 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
         self.logline('Disassembling XBLConfig file...', 'info')
         # start a child python process
         errlines = []
-        
+
         self.config(cursor='watch')
         self.cmdsout.config(cursor='watch')
         self.update()
@@ -213,8 +213,8 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
             return False
         self.list_dtbs(self.dtbs,"")
         self.logline('Success!', 'success')
-        return 
-            
+        return
+
         if len(hints) > 0:
             for hint in hints:
                 self.logline('Hint: %s' % hint, 'warn')
@@ -257,7 +257,7 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
         sel_dtb = None
         curItem = self.treeview.focus()
         parentItem = self.treeview.parent(curItem)
-        
+
         if parentItem == '':
             if self.treeview.item(curItem)['text'].endswith('.bin'):
                 return
@@ -358,7 +358,7 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
            return 'True'
         else:
            return ''
-            
+
     def export_xbl_unsign(self):
         gf['allowUnsigned'] = 1
         if not self.update_changes(transient=True):
@@ -405,7 +405,7 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
                     tk.messagebox.showwarning('Failed to save', 'Failed to save results:\n%s' % ''.join(result))
 
                 return False
-            self.logline('Reassembling Success!', 'success')  
+            self.logline('Reassembling Success!', 'success')
             self.dtbs_modified = False
             self.instructionslbl.config(text='Success!')
             self.config(cursor='')
@@ -424,7 +424,7 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
         # result in duplicated change report items. this is one way to fix that; when we store this copy of the change
         # report we mark it "transient" which means that the changes we add in this function call will be reset the next
         # time update_changes() is called.
-        
+
         gf["setting_flag"] = 0
         gf['sign_id'] = ''
         sign_id_num = 0
@@ -445,7 +445,7 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
                                                           filetypes=[('XBLConfig/DTB ELF', '*.elf'),
                                                                      ('All Files', '*.*')])
             self.lift()
-            if output_filename: 
+            if output_filename:
                 prog_win = DT_ProgressBar(self._root)
                 if gf['dryRun']:
                     self.logline('Will not actually save to the file specified, because dry run.', 'info')
@@ -465,8 +465,8 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
                         self.logline('Saved report of changes made to %s' % cr_filename, 'info')
                 except IOError:
                     self.logline('Warning: failed to save change report to accompany new XBLConfig', 'warn')
-                
-               
+
+
 
                 # start a child python process
                 # reassemble xbl images without sign
@@ -484,9 +484,9 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
                     return False
                 self.logline('Reassembling Success!', 'success')
 
-               
 
-                # If signing command doesn't contain  --image-id option, fetch it from origninal DTB elf. If the orginal DTB elf is unsigned DTB elf. 
+
+                # If signing command doesn't contain  --image-id option, fetch it from origninal DTB elf. If the orginal DTB elf is unsigned DTB elf.
                 # If the orginal DTB elf is unsigned DTB elf, it will popout a warning windows and termined signing process.
                 self.cmdsout.insert(tk.END, 'Excute Signing Command\n', 'info')
                 try:
@@ -496,16 +496,16 @@ class XblCfgGUI(tk.Toplevel,assemble.assemble,sign.st):
                 prog_win.call_popup_close()
                 if not gf['detailedConsole'] and return_result == False:
                     tk.messagebox.showerror('Signing failed', 'Please check signing log!')
-               
 
-                
+
+
                 if return_result:
                     self.dtbs_modified = False
                     self.instructionslbl.config(text='Success!')
                     self.logline('Reassembling and Signing Success!', 'success')
                     return True
 
-               
+
                 return False
 
     def cleanup_and_close(self, _=None):
@@ -568,7 +568,7 @@ class DT_Select_GUI():
         partition_label = tk.Label(main_frame, text="Partition Name:", anchor="w", font=("Times New Roman", 11, "bold"))
         partition_label.place(x=5, y=10, width=120, height=30)
 
-        
+
         self.partition_combobox = ttk.Combobox(main_frame, values=self.partition_list, font=("TkFixedFont", 10))
         self.partition_combobox.place(x=130, y=10, width=self.PartitionListMaxLength, height=30)
         self.partition_combobox.current(0)
@@ -669,7 +669,7 @@ class DT_Write_GUI():
         self.popup_win.attributes('-alpha', 0)
         screenwidth = self.popup_win.winfo_screenwidth()
         screenheight = self.popup_win.winfo_screenheight()
-        
+
         self.popup_win.title(self.title)
         # self.popup_win.attributes('-topmost', 1)
         self.popup_win.protocol("WM_DELETE_WINDOW", self.dt_flash_close)
@@ -677,7 +677,7 @@ class DT_Write_GUI():
 
         main_frame = tk.LabelFrame(self.popup_win, text="Write EFL File with DTBs",
                                    font=("Times New Roman", 11, "bold"), width=400+self.PartitionListMaxLength, height=120)
-        
+
         main_frame.pack(anchor="w", padx=5, pady=10, side="top")
         image_label = tk.Label(main_frame, text="Image:", anchor="w", font=("Times New Roman", 11, "bold"))
         image_label.place(x=5, y=10, width=50, height=30)

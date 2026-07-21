@@ -52,7 +52,7 @@ class FindWindow(tk.Toplevel):
         self.controller = controller
         self.find_next_cb = find_next_cb
         self.close_cb = close_cb
-        
+
         # set default configuration if it is not yet set up (note the static access here)
         if FindWindow.searchNames is None:
             FindWindow.searchNames = tk.BooleanVar()
@@ -92,7 +92,7 @@ class FindWindow(tk.Toplevel):
         self.minsize(470, 60)
         # we can resize the width but not the height
         self.resizable(True, False)
-        
+
 
         # labels with information (left side)
         tk.Label(self, text='Find what : ', justify='left', width=20, borderwidth=2,

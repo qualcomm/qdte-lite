@@ -15,7 +15,7 @@ class QutsClientCallbackObject:
     onProtocolLockStatusChangeCallback=None
     onProtocolMbnDownloadStatusChangeCallback=None
     onClientCloseRequestCallback=None
-        
+
     onMissingQShrinkHashFileCallback=None
     onLogSessionMissingQShrinkHashFileCallback=None
     onAsyncResponseCallback=None
@@ -38,7 +38,7 @@ class QutsClientCallbackObject:
         client.setOnProtocolLockStatusChangeCallback(self.onProtocolLockStatusChange)
         client.setOnProtocolMbnDownloadStatusChangeCallback(self.onProtocolMbnDownloadStatusChange)
         client.setOnClientCloseRequestCallback(self.onClientCloseRequest)
-        
+
         client.setOnMissingQShrinkHashFileCallback(self.onMissingQShrinkHashFile)
         client.setOnLogSessionMissingQShrinkHashFileCallback(self.onLogSessionMissingQShrinkHashFile)
         client.setOnAsyncResponseCallback(self.onAsyncResponse)
@@ -49,7 +49,7 @@ class QutsClientCallbackObject:
         client.setOnServiceEventCallback(self.onServiceEvent)
         client.setOnQShrinkStateUpdated(self.onQShrinkStateUpdated)
         pass
-    
+
     #on callback
     def onMessage(self, level, location, title, description):
         if(self.onMessageCallback):
@@ -78,15 +78,15 @@ class QutsClientCallbackObject:
     def onProtocolStateChange(self, protocolHandle, newState):
         if(self.onProtocolStateChangeCallback):
             self.onProtocolStateChangeCallback(protocolHandle, newState)
-            
+
     def onProtocolFlowControlStatusChange(self, protocolHandle, dir, newStatus):
         if(self.onProtocolFlowControlStatusChangeCallback):
             self.onProtocolFlowControlStatusChangeCallback(protocolHandle, dir, newStatus)
-    
+
     def onProtocolLockStatusChange(self, protocolHandle, newStatus):
     	if(self.onProtocolLockStatusChangeCallback):
             self.onProtocolLockStatusChangeCallback(protocolHandle, newStatus)
-    
+
     def onProtocolMbnDownloadStatusChange(self, protocolHandle, newStatus):
         if(self.onProtocolMbnDownloadStatusChangeCallback):
             self.onProtocolMbnDownloadStatusChangeCallback(protocolHandle, newStatus)
@@ -94,11 +94,11 @@ class QutsClientCallbackObject:
     def onClientCloseRequest(self, closeReason):
         if(self.onClientCloseRequestCallback):
             self.onClientCloseRequestCallback(closeReason)
-   	
+
     def onMissingQShrinkHashFile(self, protocolHandle, missingFileGuid):
         if(self.onMissingQShrinkHashFileCallback):
             self.onMissingQShrinkHashFileCallback(protocolHandle, missingFileGuid)
-            
+
     def onLogSessionMissingQShrinkHashFile(self, logSessionInstance, protocolHandle, missingFileGuid):
         if(self.onLogSessionMissingQShrinkHashFileCallback):
             self.onLogSessionMissingQShrinkHashFileCallback(logSessionInstance, protocolHandle, missingFileGuid)

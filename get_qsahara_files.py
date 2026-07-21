@@ -29,23 +29,23 @@ def get_all_sahara_files(meta_root_path, flavor=None, storage='ufs', firehose_ty
     if not os.path.exists(meta_root_path):
         dtlogger.info("Error: meta path {} does not exist!".format(meta_root_path))
         return None
-    
+
     contents_xml_path =  os.path.join(meta_root_path,"contents.xml")
     if not os.path.exists(contents_xml_path):
         dtlogger.info(f"Error: contents.xml not found at '{contents_xml_path}'")
         return None
-    
+
     meta_lib_dir = os.path.join(meta_root_path,"common","build","lib")
 
     if not os.path.exists(meta_lib_dir):
         dtlogger.info(f"Error: meta lib path not found at '{meta_lib_dir}'")
         return None
-    
+
     if meta_lib_dir not in sys.path:
         sys.path.append(meta_lib_dir)
         dtlogger.info(f"append '{meta_lib_dir}' to python sys path")
         dtlogger.info(f"sys path : '{sys.path}'")
-    
+
     if not os.path.exists(os.path.join(meta_lib_dir,'meta_lib.py')):
         dtlogger.info("{} doesn't exist!".format(os.path.join(meta_lib_dir,'meta_lib.py')))
         return None
@@ -59,7 +59,7 @@ def get_all_sahara_files(meta_root_path, flavor=None, storage='ufs', firehose_ty
 
 
     logger = SimpleLogger()
-    
+
     # Instantiate the meta_info class
     try:
         # --- FIX: Removed 'on_linux' as a keyword argument ---
@@ -77,7 +77,7 @@ def get_all_sahara_files(meta_root_path, flavor=None, storage='ufs', firehose_ty
     if flavor is None:
         flavor = meta_obj.get_product_flavors()
         if len(flavor)>0:
-           flavor = flavor[0]   
+           flavor = flavor[0]
         else:
            dtlogger.info('Build does not support any flavor')
            return None
@@ -133,15 +133,15 @@ if __name__ == "__main__":
     # Example: C:\path\to\your\meta_build\common\build\contents.xml
     # Or for the path you provided earlier (likely to the meta_lib.py itself)
     # the contents.xml would be somewhere above that, e.g., in the build root.
-    
+
     # A placeholder for your actual contents.xml path
     # You MUST change this line to point to a valid contents.xml file in your meta-build
     # For example, if your meta_lib.py is at:
     # \\grilled\nsid-sha-spsp-02\Kaanapali.LA.1.0-00839-STD.INT-1\common\build\lib\meta_lib.py
     # then contents.xml might be at:
     # \\grilled\nsid-sha-spsp-02\Kaanapali.LA.1.0-00839-STD.INT-1\common\build\contents.xml
-    
-    meta_root_path = r"R:\Pakala.LA.1.0-01230-PERF.INT-1" 
+
+    meta_root_path = r"R:\Pakala.LA.1.0-01230-PERF.INT-1"
     # Or if you know the exact path relative to where meta_lib.py is located
     # current_script_dir = os.path.dirname(os.path.abspath(__file__))
     # # Assuming contents.xml is two directories up and then in 'build'
@@ -150,7 +150,7 @@ if __name__ == "__main__":
     # Example: Filter by UFS storage (if your contents.xml supports it)
     # You might also try: flavor="DEBUG", firehose_type="ufs" etc.
     # Refer to your contents.xml for actual valid values.
-    
+
     # Get all sahara files without filters
     all_sahara_files = get_all_sahara_files(meta_root_path)
     if all_sahara_files:

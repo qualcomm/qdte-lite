@@ -24,10 +24,10 @@ class autocmd(sign.st,assemble.assemble):
         self.sectool_name = 'sectools'
         self.outdir = ''
         self.check_python()
-    
+
     def check_python(self):
         try:
-            proc = subprocess.Popen(["python",                                 
+            proc = subprocess.Popen(["python",
                                  '--version'
                                  ],
                                  stdout=subprocess.PIPE,
@@ -57,15 +57,15 @@ class autocmd(sign.st,assemble.assemble):
                 print("Python is not installed!\nPlease install python v3.7.4 or later!\n")
                 sys.exit(-1)
 
-            
-        
+
+
         print("python version ",sys.version_info)
         if sys.version_info < (3, 7, 4):
             sys.exit("Python Error","Please install python v3.7.4 or later!\n")
 
         return True
     def execute(self):
-        
+
         try:
             if self.outdir:
                 # clean up old temporary directory
@@ -90,7 +90,7 @@ class autocmd(sign.st,assemble.assemble):
                 sys.exit("Error:signing json file not provided!!\n please provide --signjson option!\n")
             elif not os.path.exists(gf['signJson']):
                 sys.exit("{}{}{}".format("Error:signing command file path:",gf['signJson'],"doesn't exist!!!\n Please provide correct signing commmand file path of --sign_json option!"))
-        
+
             if "profileXml" not in gf.keys() or gf['profileXml'] == None:
                 sys.exit("Error:Please provide  --profileXml option!")
             elif not os.path.exists(gf['profileXml']):
@@ -114,11 +114,11 @@ class autocmd(sign.st,assemble.assemble):
                     if modify_property.split('/')[0].endswith('.dtbs'):
                         dtb_name = modify_property.split('/')[1]
                         property_value = modify_property.split('=')[1].split(';')
-                        property_path = modify_property.split('=')[0]                 
+                        property_path = modify_property.split('=')[0]
                         index = property_path.find('.dtb/')+len('.dtb')
-                        dtb_path = os.path.join(self.outdir,property_path[:index])  
+                        dtb_path = os.path.join(self.outdir,property_path[:index])
                         property_path = property_path[index:]
-                      
+
                     else:
                         dtb_name = modify_property.split('/')[0]
                         property_value = modify_property.split('=')[1].split(';')
@@ -151,13 +151,13 @@ class autocmd(sign.st,assemble.assemble):
                 try:
                     self.dtw.apply(dt.DTOperation.make(dt.DTOperationType.EDIT_PROPERTY_VALUE, property_path.strip(), property_value))
                 except Exception as e:
-                    print (e) 
+                    print (e)
                     sys.exit(-1)
 
                 # save DTB
                 self.dtw.apply(dt.DTOperation.make(dt.DTOperationType.SAVE_DTB, dtb_path))
 
-            #save change report 
+            #save change report
             cr_filename = '%s_%d.json' % (os.path.basename(gf['inputFile']).rsplit('.', 1)[0], time.time())
             report = ''
             cr_report = os.path.join(gf['outputPath'],cr_filename)
@@ -173,14 +173,14 @@ class autocmd(sign.st,assemble.assemble):
             with open(cr_report, 'wb') as outfile:
                 outfile.write(report.encode())
                 outfile.close()
-            
+
         # reassemable the dtb elfs
         try:
             print("\nentering reassembly...")
             self.reassemble_config_elf()
         except Exception as result:
             sys.exit(result)
-            
+
         if not gf['allowUnsigned']:
             try:
                 self.sign_config_image()
@@ -200,4 +200,3 @@ class autocmd(sign.st,assemble.assemble):
             except Exception as e:
                 sys.exit(e)
             print(os.path.join(gf['outputPath'],gf['outputFile'])," was created successfully")
-                 

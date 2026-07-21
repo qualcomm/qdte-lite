@@ -57,7 +57,7 @@ sense to you, I am powerless to stop you.
 ### Generate/display DTB hash on demand
 
 The logic parts of this feature (i.e. hashing) would be done in the `dtwrapper.py` file, and the GUI elements
-would belong in `controller.py`. 
+would belong in `controller.py`.
 
 #### Exposing DTB hashing functionality in the DTWrapper
 

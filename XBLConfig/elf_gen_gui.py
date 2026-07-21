@@ -17,7 +17,7 @@ from functools import partial
 from elf_gen_tools import *
 import tkMessageBox
 import subprocess
-import ConfigParser 
+import ConfigParser
 import json
 import collections
 from pprint import pprint
@@ -60,23 +60,23 @@ frame_start = Frame(root, width=50, height=50)
 frame2 = Frame(root)
 
 rb_var1 = IntVar() #radiobutton variables - need to be global b/c of radiobutton bug (mouse hover)
-rb_var2 = IntVar() 
-      
+rb_var2 = IntVar()
+
 #####################################################################################
 # quit - Closes GUI
 #####################################################################################
 def quit():
 
-  print "\n************** Program Ended **************\n" #needed here 
+  print "\n************** Program Ended **************\n" #needed here
   exit()
   return
 
 #####################################################################################
-# load_directory - Loads directory path into the 'Output Path' field in GUI 
+# load_directory - Loads directory path into the 'Output Path' field in GUI
 #####################################################################################
 def load_directory(file_struct, grey_grid, seg_num, frame):
   directory = filedialog.askdirectory()
-  file_struct.output_file.delete(0, 'end') 
+  file_struct.output_file.delete(0, 'end')
   file_struct.output_file.insert(0, directory)
   print directory
 
@@ -102,7 +102,7 @@ def load_file(file_struct, frame):
     file_struct.input_file.insert(0, new_file)
     # new_file = ntpath.basename(file_struct.input_file.get())
     #Recreate Grid
-    frame.grid_forget()    
+    frame.grid_forget()
     frame2 = Frame(root)
     frame2.grid(row=0, column=0)
     root.geometry("1570x700") #used to make smaller window larger after file input is given in GUI when script is called with no file argument
@@ -110,7 +110,7 @@ def load_file(file_struct, frame):
     return
 
 ###################################################################################
-# load_file_grey_grid - Calls 'grey_grid' with the newly specified input file. 
+# load_file_grey_grid - Calls 'grey_grid' with the newly specified input file.
 #                       Arguments are passed to preserve values from function that
 #                       originally called 'grey_grid'
 ###################################################################################
@@ -119,7 +119,7 @@ def load_file_grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_fil
   if not os.path.isfile(new_file):
     return
   else:
-    load_file_struct.input_file.delete(0, 'end')  
+    load_file_struct.input_file.delete(0, 'end')
     load_file_struct.input_file.insert(0, new_file)
     # new_file = ntpath.basename(file_struct.input_file.get())
     #Recreate Grid
@@ -187,7 +187,7 @@ def raise_frame(frame_new):
   return
 
 ###############################################################################
-# raise_frame_start - Creates GUI window with smaller size, since no input file 
+# raise_frame_start - Creates GUI window with smaller size, since no input file
 #                     given to 'create_frame_start'
 ###############################################################################
 def raise_frame_start(frame_new):
@@ -207,7 +207,7 @@ def create_frame_start(file_arg):
   Label(frame_start, text='Please Make Sure the Following is Installed :', height=2).pack()
   # Label(frame_start, text='OS : Windows 7', width=30).pack()
   Label(frame_start, text='Python 2.7 or Higher', width=40).pack()
-  
+
   if not file_arg:  #If file is given, make second frame full size - else make it smaller since no input given
     button_frame_cont = Button(frame_start, text = "Continue", command=lambda: raise_frame_start(frame2))
   else:
@@ -227,7 +227,7 @@ def roundup(x, precision):
   if precision == 0:
     return x
   else:
-    return x if x % precision == 0 else (x + precision - (x % precision)) 
+    return x if x % precision == 0 else (x + precision - (x % precision))
 
 ##############################################################################
 # scrollFunction - Used to enable scrollbar
@@ -253,11 +253,11 @@ def init_gui(frame):
   #Input/Output file code
   file_struct_new = fileStruct(frame2)
   file_struct_new.input_file.grid(row=1, column=1, columnspan=3, sticky='WE')
-  button_input_file = Button(frame2, text = "Input File", command= partial(load_file, file_struct_new, frame2)) 
+  button_input_file = Button(frame2, text = "Input File", command= partial(load_file, file_struct_new, frame2))
   button_input_file.grid(row=1, column=0)
 
   file_struct_new.output_file.grid(row=1, column=5, columnspan=3, sticky='WE')
-  button_input_file = Button(frame2, text = "Output Path", state='disabled') 
+  button_input_file = Button(frame2, text = "Output Path", state='disabled')
   button_input_file.grid(row=1, column=4)
 
   #ELF HEADER CODE
@@ -296,7 +296,7 @@ def init_gui(frame):
   #LINE CODE - between radiobuttons and ELF header segment
   canvas_a = Canvas(frame2, width=1500, height=10)      #horizontal line above phdr
   canvas_a.grid(row=4+1, column=0, columnspan=12)
-  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4)) 
+  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4))
   canvas_b = Canvas(frame2, width=1500, height=10)      #horizontal line above elf header
   canvas_b.grid(row=2, column=0, columnspan=12)
   canvas_b.create_line(20, 8, 1550, 8, width=1, dash=(4))
@@ -312,10 +312,10 @@ def init_gui(frame):
   #Create 'help' button
   button_generate = Button(frame2, text = "Help", width=16, command=lambda: pop_up(init_help_msg))
   button_generate.grid(row=0, column=10)
- 
+
   #Create 'quit' button
   button_generate = Button(frame2, text = "Quit", width=16, command=lambda: quit()) #disintegrates original ELF
-  button_generate.grid(row=0, column=11) 
+  button_generate.grid(row=0, column=11)
   root.mainloop()
 
   return
@@ -400,7 +400,7 @@ def call_gui(elf_in_file_name1, frame1):
   e_headersize = Entry(frame2)
   e_phsize = Entry(frame2)
   e_phnum = Entry(frame2)
-  e_data = Entry(frame2) 
+  e_data = Entry(frame2)
   e_flags = Entry(frame2)
   e_secoff = Entry(frame2)
   e_secsize = Entry(frame2)
@@ -428,7 +428,7 @@ def call_gui(elf_in_file_name1, frame1):
     eclass = "ELF_64"
   else :
     eclass = "ELF_32"
-  #Decode version  
+  #Decode version
   if(elf_header1.e_version == 0x1):
     version_var = 'Current'
   else:
@@ -445,7 +445,7 @@ def call_gui(elf_in_file_name1, frame1):
   e_headersize.insert(0, hex(elf_header1.e_ehsize))
   e_phsize.insert(0, hex(elf_header1.e_phentsize*elf_header1.e_phnum))
   e_phnum.insert(0, hex(elf_header1.e_phnum))
-  e_secoff.insert(0, hex(elf_header1.e_shoff)) 
+  e_secoff.insert(0, hex(elf_header1.e_shoff))
   e_secsize.insert(0, hex(elf_header1.e_shentsize*elf_header1.e_shnum))
   e_version.insert(0, version_var)
 
@@ -502,9 +502,9 @@ def call_gui(elf_in_file_name1, frame1):
   add_entry_list.append(Entry(frame2, textvariable=add_val_list[4]))
   add_entry_list.append(Entry(frame2, textvariable=add_val_list[5]))
   add_entry_list.append(Entry(frame2, textvariable=add_val_list[6]))
-  add_entry_list.append(Entry(frame2, textvariable=add_val_list[7])) 
-  add_entry_list.append(Entry(frame2, textvariable=add_val_list[8])) 
-  add_entry_list.append(Entry(frame2, textvariable=add_val_list[9])) 
+  add_entry_list.append(Entry(frame2, textvariable=add_val_list[7]))
+  add_entry_list.append(Entry(frame2, textvariable=add_val_list[8]))
+  add_entry_list.append(Entry(frame2, textvariable=add_val_list[9]))
   add_entry_list.append(Entry(frame2, textvariable=add_val_list[10]))
 
   #insert list into grid
@@ -525,7 +525,7 @@ def call_gui(elf_in_file_name1, frame1):
   #Segment alignment entry update
   entry_struct_new.segalign.insert(0, hex(4096))
   entry_struct_new.segalign.grid(row=2+1+2+1, column=1)
-  Label(frame2, text = "Offset Alignment(nbytes)").grid(row=2+1+2+1, column=0) 
+  Label(frame2, text = "Offset Alignment(nbytes)").grid(row=2+1+2+1, column=0)
   #Labels for PHDR entries
   Label(frame2, text = "PHDR Entries").grid(row=2+1+2+2, column=0)
   Label(frame2, text = "Type").grid(row=2+1+2+2, column=1)
@@ -573,7 +573,7 @@ def call_gui(elf_in_file_name1, frame1):
     #Create structure for current entries
     phdr_struct.s_type.append(Entry(frame2, textvariable=val_list[i*11]))
     phdr_struct.offset.append(Entry(frame2, textvariable=val_list[i*11+1]))
-    phdr_struct.vaddr.append(Entry(frame2, textvariable=val_list[i*11+2]))                                                                                                                                      
+    phdr_struct.vaddr.append(Entry(frame2, textvariable=val_list[i*11+2]))
     phdr_struct.paddr.append(Entry(frame2, textvariable=val_list[i*11+3]))
     phdr_struct.fsize.append(Entry(frame2, textvariable=val_list[i*11+4]))
     phdr_struct.msize.append(Entry(frame2, textvariable=val_list[i*11+5]))
@@ -634,7 +634,7 @@ def call_gui(elf_in_file_name1, frame1):
       pflag_var = 0x0
       if(phdr_table1[i].p_flags & 0x4 == 4):
         # tmp_string += "R"
-        pflag_var += 0x4 
+        pflag_var += 0x4
         # rvar.set(1)
       if(phdr_table1[i].p_flags & 0x2 == 2):
         # tmp_string += "W"
@@ -642,7 +642,7 @@ def call_gui(elf_in_file_name1, frame1):
         # wvar.set(1)
       if(phdr_table1[i].p_flags & 0x1 == 1):
         # tmp_string += "E"
-        pflag_var += 0x1 
+        pflag_var += 0x1
         # evar.set(1)
     # check_list.append(checkbox1)
     # check_list.append(checkbox2)
@@ -722,10 +722,10 @@ def call_gui(elf_in_file_name1, frame1):
   # print "initial checklist size", len(check_list)
 
   #populate segment structure
-  seg_struct.oldseg_num = elf_header1.e_phnum 
-  seg_struct.num_segs_added = 0 
+  seg_struct.oldseg_num = elf_header1.e_phnum
+  seg_struct.num_segs_added = 0
   seg_struct.seg_num = elf_header1.e_phnum
-  #DELETE buttons  
+  #DELETE buttons
   for i in range(elf_header1.e_phnum):
     button_generate = Button(frame2, text = "Delete", width=4, command= partial(create_grid, original_offset_list, frame2, val_list, elf_in_fp1, elf_in_file_name1, elf_in_file_name1, is_out_elf_64_bit, elf_header1, phdr_table1, False, True, i, add_entry_list, add_val_list, file_struct_new, entry_struct_new, canvas, seg_struct, initial_phdr_struct, phdr_struct)) #modifies/disintegrates new ELF
     button_generate.grid(row=i+2+1+1+2+2, column=12)
@@ -743,7 +743,7 @@ def call_gui(elf_in_file_name1, frame1):
   #LINE CODE - between radiobuttons and ELF header segment
   canvas_a = Canvas(frame2, width=1500, height=10)      #horizontal line above phdr
   canvas_a.grid(row=4+1, column=0, columnspan=12)
-  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4)) 
+  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4))
   canvas_b = Canvas(frame2, width=1500, height=10)      #horizontal line above elf header
   canvas_b.grid(row=2, column=0, columnspan=12)
   canvas_b.create_line(20, 8, 1550, 8, width=1, dash=(4))
@@ -751,7 +751,7 @@ def call_gui(elf_in_file_name1, frame1):
   canvas_c.grid(row=elf_header1.e_phnum+9, column=0, columnspan=12)
   canvas_c.create_line(20, 8, 1550, 8, width=1, dash=(4))
 
-  #Create 'add' button                                                                                     
+  #Create 'add' button
   button_generate = Button(frame2, text = "Add", width=4, command= partial(create_grid, original_offset_list, frame2, val_list, elf_in_fp1, elf_in_file_name1, elf_in_file_name1, is_out_elf_64_bit, elf_header1, phdr_table1, True, False, 0, add_entry_list, add_val_list, file_struct_new, entry_struct_new, canvas, seg_struct, initial_phdr_struct, phdr_struct)) #modifies/disintegrates new ELF
   button_generate.grid(row=elf_header1.e_phnum+8, column=12, sticky='w')
 
@@ -763,17 +763,17 @@ def call_gui(elf_in_file_name1, frame1):
   #Create 'help' button
   button_generate = Button(frame2, text = "Help", width=16, command=lambda: pop_up(modify_help_msg))
   button_generate.grid(row=0, column=10)
- 
+
   #Create 'quit' button
   button_generate = Button(frame2, text = "Quit", width=16, command=lambda: quit()) #disintegrates original ELF
-  button_generate.grid(row=0, column=11) 
+  button_generate.grid(row=0, column=11)
 
 
 
   #event loop
   root.mainloop()
   elf_in_fp1.close() #originally above
-  
+
   return 0
 
 ###########################################################################################
@@ -818,7 +818,7 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
 
   #Create New Header Structures
   [new_elf_header, new_phdr_table] = \
-    elf_gen_tools.preprocess_elf_file(file_struct_new.input_file.get()) 
+    elf_gen_tools.preprocess_elf_file(file_struct_new.input_file.get())
 
   # button_input_file = Button(frame2, text = "Input File", command=partial(load_file, file_struct_new))
   button_input_file = Button(frame2, text = "Input File", command=partial(load_file_grey_grid, original_offset_list, frame2, val_list, elf_fp, elf_filename, original_elf_filename, is_out_elf_64_bit, elf_header, phdr_table, seg_added, seg_deleted, add_entry_list, add_val_list, file_struct, entry_struct, canvas, load_file_struct, seg_struct, initial_phdr_struct, phdr_struct))
@@ -826,7 +826,7 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
 
   if file_struct.output_file.get():
     file_struct_new.output_file.insert(0, file_struct.output_file.get())
-  else: 
+  else:
     file_struct_new.output_file.insert(0, os.getcwd())
   file_struct_new.output_file.grid(row=1, column=5, columnspan=3, sticky='WE')
   button_input_file = Button(frame2, text = "Output Path", command= partial(load_directory, file_struct_new, True, new_elf_header.e_phnum, frame2)) #, command=lambda: call_gui(file_struct_new.input_file.get(), is_elf1_64_bit))
@@ -878,7 +878,7 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
   e_headersize = Entry(frame2)
   e_phsize = Entry(frame2)
   e_phnum = Entry(frame2)
-  e_data = Entry(frame2) 
+  e_data = Entry(frame2)
   e_flags = Entry(frame2)
   e_secoff = Entry(frame2)
   e_secsize = Entry(frame2)
@@ -906,7 +906,7 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
     eclass = "ELF_64"
   else:
     eclass = "ELF_32"
-  #Decode version  
+  #Decode version
   if(new_elf_header.e_version == 0x1):
     version_var = 'Current'
   else:
@@ -917,19 +917,19 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
   e_type.insert(0, etype)
   e_entryaddr.insert(0, hex(new_elf_header.e_entry))
   e_phdrstart.insert(0, hex(new_elf_header.e_phoff))
-  seg_start = roundup(new_elf_header.e_phoff + new_elf_header.e_phentsize*new_elf_header.e_phnum, PAGE_SIZE) 
+  seg_start = roundup(new_elf_header.e_phoff + new_elf_header.e_phentsize*new_elf_header.e_phnum, PAGE_SIZE)
   e_segstart.insert(0, hex(seg_start))
   e_headersize.insert(0, hex(new_elf_header.e_ehsize))
   e_phsize.insert(0, hex(new_elf_header.e_phentsize*new_elf_header.e_phnum))
   e_phnum.insert(0, new_elf_header.e_phnum)
-  e_secoff.insert(0, hex(new_elf_header.e_shoff)) 
+  e_secoff.insert(0, hex(new_elf_header.e_shoff))
   e_secsize.insert(0, hex(new_elf_header.e_shentsize*new_elf_header.e_shnum))
   e_version.insert(0, version_var)
 
   e_class.configure(state='readonly')
   e_type.configure(state='readonly')
-  e_entryaddr.configure(state='readonly') 
-  e_phdrstart.configure(state='readonly') 
+  e_entryaddr.configure(state='readonly')
+  e_phdrstart.configure(state='readonly')
   e_segstart.configure(state='readonly')
   e_headersize.configure(state='readonly')
   e_phsize.configure(state='readonly')
@@ -1037,11 +1037,11 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
     access_type_var = 0x0
     segment_type_var = 0x0
     if(new_phdr_table[i].p_flags & 0x4 == 4):
-      pflag_var += 0x4 
+      pflag_var += 0x4
     if(new_phdr_table[i].p_flags & 0x2 == 2):
       pflag_var += 0x2
     if(new_phdr_table[i].p_flags & 0x1 == 1):
-      pflag_var += 0x1 
+      pflag_var += 0x1
     if(new_phdr_table[i].p_flags & 0x200000 == 0x200000):
       access_type_var += 0x1
     if(new_phdr_table[i].p_flags & 0x400000 == 0x400000):
@@ -1099,14 +1099,14 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
     # checkbox2.grid(row=i+6+1, column=8, sticky='nesw')
     # checkbox3.grid(row=i+6+1, column=9, sticky='news')
 
-    #create delete buttons                                                        
+    #create delete buttons
     button_generate = Button(frame2, text = "Delete", width=4, state='disabled') #modifies/disintegrates new ELF
     button_generate.grid(row=i+2+1+1+2+1, column=12)
-  
+
   #LINE CODE - between radiobuttons and ELF header segment
   canvas_a = Canvas(frame2, width=1500, height=10)      #horizontal line above phdr
   canvas_a.grid(row=4+1, column=0, columnspan=12)
-  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4)) 
+  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4))
   canvas_b = Canvas(frame2, width=1500, height=10)      #horizontal line above elf header
   canvas_b.grid(row=2, column=0, columnspan=12)
   canvas_b.create_line(20, 8, 1550, 8, width=1, dash=(4))
@@ -1115,7 +1115,7 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
   canvas_c.create_line(20, 8, 1550, 8, width=1, dash=(4))
   new_elf_fp = elf_gen_tools.OPEN(file_struct_new.input_file.get(), "rb")
 
-  #Create 'disintegrate' Button                                                                     
+  #Create 'disintegrate' Button
   button_generate = Button(frame2, text = "Disintegrate", width=16, command=lambda: disassemble_elf(new_elf_fp, new_elf_header, arch_64_bit, file_struct_new, new_phdr_struct))
   button_generate.grid(row=0, column=9)
   # button_generate.grid(row=new_elf_header.e_phnum+10, column=0)
@@ -1123,20 +1123,20 @@ def grey_grid (original_offset_list, frame2, val_list, elf_fp, elf_filename, ori
   #Create 'help' button
   button_generate = Button(frame2, text = "Help", width=16, command=lambda: pop_up(disintegrate_help_msg))
   button_generate.grid(row=0, column=10)
- 
+
   #Create 'quit' button
   button_generate = Button(frame2, text = "Quit", width=16, command=lambda: quit()) #disintegrates original ELF
-  button_generate.grid(row=0, column=11) 
+  button_generate.grid(row=0, column=11)
 
 
   #event loop
   root.mainloop()
   elf_fp.close() #originally above
-  return 
+  return
 
-  
+
 #################################################################################
-# create_grid - Recreates grid. Called after segments added or deleted, or when   
+# create_grid - Recreates grid. Called after segments added or deleted, or when
 #               switching from 'Disintegrate' to 'Modify'
 #################################################################################
 def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, original_elf_filename, is_out_elf_64_bit, elf_header, phdr_table, seg_added, seg_deleted, num_deleted, add_entry_list, add_val_list, file_struct, entry_struct, canvas, seg_struct, initial_phdr_struct, phdr_struct):
@@ -1147,14 +1147,14 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
       pop_up('Binary does not exist in added segment. \n\nFile must be in working directory')
       return                                            #make sure other fields have input
     for i in range (1,7):
-      try: 
+      try:
         int(add_val_list[i].get(), 16)
       except:
         pop_up('Invalid hex value for added segment')
         return
-    if not (add_val_list[0].get() == 'load' or add_val_list[0].get() == 'null' or add_val_list[0].get() == 'dynamic' or add_val_list[0].get() == 'interp' or add_val_list[0].get() == 'note' or add_val_list[0].get() == 'shlib' or add_val_list[0].get() == 'phdr' or add_val_list[0].get() == 'loproc' or add_val_list[0].get() == 'hiproc'): 
+    if not (add_val_list[0].get() == 'load' or add_val_list[0].get() == 'null' or add_val_list[0].get() == 'dynamic' or add_val_list[0].get() == 'interp' or add_val_list[0].get() == 'note' or add_val_list[0].get() == 'shlib' or add_val_list[0].get() == 'phdr' or add_val_list[0].get() == 'loproc' or add_val_list[0].get() == 'hiproc'):
       pop_up('Invalid Type for added segment. \n\nDefault Type will be load')
-      
+
   frame1.grid_forget()
   canvas.delete("all")
   frame1 = Frame(root)
@@ -1268,12 +1268,12 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   elf_fp.seek(file_offset)
   if(seg_added == True):
     #Update PHDR for added segment
-    if(is_out_elf_64_bit): 
+    if(is_out_elf_64_bit):
       phdr_table.append(elf_gen_tools.Elf64_Phdr(elf_fp.read(elf_header.e_phentsize))) #append PHDR for 64 byte
     else:
       phdr_table.append(elf_gen_tools.Elf32_Phdr(elf_fp.read(elf_header.e_phentsize))) #append PHDR for 32 byte
     #Decode 'type'
-    if(Entry.get(add_entry_list[0]) == 'null'):     
+    if(Entry.get(add_entry_list[0]) == 'null'):
       phdr_table[seg_struct.seg_num].p_type  = 0
     elif (Entry.get(add_entry_list[0]) == 'load'):
       phdr_table[seg_struct.seg_num].p_type  = 1
@@ -1334,7 +1334,7 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
     #Populate structure with current entries
     phdr_struct.s_type.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11]))
     phdr_struct.offset.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11+1]))
-    phdr_struct.vaddr.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11+2]))                                                                                                                                      
+    phdr_struct.vaddr.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11+2]))
     phdr_struct.paddr.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11+3]))
     phdr_struct.fsize.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11+4]))
     phdr_struct.msize.append(Entry(frame2, textvariable=val_list[seg_struct.seg_num*11+5]))
@@ -1442,13 +1442,13 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   entry_struct_new.entry_addr.insert(0, tmp_addr)
   # e_entryaddr.insert(0, tmp_addr)
   e_phdrstart.insert(0, hex(elf_header.e_phoff))
-  seg_start = roundup(elf_header.e_phoff + elf_header.e_phentsize*elf_header.e_phnum, PAGE_SIZE) 
+  seg_start = roundup(elf_header.e_phoff + elf_header.e_phentsize*elf_header.e_phnum, PAGE_SIZE)
   e_segstart.insert(0, hex(seg_start))
   # e_segstart.insert(0, hex(elf_header.e_phoff+(elf_header.e_phentsize*seg_num)))  #elf header fields being used remain consistent through execution
   e_headersize.insert(0, hex(elf_header.e_ehsize))
   e_phsize.insert(0, hex(elf_header.e_phentsize*seg_struct.seg_num))
   e_phnum.insert(0, hex(seg_struct.seg_num))
-  e_secoff.insert(0, hex(elf_header.e_shoff)) 
+  e_secoff.insert(0, hex(elf_header.e_shoff))
   e_secsize.insert(0, hex(elf_header.e_shentsize*elf_header.e_shnum))
   e_version.insert(0, version_var)
   e_class.configure(state='readonly')
@@ -1483,7 +1483,7 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   #Segment alignment entry update
   entry_struct_new.segalign.insert(0, entry_struct.segalign.get())
   entry_struct_new.segalign.grid(row=6, column=1)
-  Label(frame2, text = "Offset Alignment(nbytes)").grid(row=6, column=0) 
+  Label(frame2, text = "Offset Alignment(nbytes)").grid(row=6, column=0)
   #Labels for PHDR entries
   Label(frame2, text = "PHDR Entries").grid(row=7, column=0)
   Label(frame2, text = "Type").grid(row=7, column=1)
@@ -1631,7 +1631,7 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
     #Change 'offset' field to be the sum of previous 'offset' and 'file size'
     c = 0
     original_offset_list.append(c)
-    Label(frame2, text = "Segment "+ str(i)).grid(row=i+8)  
+    Label(frame2, text = "Segment "+ str(i)).grid(row=i+8)
 
     # #CHECKBOX FOR ADDED SEGMENT
     # rvar = IntVar()
@@ -1667,14 +1667,14 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   # checkbox3.var = evar
   # new_check_list.append(checkbox1)
   # new_check_list.append(checkbox2)
-  # new_check_list.append(checkbox3)    
+  # new_check_list.append(checkbox3)
   # new_check_list[seg_struct.seg_num*3].grid(row=seg_struct.seg_num+6+1, column=7, sticky='nesw')
   # new_check_list[seg_struct.seg_num*3+1].grid(row=seg_struct.seg_num+6+1, column=8, sticky='nesw')
   # new_check_list[seg_struct.seg_num*3+2].grid(row=seg_struct.seg_num+6+1, column=9, sticky='nesw')
-    
+
   for i in range(seg_struct.seg_num):
     #Keep all other fields the same, even if user input entered
-    new_phdr_struct.s_type[i].grid(row=i+8, column=1) 
+    new_phdr_struct.s_type[i].grid(row=i+8, column=1)
     new_phdr_struct.offset[i].grid(row=i+8, column=2)
     new_phdr_struct.vaddr[i].grid(row=i+8, column=3)
     new_phdr_struct.paddr[i].grid(row=i+8, column=4)
@@ -1686,7 +1686,7 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
     new_phdr_struct.align[i].grid(row=i+8, column=7)
     new_phdr_struct.binary[i].grid(row=i+8, column=11)
 
-    #create delete buttons      
+    #create delete buttons
     button_generate = Button(frame2, text = "Delete", width=4, command= partial(create_grid, original_offset_list, frame2, new_val_list, elf_fp, elf_filename, original_elf_filename, is_out_elf_64_bit, elf_header, phdr_table, False, True, i, new_add_entry_list, new_add_val_list, file_struct_new, entry_struct_new, canvas, seg_struct, initial_phdr_struct, new_phdr_struct)) #modifies/disintegrates new ELF
     button_generate.grid(row=i+8, column=12)
 
@@ -1700,7 +1700,7 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   #LINE CODE - between radiobuttons and ELF header segment
   canvas_a = Canvas(frame2, width=1500, height=10)      #horizontal line above phdr
   canvas_a.grid(row=4+1, column=0, columnspan=12)
-  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4)) 
+  canvas_a.create_line(20, 8, 1550, 8, width=1, dash=(4))
   canvas_b = Canvas(frame2, width=1500, height=10)      #horizontal line above elf header
   canvas_b.grid(row=2, column=0, columnspan=12)
   canvas_b.create_line(20, 8, 1550, 8, width=1, dash=(4))
@@ -1709,7 +1709,7 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   canvas_c.create_line(20, 8, 1550, 8, width=1, dash=(4))
 
 
-  #Create 'add' button   
+  #Create 'add' button
   button_generate = Button(frame2, text = "Add", width=4, command= partial(create_grid, original_offset_list, frame2, new_val_list, elf_fp, elf_filename, original_elf_filename, is_out_elf_64_bit, elf_header, phdr_table, True, False, 0, new_add_entry_list, new_add_val_list, file_struct_new, entry_struct_new, canvas, seg_struct, initial_phdr_struct, new_phdr_struct)) #modifies/disintegrates new ELF
   button_generate.grid(row=seg_struct.seg_num+8, column=12)
 
@@ -1718,14 +1718,14 @@ def create_grid (original_offset_list, frame1, val_list, elf_fp, elf_filename, o
   button_generate.grid(row=0, column=9)
   # button_generate.grid(row=seg_num+10, column=0)
 
-  #Create 'help' button                                                                        
+  #Create 'help' button
   button_generate = Button(frame2, text = "Help", width=16, command=lambda: pop_up(modify_help_msg))
   button_generate.grid(row=0, column=10)
 
   #Create 'quit' button
   button_generate = Button(frame2, text = "Quit", width=16, command=lambda: quit()) #disintegrates original ELF
-  button_generate.grid(row=0, column=11) 
-  return 
+  button_generate.grid(row=0, column=11)
+  return
 
 #Called after 'Generate' is pressed. Checks for GUI entry validity, then updates lists, then calls 'generate_modified_elf' to create a new ELF file with GUI entries
 #############################################################################################
@@ -1744,7 +1744,7 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
 
   #MAKE SURE GUI ENTRIES ARE HEX
   for i in range (phdr_num):
-    try: 
+    try:
       int(val_list[i*11 + 1].get(), 16)
       int(val_list[i*11 + 4].get(), 16)
       int(val_list[i*11 + 5].get(), 16)
@@ -1754,11 +1754,11 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
       int(val_list[i*11 + 9].get(), 16)
       if val_list[i*11+2].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
         vaddr = val_list[i*11+2].get()[:-1]
-      else: 
+      else:
         vaddr = val_list[i*11+2].get()
       if val_list[i*11+3].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
         paddr = val_list[i*11+3].get()[:-1]
-      else: 
+      else:
         paddr = val_list[i*11+3].get()
       int(vaddr, 16)
       int(paddr,16)
@@ -1769,7 +1769,7 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
       return
     #Count all hash segments. Only one should be present
     if(int(val_list[i*11+8].get(), 16) == 0x2):
-      hash_counter += 0x1 
+      hash_counter += 0x1
   #Exit out if more than one hash segment is seen
   if(hash_counter > 0x1):
     pop_up('ERROR: Only one hash segment can be used. \n\nThe hash segment is identified with value 0x2 in the Segment Type Bits field')
@@ -1790,12 +1790,12 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
   #CHECK TYPE, ENTRY ADDRESS VALIDITY WITH VADDRS, AND ORIGINAL SEGMENT BINARY VALIDITY
   for i in range(phdr_num):
     #Type check
-    if not (val_list[i*11].get() == 'load' or val_list[i*11].get() == 'null' or val_list[i*11].get() == 'dynamic' or val_list[i*11].get() == 'interp' or val_list[i*11].get() == 'note' or val_list[i*11].get() == 'shlib' or val_list[i*11].get() == 'phdr' or val_list[i*11].get() == 'loproc' or val_list[i*11].get() == 'hiproc'): 
+    if not (val_list[i*11].get() == 'load' or val_list[i*11].get() == 'null' or val_list[i*11].get() == 'dynamic' or val_list[i*11].get() == 'interp' or val_list[i*11].get() == 'note' or val_list[i*11].get() == 'shlib' or val_list[i*11].get() == 'phdr' or val_list[i*11].get() == 'loproc' or val_list[i*11].get() == 'hiproc'):
       pop_up('WARNING: Invalid Type for some segment \n\nDefault Type will be load')
     #Entry point address check - must be between vaddr and filessize for at least ONE of the segments
     if val_list[i*11+2].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
       vaddr = int(val_list[i*11+2].get()[:-1], 16)
-    else: 
+    else:
       vaddr = int(val_list[i*11+2].get(), 16)
     filesz = int(val_list[i*11+4].get(), 16)
     if (int(entry_struct.entry_addr.get(), 16) >= vaddr and int(entry_struct.entry_addr.get(), 16) < filesz + vaddr):
@@ -1832,19 +1832,19 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
     for j in range (phdr_num):
       if val_list[i*11+2].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
         vaddr_start = int(val_list[i*11+2].get()[:-1], 16)
-      else: 
+      else:
         vaddr_start = int(val_list[i*11+2].get(), 16)
       if val_list[i*11+3].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
         paddr_start = int(val_list[i*11+3].get()[:-1], 16)
-      else: 
+      else:
         paddr_start = int(val_list[i*11+3].get(), 16)
       if val_list[j*11+2].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
         tmp_vaddr_start = int(val_list[j*11+2].get()[:-1], 16)
-      else: 
+      else:
         tmp_vaddr_start = int(val_list[j*11+2].get(), 16)
       if val_list[j*11+3].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
         tmp_paddr_start = int(val_list[j*11+3].get()[:-1], 16)
-      else: 
+      else:
         tmp_paddr_start = int(val_list[j*11+3].get(), 16)
 
       # vaddr_start = roundup(vaddr_start, int(val_list[i*11+9].get(), 16))       #vaddr is aligned
@@ -1871,7 +1871,7 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
           # print "x1", hex(tmp_vaddr_start)
           # print "x2", hex(tmp_vaddr_end), "\n"
           elf_error()
-          return  
+          return
         if((paddr_start < tmp_paddr_end and paddr_start >= tmp_paddr_start) or (paddr_end < tmp_paddr_end and paddr_end > tmp_paddr_start) or (paddr_start >= tmp_paddr_start and paddr_end < tmp_paddr_end) or (paddr_start <= tmp_paddr_start and paddr_end > tmp_paddr_end)): # FIND OVERLAP LOGIC
           pop_up_overlap('ERROR: Physical address and mem size overlaps with segments', i, j)
           # print "y1", hex(paddr_start)
@@ -1883,7 +1883,7 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
 
 
   #GUI, LIST, SOME ELF HEADER UPDATING ****************************************************************
-  # file pointer for ELF 
+  # file pointer for ELF
   elf_fp = elf_gen_tools.OPEN(elf_filename, "rb")
   seg_num = phdr_num
   old_seg_num = phdr_num #used to check indexes since seg_num changes in this function
@@ -1893,7 +1893,7 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
 
     #UPDATE ENTRY LIST WITH GUI VALUES
     tmp_type = val_list[i*11].get()
-    phdr_struct.s_type[i].delete(0, 'end')  
+    phdr_struct.s_type[i].delete(0, 'end')
     phdr_struct.s_type[i].insert(0, tmp_type)        #type
 
     #offset change
@@ -1901,78 +1901,78 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
       tmp_offset = int(val_list[i*11+1].get(), 16)
       tmp_offset = roundup(tmp_offset, int(entry_struct.segalign.get(), 16)) #BYTE ALIGN THE OFFSET
       # tmp_offset = roundup(tmp_offset, SEGMENT_ALIGN) #16 BYTE ALIGN
-      phdr_struct.offset[i].delete(0, 'end')  
+      phdr_struct.offset[i].delete(0, 'end')
       phdr_struct.offset[i].insert(0, hex(tmp_offset))  #offset
     else:
       # val_list[i*11+1] = shift_offset
-      phdr_struct.offset[i].delete(0, 'end')  
+      phdr_struct.offset[i].delete(0, 'end')
       phdr_struct.offset[i].insert(0, hex(shift_offset))  #offset
     cur_offset = int(phdr_struct.offset[i].get(), 16)   #MUST be assigned after current offset has been set above
-    cur_filesz = int(val_list[i*11+4].get(), 16)   
+    cur_filesz = int(val_list[i*11+4].get(), 16)
 
     #VADDR CHECK
     if val_list[i*11+2].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers  VADDR IS ALIGNED WITH PHDR 'ALIGNMENT' FIELD ********************
       # tmp_vaddr = roundup(int(val_list[i*11+2].get()[:-1], 16), int(val_list[i*11+9].get(), 16))  #ALIGN ADDRESSS
       tmp_vaddr = val_list[i*11+2].get()[:-1]
-    else: 
+    else:
       # tmp_vaddr = roundup(int(val_list[i*11+2].get(), 16), int(val_list[i*11+9].get(), 16)) #ALIGN ADDRESSS
       tmp_vaddr = val_list[i*11+2].get()
-    phdr_struct.vaddr[i].delete(0, 'end')   
+    phdr_struct.vaddr[i].delete(0, 'end')
     if tmp_vaddr[-1] == "L":  #check for 'L' bug after address alignment
       tmp_vaddr = tmp_vaddr[:-1]
     phdr_struct.vaddr[i].insert(0, tmp_vaddr)  #vaddr
-    
+
     #PADDR CHECK
     if val_list[i*11+3].get()[-1] == "L":    #fixes Python bug - trailing found 'L' in large hex numbers
       # tmp_paddr = roundup(int(val_list[i*11+3].get()[:-1], 16), int(val_list[i*11+9].get(), 16))  #ALIGN ADDRESSS
       tmp_paddr = val_list[i*11+3].get()[:-1]
-    else: 
+    else:
       # tmp_paddr = roundup(int(val_list[i*11+3].get(), 16), int(val_list[i*11+9].get(), 16))  #ALIGN ADDRESSS
       tmp_paddr = val_list[i*11+3].get()
-    phdr_struct.paddr[i].delete(0, 'end')  
+    phdr_struct.paddr[i].delete(0, 'end')
     if tmp_paddr[-1] == "L":    #check for 'L' bug after address alignment
       tmp_paddr = tmp_paddr[:-1]
     phdr_struct.paddr[i].insert(0, tmp_paddr)  #paddr
 
-    tmp_size = int(val_list[i*11+4].get(), 16)  
-    phdr_struct.fsize[i].delete(0, 'end')  
-    phdr_struct.fsize[i].insert(0, hex(tmp_size))  #filesize* convert input from entry (string) into hex value 
+    tmp_size = int(val_list[i*11+4].get(), 16)
+    phdr_struct.fsize[i].delete(0, 'end')
+    phdr_struct.fsize[i].insert(0, hex(tmp_size))  #filesize* convert input from entry (string) into hex value
 
     tmp_msize = int(val_list[i*11+5].get(), 16)
-    phdr_struct.msize[i].delete(0, 'end')  
+    phdr_struct.msize[i].delete(0, 'end')
     phdr_struct.msize[i].insert(0, hex(tmp_msize))  #memsize
 
     tmp_pflag = int(val_list[i*11+6].get(), 16)
-    phdr_struct.flags[i].delete(0, 'end')  
+    phdr_struct.flags[i].delete(0, 'end')
     phdr_struct.flags[i].insert(0, hex(tmp_pflag)) #pflag bits
 
     tmp_abits = int(val_list[i*11+7].get(), 16)
-    phdr_struct.acc_bits[i].delete(0, 'end')  
-    phdr_struct.acc_bits[i].insert(0, hex(tmp_abits)) #access type bits 
+    phdr_struct.acc_bits[i].delete(0, 'end')
+    phdr_struct.acc_bits[i].insert(0, hex(tmp_abits)) #access type bits
 
     tmp_sbits = int(val_list[i*11+8].get(), 16)
-    phdr_struct.seg_bits[i].delete(0, 'end')  
-    phdr_struct.seg_bits[i].insert(0, hex(tmp_sbits)) #segment type bits 
+    phdr_struct.seg_bits[i].delete(0, 'end')
+    phdr_struct.seg_bits[i].insert(0, hex(tmp_sbits)) #segment type bits
 
     tmp_align = int(val_list[i*11+9].get(), 16)
-    phdr_struct.align[i].delete(0, 'end')  
+    phdr_struct.align[i].delete(0, 'end')
     phdr_struct.align[i].insert(0, hex(tmp_align))  #align
 
     tmp_bin = val_list[i*11+10].get()
-    phdr_struct.binary[i].delete(0, 'end')  
+    phdr_struct.binary[i].delete(0, 'end')
     phdr_struct.binary[i].insert(0, tmp_bin)  #binary
 
     #Logic for offset changes
     if(i < phdr_num-1): #index before the last row
       next_offset = int(phdr_struct.offset[(i+1)].get(), 16)
-      # print "i ", i   
+      # print "i ", i
       # print "cur offset", hex(cur_offset)
       # print "cur filesz ", hex(cur_filesz)
       # print "next offset", hex(next_offset), "\n"
       if(cur_offset + cur_filesz > next_offset): #must shift offsets down
         change_var = True
         shift_offset = cur_offset + cur_filesz
-        shift_offset = roundup(shift_offset, int(entry_struct.segalign.get(), 16)) #VARIABLE BYTE ALIGN 
+        shift_offset = roundup(shift_offset, int(entry_struct.segalign.get(), 16)) #VARIABLE BYTE ALIGN
         # shift_offset = roundup(shift_offset, SEGMENT_ALIGN) #16 BYTE ALIGN
       else:
         change_var = False
@@ -1995,7 +1995,7 @@ def update_grid(val_list, original_offset_list, elf_filename, original_elf_filen
   elf_gen.create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, is_out_elf_64_bit, segment_added, val_list, original_elf_filename, file_struct, entry_struct, seg_struct, initial_phdr_struct, phdr_struct)
                                                                                               #segment_added
   elf_fp.close()
-  return  
+  return
 
 #############################################################################################
 # disassemble_elf - Parses an ELF file and places sections of file into different binaries
@@ -2030,15 +2030,15 @@ if __name__ == "__main__":
 
   (options, args) = parser.parse_args()
 
-  # Dependent Tools (elf_gen, elf_gen_tools.py etc.) path directory 
+  # Dependent Tools (elf_gen, elf_gen_tools.py etc.) path directory
   if options.tools_path and os.path.isdir(options.tools_path):
     options.tools_path = os.path.abspath(options.tools_path)
   else:
     options.tools_path = os.getcwd()
-  
+
   if options.json_file: #Make a new ELF with data from config file
     # parse json_file and create ELF file
-    elf_gen.config_parser(options.json_file, True) 
+    elf_gen.config_parser(options.json_file, True)
     frame2.grid(row=0, column=0)
     Label(frame2, text='2')
     frame2.grid_forget()
@@ -2059,5 +2059,5 @@ if __name__ == "__main__":
       init_gui(frame2) #function to create GUI
     else:
       call_gui(options.elf_input, frame2) #function to create GUI
-  
+
   exit(0)

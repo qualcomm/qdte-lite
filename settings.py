@@ -74,14 +74,14 @@ class Json_Operate():
                         gf['sectoolsDir'] =  data["paths"]["sectoolsDir"]
 
                     if "profileXml" in data["paths"] :
-                        gf['profileXml'] = data["paths"]["profileXml"] 
+                        gf['profileXml'] = data["paths"]["profileXml"]
 
                     if "signJson" in data["paths"] :
-                        gf['signJson'] = data["paths"]["signJson"] 
-                    
+                        gf['signJson'] = data["paths"]["signJson"]
+
                     if "devprg" in data["paths"] :
                         gf['devprg'] = data["paths"]["devprg"]
-                
+
                 if "options" in data and "flashtype" in data["options"]:
                     gf['flashtype'] = data["options"]["flashtype"]
                 else:
@@ -113,12 +113,12 @@ class Json_Operate():
                 return_value = data["options"][select]
 
         return return_value
-    
+
     def check_json_items(self,items):
         if items == ITEMS_ALL:
             return False
         if items == ITEMS_DEVPRG:
-            if self.read_json_cfg_data("devprg")=='':  
+            if self.read_json_cfg_data("devprg")=='':
                 return False
         if items == ITEMS_SECTOOL:
             if self.read_json_cfg_data('sectoolsDir')=="" or self.read_json_cfg_data('profileXml')==''\
@@ -198,7 +198,7 @@ class Settings():
             star ='*'
         else:
             star = ''
-        
+
         start_x = 5
         start_y = 5
         lable_width = 200
@@ -263,7 +263,7 @@ class Settings():
         self.Flash_type['values'] = ("UFS","SPINOR","EMMC","NVME")
         flash_type = self.jsonx.read_json_cfg_data("flashtype")
         dtlogger.info("flash_type is {}".format(flash_type))
-        self.Flash_type.set(flash_type)   
+        self.Flash_type.set(flash_type)
 
         self.tip_frame = tk.Frame(self.popup_win2, width=self.select_width - 10, height=80)
         self.tip_frame.pack(anchor="w", padx=5)
@@ -334,13 +334,13 @@ class Settings():
             if not os.path.exists(profile_path):
                 tkinter.messagebox.showerror(parent=self.popup_win2, title="Error", message="Please select a valid profile file Path.\n")
                 return False
-            
+
         if (self.setting_items == ITEMS_ALL and sign_path!='') or self.setting_items== ITEMS_SECTOOL:
             if not os.path.exists(sign_path):
                 tkinter.messagebox.showerror(parent=self.popup_win2, title="Error", message="Please select a valid signing mode file Path.\n")
                 return False
 
-            
+
         gf['sectoolsDir'] = sec_tool_path
         gf['profileXml'] = profile_path
         gf['signJson'] = sign_path
@@ -350,14 +350,14 @@ class Settings():
                 tkinter.messagebox.showerror(parent=self.popup_win2, title="Error", message="Not a valid meta path\n")
                 return False
         gf['devprg'] = prg_path
-            
+
         if self.setting_items != ITEMS_ALL:
             gf["setting_flag"] = 1
 
         self.jsonx.update_json_cfg_data()
         self.popup_win2.destroy()
 
-   
+
     def call_sec_tool_select_bt(self):
         initialdir_path = self.jsonx.read_json_cfg_data("sectoolsDir")
         sec_tool_path = tkinter.filedialog.askdirectory(parent=self.popup_win2, title="Select SecTool Path", initialdir=initialdir_path)

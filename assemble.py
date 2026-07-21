@@ -59,7 +59,7 @@ class assemble:
             return 'True'
         else:
             return ''
-    
+
     # get the alignment setting
     def check_alignment_setting(self):
         try:
@@ -68,7 +68,7 @@ class assemble:
                 fp.close()
         except Exception as e:
             dtlogger.info(e)
-    
+
     # detect if the elf is compressed elf
     def is_compressed_elf(self, inputfile):
         try:
@@ -170,7 +170,7 @@ class assemble:
             raise Exception('test dissamble exception')
         if errlines != []:
             raise Exception('\n'.join(errlines))
-                    
+
         #check if there is dtbs.bin in disassemble output folder.
         #If there is dtbs.bin, disassemble it
         dtbs_bin_list=[file for file in os.listdir(self.outdir) if file.endswith('dtbs.bin')]
@@ -179,7 +179,7 @@ class assemble:
             dtbs_file = os.path.join(self.outdir,dtbs_bin)
             dtbs_folder_name = dtbs_file.rsplit('.bin',1)[0]
             os.mkdir(dtbs_folder_name)
-            
+
             meta_entry_json = version_2_assemble.walk_dtbs(dtbs_file, False)
 
             if "-1" in meta_entry_json or "-2" in meta_entry_json:
@@ -246,7 +246,7 @@ class assemble:
                                      os.path.basename(gf['outputFile'])),
                         gf['outputFile'])
             return True
-        # Reassembles a directory of individual DTBs into a single DTBS file    
+        # Reassembles a directory of individual DTBs into a single DTBS file
         dtb_dtbs_folder = [folder for folder in os.listdir(self.outdir) if folder.endswith('.dtbs')]
         for dtbs_folder in dtb_dtbs_folder:
             dtbs_file = os.path.join(self.outdir,dtbs_folder+".bin")

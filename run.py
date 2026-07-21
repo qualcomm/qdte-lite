@@ -62,7 +62,7 @@ import controller
 
 
 if __name__ == '__main__':
-    
+
     parser = argparse.ArgumentParser(description=gflags.helpmsg,formatter_class=argparse.RawTextHelpFormatter)
     # initial file
     parser.add_argument('file', nargs='?', default=None, help='Path to the file to open upon initial launch of the '

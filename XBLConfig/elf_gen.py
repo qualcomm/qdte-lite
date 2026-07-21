@@ -10,7 +10,7 @@ from shutil import copyfile
 import ntpath
 import elf_gen_tools
 from elf_gen_tools import *
-import subprocess 
+import subprocess
 import json
 import collections
 import commons
@@ -38,14 +38,14 @@ class segInfoStruct:
   def __init__(self):
       self.old_seg_num = 0x1
       self.num_segs_added = 0x0
-      self.num_deleted = 0x0                                                                                                                                        
+      self.num_deleted = 0x0
       self.seg_num = 0
 
 class phdrStruct:
   def __init__(self):
       self.s_type = []
       self.offset = []
-      self.vaddr = []                                                                                                                                       
+      self.vaddr = []
       self.paddr = []
       self.fsize = []
       self.msize = []
@@ -54,7 +54,7 @@ class phdrStruct:
       self.seg_bits = []
       self.align = []
       self.binary = []
-      
+
 ###########################################################################################################
 # findConfigFile - takes a json_file and returns the filename (with path). Also creates directories needed
 ###########################################################################################################
@@ -135,17 +135,17 @@ def config_parser(json_file, gui_option):
     data = json.load(data_file)
 
   #Check binary, class, address overlap
-  for i in range (int(data["elf_header"]["ph_num"],16)):  
+  for i in range (int(data["elf_header"]["ph_num"],16)):
     #binary check
     if data["program_header"]["segment"][i]["binary"]:  #if binary given, it must be valid. Else, error out
-      if not os.path.isfile(data["program_header"]["segment"][i]["binary"]):  
+      if not os.path.isfile(data["program_header"]["segment"][i]["binary"]):
         print("ERROR: Binary file does not exist for segment", i)
         config_error()
         return
     else: #no binary given, load with 0xFF
       print("WARNING: Binary file not given for segment", i,"- segment will be filled with 0xFF")
     #class check
-    if not (int(data["elf_header"]["e_ident"]["ei_class"],16) == int(data["program_header"]["segment"][i]["binary_class"],16)): 
+    if not (int(data["elf_header"]["e_ident"]["ei_class"],16) == int(data["program_header"]["segment"][i]["binary_class"],16)):
       print("ERROR: Elf header class differs from binary class of segment", i)
       config_error()
       return
@@ -183,12 +183,12 @@ def config_parser(json_file, gui_option):
         # if((paddr_start < tmp_paddr_end and paddr_start >= tmp_paddr_start) or (paddr_end < tmp_paddr_end and paddr_end >= tmp_paddr_start) or (paddr_start >= tmp_paddr_start and paddr_end < tmp_paddr_end) or (paddr_start <= tmp_paddr_start and paddr_end > tmp_paddr_end)): # FIND OVERLAP LOGIC
         #   print "Error: Physical address and mem size overlap with segments:" i, j
         #   config_error()
-        #   return  
+        #   return
   #make sure entry address is valid
   if (entry_addr_valid == False):
     print("ERROR: Invalid entry point address. Must be between a segment's vaddr and file size")
     config_error()
-    return      
+    return
 
   #make sure ph_num in elf header is less than or equal to segment number given in config file
   if len(data["program_header"]["segment"]) < int(data["elf_header"]["ph_num"],16):
@@ -211,11 +211,11 @@ def config_parser(json_file, gui_option):
                            "elf_files",
                            "create_cli",
                            "config_eh.bin")
-  eh_fp = elf_gen_tools.OPEN(eh_file, "wb+") 
+  eh_fp = elf_gen_tools.OPEN(eh_file, "wb+")
 
-  #check if the e_machine field exists in the json config file 
-  if "machine" in data["elf_header"].keys(): 
-    e_machine_flag_present = True 
+  #check if the e_machine field exists in the json config file
+  if "machine" in data["elf_header"].keys():
+    e_machine_flag_present = True
 
 
   elf_struct = elfStruct()
@@ -228,7 +228,7 @@ def config_parser(json_file, gui_option):
   elf_struct.e_phnum = int(data["elf_header"]["ph_num"],16)
   elf_struct.e_shentsize = int(data["elf_header"]["sh_size"],16)
   elf_struct.e_shnum = int(data["elf_header"]["sh_num"],16)
-  if e_machine_flag_present == True: 
+  if e_machine_flag_present == True:
     elf_struct.e_machine = int(data["elf_header"]["machine"],16)
   if int(data["elf_header"]["e_ident"]["ei_class"],16) == 0x1:
     elf_struct.is_elf_64_bit = False
@@ -237,9 +237,9 @@ def config_parser(json_file, gui_option):
   else:
     print("Invalid elf header class. Must be value '1' for 32 bit or '2' for 64 bit")
     return
-    
+
   #Create ELF Header (PARTIAL HEADER)
-  elf_gen_tools.create_elf_header_gui(eh_file, 0, 0, elf_struct)  #creates an elf header 
+  elf_gen_tools.create_elf_header_gui(eh_file, 0, 0, elf_struct)  #creates an elf header
 
   #create blank ELF image
   [elf_header, phdr_table] = \
@@ -251,17 +251,17 @@ def config_parser(json_file, gui_option):
   elf_header.e_shentsize = elf_struct.e_shentsize
   elf_header.e_shnum = elf_struct.e_shnum
   elf_header.e_entry = elf_struct.e_entryaddr
-  if e_machine_flag_present == True: 
-    elf_header.e_machine = elf_struct.e_machine 
+  if e_machine_flag_present == True:
+    elf_header.e_machine = elf_struct.e_machine
 
   del phdr_table[0] #delete first ph entry given from 'create_elf_header_gui' function
 
   seg_start_offset = roundup(elf_header.e_phoff + elf_header.e_phentsize*elf_header.e_phnum, PAGE_SIZE)
-  
+
   #CREATE PROGRAM HEADERS AND APPEND TO PHDR_TABLE
   for i in range (elf_struct.e_phnum):
     #Update phdr. First entry is already there
-    if(elf_struct.is_elf_64_bit): 
+    if(elf_struct.is_elf_64_bit):
       new_phdr = elf_gen_tools.Elf64_Phdr(b'\0'*ELF64_PHDR_SIZE)
     else:
       new_phdr = elf_gen_tools.Elf32_Phdr(b'\0'*ELF32_PHDR_SIZE)
@@ -302,7 +302,7 @@ def config_parser(json_file, gui_option):
     elf_header.e_phentsize = ELF32_PHDR_SIZE
     elf_fp.write(elf_gen_tools.Elf32_Ehdr.getPackedData(elf_header))
   else:
-    elf_header.e_phoff = ELF64_HDR_SIZE 
+    elf_header.e_phoff = ELF64_HDR_SIZE
     elf_header.e_phentsize = ELF64_PHDR_SIZE
     elf_fp.write(elf_gen_tools.Elf64_Ehdr.getPackedData(elf_header))
 
@@ -319,10 +319,10 @@ def config_parser(json_file, gui_option):
 
 
   #WRITE EACH SEGMENT INTO FILE
-  for i in range (elf_header.e_phnum):      
+  for i in range (elf_header.e_phnum):
     segment_offset = roundup(int(data["program_header"]["segment"][i]["offset"],16) + seg_start_offset, int(data["program_header"]["segment_alignment_offset"],16))
     seg_size = int(data["program_header"]["segment"][i]["file_size"],16)
-    if os.path.isfile(data["program_header"]["segment"][i]["binary"]):  #binary check                 
+    if os.path.isfile(data["program_header"]["segment"][i]["binary"]):  #binary check
       bin_fp = elf_gen_tools.OPEN(data["program_header"]["segment"][i]["binary"], "rb")
       seg_bytes_written = elf_gen_tools.file_copy_offset(bin_fp,
                  0,
@@ -356,10 +356,10 @@ def config_parser(json_file, gui_option):
                            "config_eh.bin"))
 
   if not (gui_option):  #program not termintaed if GUI still running after this function
-    print("\n" + ELF_GENERATOR_SCRIPT + ": Generated elf \"" + elf_file + "\"\n")  
+    print("\n" + ELF_GENERATOR_SCRIPT + ": Generated elf \"" + elf_file + "\"\n")
   elf_fp.close()
 
-  return 
+  return
 
 #************************************************************* GUI CODE ****************************************************************************
 
@@ -402,7 +402,7 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
                             "elf_files",
                             "modified",
                             "out_" + ntpath.basename(file_struct.input_file.get()))
-  m_elf_fp = elf_gen_tools.OPEN(elf_path, "wb+")  
+  m_elf_fp = elf_gen_tools.OPEN(elf_path, "wb+")
   m_elf_fp.seek(0)
   m_elf_fp.truncate(0)  #clear contents of file before using (without this, contents remain in file if file size of segments are changed to be smaller)
 
@@ -413,7 +413,7 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
   # print "offset count: ", len(original_offset_list), "\n"
 
   #update ELF header (only e_phnum), but save original number of segments
-  old_seg_num = elf_header.e_phnum 
+  old_seg_num = elf_header.e_phnum
   elf_header.e_phnum = seg_num
 
   #write ELF header into file
@@ -424,7 +424,7 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
 
   #UPDATE PHDR (p_filesz, p_offset)
   phdr_offset = elf_header.e_phoff  # offset from file to start of phdrs
-  for i in range (seg_num): 
+  for i in range (seg_num):
     tmp = phdr_table[i].p_offset
     prev_offset_list.append(tmp)
     #Decode 'type' in GUI
@@ -447,7 +447,7 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
     elif val_list[i*11].get() == 'hiproc' :
       ptype = 0x7ffffff
     else :
-      ptype = 0x1 #default is load 
+      ptype = 0x1 #default is load
 
     #Decode flags
     pflags_var = int(phdr_struct.flags[i].get(), 16) #bottom 3 bits - no need to decode
@@ -492,19 +492,19 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
       m_elf_fp.write(elf_gen_tools.Elf64_Phdr.getPackedData(phdr_table[i]))
 
     # increment phdr_offset to next location
-    phdr_offset += elf_header.e_phentsize #** this or file size?? **   
+    phdr_offset += elf_header.e_phentsize #** this or file size?? **
 
   #SEGMENT COPYING
   phdr_size = elf_header.e_phentsize*seg_num
   seg_start_offset = elf_header.e_phoff + phdr_size  #first seg offset is phdr offset + phdr size
-  
+
   # offset the start of the segments just after the program headers
   [original_elf_header, original_phdr_table] = \
   elf_gen_tools.preprocess_elf_file(original_elf_filename) #need to use offsets from original ELF for adding segments
 
   #COPY SEGMENTS INTO ELF - added segments not included here
   original_seg_start_offset = roundup(original_elf_header.e_phoff + original_elf_header.e_phentsize*original_elf_header.e_phnum, PAGE_SIZE) #MAY NOT ALWAYS BE ALIGNED TO 4KB (PAGE_SIZE)
-  seg_start_offset = roundup(elf_header.e_phoff + elf_header.e_phentsize*elf_header.e_phnum, PAGE_SIZE) 
+  seg_start_offset = roundup(elf_header.e_phoff + elf_header.e_phentsize*elf_header.e_phnum, PAGE_SIZE)
   for i in range (seg_num - num_segs_added):
     segment_offset_in = (original_offset_list[i] + original_seg_start_offset) #CHECK IF CORRECT TO USE ALIGNMENT***************
     segment_offset_out = roundup((int(Entry.get(phdr_struct.offset[i]), 16) + seg_start_offset), int(entry_struct.segalign.get(), 16)) #VARIABLE SEGMENT ALIGNMENT
@@ -534,7 +534,7 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
           m_elf_fp.write(b'\xFF')
       bin_fp.close()
 
-  #COPY EACH ADDED SEGMENT INTO ELF - MAKES SURE 
+  #COPY EACH ADDED SEGMENT INTO ELF - MAKES SURE
   for i in range (num_segs_added):                          #start at first added segment entry
     # path_idx = (seg_num - num_segs_added + i)*11
     path_idx = (seg_num - num_segs_added + i)
@@ -560,7 +560,7 @@ def create_modifided_elf(original_offset_list, elf_fp, phdr_table, elf_header, i
   elf_fp.close()
   m_elf_fp.close()
 
-  return m_elf_fp  
+  return m_elf_fp
 
 #############################################################################################
 # disassemble_elf_raw - Parses an ELF file and places sections of file into different binaries
@@ -570,10 +570,10 @@ def disassemble_elf_raw(elf_fp, input_elf_filename, elf_info_out_json, output_pa
   hash_seg_found = False
   hash_idx = 0
   elf_info_dict = collections.OrderedDict({})
-  
+
   #load elf header and phdr table
   [elf_header, phdr_table] = \
-    elf_gen_tools.preprocess_elf_file(input_elf_filename) 
+    elf_gen_tools.preprocess_elf_file(input_elf_filename)
   #Create directory if it doesn't exist
   if not output_path: #if nothing in entry, default to working directory
     output_path = os.path.abspath(os.getcwd())
@@ -587,7 +587,7 @@ def disassemble_elf_raw(elf_fp, input_elf_filename, elf_info_out_json, output_pa
   elf_info_dict[INPUT_ELF] = input_elf_filename
   # store output path where disassembled files are stored.
   elf_info_dict[DISASSEMBLE_PATH] = output_path
-  
+
   #write ELF header
   elf_hdr_path = os.path.join(output_path, EHDR_BIN)
   elf_header_fp = elf_gen_tools.OPEN(elf_hdr_path, "wb+")
@@ -628,7 +628,7 @@ def disassemble_elf_raw(elf_fp, input_elf_filename, elf_info_out_json, output_pa
                                                       phdr_fp,
                                                       0,
                                                       phdr_size)
-  
+
   # store disassembled program-header filename with path.
   elf_info_dict[PHDR] = PHDR_BIN
   elf_info_dict[ALIGNMENT] = "0x{:x}".format(phdr_table[1].p_align)
@@ -639,7 +639,7 @@ def disassemble_elf_raw(elf_fp, input_elf_filename, elf_info_out_json, output_pa
     # store disassembled segment filename with path.
     elf_info_dict[SEGMENT+str(i)] = segment_name
     segment_path = os.path.join(str(output_path), segment_name)
-    segment_fp = elf_gen_tools.OPEN(segment_path, "wb+")  #create files 
+    segment_fp = elf_gen_tools.OPEN(segment_path, "wb+")  #create files
     seg_size = phdr_table[i].p_filesz  #segment size
     segment_offset = phdr_table[i].p_offset
     seg_bytes_written = elf_gen_tools.file_copy_offset(elf_fp,
@@ -717,7 +717,7 @@ if __name__ == "__main__":
   parser.add_option("-d", "--disassemble_elf",
                     action="store", dest="elf_to_be_disassembled",
                     help="Command to disassemble with input elf file.")
-                    
+
   parser.add_option("-e", "--elf_info_out_json",
                     action="store", dest="elf_info_out_json",
                     help="Output json filename to capture disassembled elf information.")
@@ -738,8 +738,8 @@ if __name__ == "__main__":
                     action="store", dest="align_bytes",
                     help="alignment requirement in hex.")
   (options, args) = parser.parse_args()
-  
-  # Dependent Tools (elf_gen, elf_gen_tools.py etc.) path directory 
+
+  # Dependent Tools (elf_gen, elf_gen_tools.py etc.) path directory
   if options.tools_path and os.path.isdir(options.tools_path):
     options.tools_path = os.path.abspath(options.tools_path)
   else:
@@ -764,7 +764,7 @@ if __name__ == "__main__":
     print("\n" + ELF_GENERATOR_SCRIPT + ": Generating elf.........")
     config_parser(options.json_file, False)
   else:
-    command = "python " + options.tools_path + "/" + GUI_ELF_GENERATOR_SCRIPT 
+    command = "python " + options.tools_path + "/" + GUI_ELF_GENERATOR_SCRIPT
     if options.json_file:
       command = command + " -c " + options.json_file
     if options.elf_input:

@@ -49,7 +49,7 @@ SIGNED_FOLDER = "/signed/"
 RAW_FOLDER = "/raw/"
 # For Sectools V2
 V2_SECTOOLS_SCRIPT = "sectools"
-def get_abspath_if_exist(fname, parser, error_msg="missing"): 
+def get_abspath_if_exist(fname, parser, error_msg="missing"):
   if fname and (os.path.isdir(fname) or os.path.isfile(fname)):
     return os.path.abspath(fname)
   else:
@@ -70,7 +70,7 @@ def create_directory(directory_name):
     except:
       print("\nERROR: An error occurred while creating directory " + \
             directory_name)
-      exit(-1)               
+      exit(-1)
 
 def call_os_system(command, error_msg="missing"):
   if error_msg == "missing":
@@ -81,7 +81,7 @@ def call_os_system(command, error_msg="missing"):
     except:
       print(error_msg)
       exit(-1)
-      
+
     if os_call_res != 0:
       print(error_msg)
       exit(-1)
@@ -91,12 +91,12 @@ def get_alpha_numeric_only(input_string):
 
 def replace_non_alpha_numeric_chars(rep_char, input_string):
   return re.sub(r'[\\/*?:"<>|]', rep_char, input_string)
-  
+
 ###############################################################################
 # correct_path
 ###############################################################################
 def correct_path(path):
-  
+
   # Strip off initial separator
   if path[0] == "/" or path[0] == "\\":
     path = path[1:]
@@ -128,4 +128,4 @@ def roundup(x, precision):
   if precision == 0:
     return x
   else:
-    return x if x % precision == 0 else (x + precision - (x % precision)) 
+    return x if x % precision == 0 else (x + precision - (x % precision))

@@ -779,7 +779,7 @@ def convert_int_to_byte_string(n, l):
       return n.to_bytes(l,byteorder='little')
     else:
       return b''.join([chr((n >> ((l - i - 1) * 8)) % 256) for i in range(l)][::-1])
-    
+
 
 def convert_bytes_to_int(bytes):
     if sys.version_info > (3, 0, 0):

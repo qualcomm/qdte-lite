@@ -30,7 +30,7 @@ def logger_init(log_file=None, log_level=logging.DEBUG, max_file_size_mb=1):
             os.makedirs(os.path.dirname(log_file))
         file_handler = RotatingFileHandler(log_file, maxBytes=(1024*1024*max_file_size_mb), backupCount=1)
         file_handler.setFormatter(formatter)
-        file_handler.setLevel(logging.NOTSET) 
+        file_handler.setLevel(logging.NOTSET)
         logger.addHandler(file_handler)
 
     logger.addHandler(console_handler)

@@ -77,7 +77,7 @@ def ATOM_PRINT(logtype, *logs):
                 line+=" "
             line+="{}".format(log)
             i+=1
-        
+
         if(logtype==ATOM_PRINT_TYPE.ERROR):
             logger.error(line)
         elif(logtype==ATOM_PRINT_TYPE.WARNING):
@@ -85,7 +85,7 @@ def ATOM_PRINT(logtype, *logs):
         elif(logtype==ATOM_PRINT_TYPE.DEBUG):
             if(DEBUG_ENABLED):
                 logger.debug(line)
-                
+
         else:
             logger.info(line)
     except Exception as e:
@@ -123,7 +123,7 @@ def ATOM_RUN_ELVATED(cmd, param):
 
     ATOM_DEBUG("CMD:", sys.executable)
     ATOM_DEBUG("ARG:", processparam)
-    
+
     try:
         exechandle=ctypes.windll.shell32.ShellExecuteW(None, verbrunas, processname, processparam, None, 2)
         return exechandle>0
@@ -142,7 +142,7 @@ def ATOM_REMOVE_FILE(path, requestAdmin=False, timeoutInSec=5):
                 waittime+=1
             else:
                 ATOM_DEBUG("Remove Finished")
-                return                
+                return
         ATOM_ERROR("Remove Timeout")
     else:
         os.remove(path)
@@ -226,7 +226,7 @@ def ATOM_CREATE_DATA_RETURN_CONFIG_FOR_PROTOCOL_TYPES(protocolTypes,
         if(protocolType==Common.ttypes.ProtocolType.PROT_ADPL and dataReturnConfig.adplConfig==None):
             dataReturnConfig.adplConfig=adplConfig
     return dataReturnConfig
-    
+
 def ATOM_CREATE_DATA_RETURN_CONFIG_FOR_PROTOCOLS(protocols,
     diagConfig=ATOM_CREATE_DIAG_RETURN_CONFIG(),
     qmiConfig=None,
@@ -313,7 +313,7 @@ def ATOM_APPEND_A_DIAG_FILTER_BY_ID_OR_NAME(packetIdOrNames, packetType, diagPac
 
     for packetIdOrName in packetIdOrNames:
         diagFilterItem = Common.ttypes.DiagIdFilterItem(idOrName=packetIdOrName)
-        
+
         if(not diagPacketFilter.idOrNameMask):
             diagPacketFilter.idOrNameMask[packetType]=[diagFilterItem]
             continue
@@ -337,7 +337,7 @@ def ATOM_CREATE_DIAG_FILTER(allFilters={}):
         allFilters[Common.ttypes.DiagPacketType.SUBSYS_RESPONSE] =  ["50/3", "87/14"]
         allFilters[Common.ttypes.DiagPacketType.SUBSYSV2_IMMEDIATE_RESPONSE] =  ["33/60004"]
         allFilters[Common.ttypes.DiagPacketType.SUBSYSV2_DELAYED_RESPONSE] =  ["33/60004"]
-    
+
     diagPacketFilter = None
     for packetType in allFilters:
         diagPacketFilter=ATOM_APPEND_A_DIAG_FILTER_BY_ID_OR_NAME(allFilters[packetType], packetType, diagPacketFilter)
@@ -398,7 +398,7 @@ class TemplateDiagFilter(object):
 
     def __hash__(self):
         return 0
-    
+
     def __eq__(self, other):
         if(isinstance(other, TemplateLEM)):
             if(other.filterType != self.filterType):
@@ -432,7 +432,7 @@ def ATOM_CREATE_RANDOM_DIAG_FILTER_FROM_PACKETS(packets, maxcount=0, option=ATOM
                         dataPacketsGroupByIdOrName[packet.packetType].append(packet.packetName)
                     elif(packet.packetName not in dataPacketsGroupByIdOrName[packet.packetType]):
                         dataPacketsGroupByIdOrName[packet.packetType].append(packet.packetName)
-            
+
             if(option&ATOM_DIAG_FILTER_OPTION.REGEX!=0):
                 if(packet.packetType!=None and packet.parsedText!=None):
                     randomstart=random.randint(0,len(packet.parsedText)-1)
@@ -460,7 +460,7 @@ def ATOM_CREATE_RANDOM_DIAG_FILTER_FROM_PACKETS(packets, maxcount=0, option=ATOM
                 ATOM_ERROR("A unknown error")#never comes here
             if(len(dataPacketsGroupByIdOrName[assignType])==0):
                 del dataPacketsGroupByIdOrName[assignType]
-    
+
     if(dataPacketsGroupByRegex):
         for idx in range(0, maxcount):
             assignType=random.choice(list(dataPacketsGroupByRegex.keys()))
@@ -475,7 +475,7 @@ def ATOM_CREATE_RANDOM_DIAG_FILTER_FROM_PACKETS(packets, maxcount=0, option=ATOM
 
     return diagPacketFilter
 
-def ATOM_CREATE_DATA_FILTER_FOR_PROTOCOLS(protocols, 
+def ATOM_CREATE_DATA_FILTER_FOR_PROTOCOLS(protocols,
     protocolRange,
     diagFilter=ATOM_CREATE_DIAG_FILTER(),
     qmiFilter=None,
@@ -504,9 +504,9 @@ def ATOM_CREATE_DATA_FILTER_FOR_PROTOCOLS(protocols,
             dataPacketFilter.qdssFilter=qdssFilter
     if(annotationsFilter):
         dataPacketFilter.annotationsFilter=annotationsFilter
-    
+
     dataPacketFilter.protocolHandleList=protocolHandles
-    
+
     if(protocolRange or protocolRange==None):
         dataPacketFilter.protocolRange=protocolRange
     return dataPacketFilter
@@ -523,10 +523,10 @@ class TemplateLEM(object):
     def __init__(self, packetType, packetId):
         self.PacketType=packetType
         self.PacketId=packetId
-    
+
     def __hash__(self):
         return 0
-    
+
     def __eq__(self, other):
         if(isinstance(other, TemplateLEM)):
             if(other.PacketType != self.PacketType):
@@ -751,7 +751,7 @@ def ATOM_VALIDATE_PACKETS(packet1, packet2, timediff=0):
             t2=ATOM_CONVERT_TIMESTAMP(ATOM_PARSE_PACKET(packet2[i]).receiveTimeString)
             ATOM_LOG("#packet2 start time", ATOM_PARSE_PACKET(packet2[i]).receiveTimeString, t2)
             break
-    
+
     packSample=[]
     packComp=[]
 

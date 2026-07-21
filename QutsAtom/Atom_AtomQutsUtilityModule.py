@@ -285,7 +285,7 @@ def ATOM_CREATE_LEM_TEMPLATE_FOR_DEVICES(deviceHandle, interval, sampleThreshold
                         if(lemtemp.PacketType not in lemFilters):
                             lemFilters[lemtemp.PacketType]=[]
                         lemFilters[lemtemp.PacketType].append(lemtemp.PacketId)
-                
+
                 if(lemFilters):
                     dataPacketFilter=ATOM_CREATE_DATA_FILTER_FOR_PROTOCOLS(protocolHandles, None, ATOM_CREATE_DIAG_FILTER(lemFilters))
                     ATOM_LOG(qutsprefix, "Load Filter Data From File")

@@ -200,7 +200,7 @@ class EditDialog(tk.Toplevel):
         self.transient(parent)
         self.wait_visibility()
         self.grab_set()
-        
+
 
         # set various variables
         self.controller = controller

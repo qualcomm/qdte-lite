@@ -2,10 +2,10 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 ###########################################################################################################################################################
 # This script generates Meta data tables and outputs them as .bin files for Loader and Core Config, from a given input JSON file.
-# Script also supports disassembling XBL-config option: 
-#             script takes input "disassembled_xcfg_info_json" with disassembled xbl_config binaries, parses  
-#             xbl-config-meta-data and creates "out_create_xcfg_json" with disassembled xcfg items listed 
-#             which can be re-input to tool to re-generate xbl-config.elf.  
+# Script also supports disassembling XBL-config option:
+#             script takes input "disassembled_xcfg_info_json" with disassembled xbl_config binaries, parses
+#             xbl-config-meta-data and creates "out_create_xcfg_json" with disassembled xcfg items listed
+#             which can be re-input to tool to re-generate xbl-config.elf.
 ###########################################################################################################################################################
 from __future__  import print_function
 import sys
@@ -24,7 +24,7 @@ if sys.version_info < MINIMUM_SUPPORTED_PYTHON_VERSION:
 
 #----------------------- Meta Data Table: 12 bytes table-header + config item info for each item -----------------------------
 #-----------------------------------------------------------------------------------------------------------------------------
-# xcfg_type[4], major_version_number[1], minor_version_number[1], number_of_entries[2], XBLConfig_meta_size[4]        
+# xcfg_type[4], major_version_number[1], minor_version_number[1], number_of_entries[2], XBLConfig_meta_size[4]
 #-----------------------------------------------------------------------------------------------------------------------------
 # attributes[4] # offset_from_meta_start[4] # size[4] # config_name_len[4] # config_name[config_name_len] # align to 8 bytes.#
 #               #                           #         #                    #                              #                  #
@@ -41,16 +41,16 @@ major_version = MAJOR_VERSION_CFG
 minor_version = MINOR_VERSION_CFG
 XBL_CFG_VALUE,   MAJOR_VERSION,  MINOR_VERSION,   CFG_ITEM_ENTRIES_NUM,  META_DATA_SIZE = \
  "xbl_cfg_value","major_version","minor_version","cfg_item_entries_num","meta_data_size"
-meta_header_json = """{ "xbl_cfg_value": 
-                                         { "value" : "0x0", "size" : "0x4", "type" : "string" }, 
-                        "major_version": 
-                                         { "value" : "0x0", "size" : "0x1", "type" : "number" }, 
-                        "minor_version": 
-                                         { "value" : "0x0", "size" : "0x1", "type" : "number" }, 
-                        "cfg_item_entries_num": 
-                                         { "value" : "0x0", "size" : "0x2", "type" : "number" }, 
-                       "meta_data_size":     
-                                         { "value" : "0x0", "size" : "0x4", "type" : "number" } 
+meta_header_json = """{ "xbl_cfg_value":
+                                         { "value" : "0x0", "size" : "0x4", "type" : "string" },
+                        "major_version":
+                                         { "value" : "0x0", "size" : "0x1", "type" : "number" },
+                        "minor_version":
+                                         { "value" : "0x0", "size" : "0x1", "type" : "number" },
+                        "cfg_item_entries_num":
+                                         { "value" : "0x0", "size" : "0x2", "type" : "number" },
+                       "meta_data_size":
+                                         { "value" : "0x0", "size" : "0x4", "type" : "number" }
                       }"""
 # config item key names used in input .json and this file.
 RAM_ADDRESS,    ATTRIBUTES, FILE_NAME,  CONFIG_NAME,  OFFSET_FROM_META_START,  CHIPINFO,  PLATFORMINFO,  ALIGN_BYTES = \
@@ -63,34 +63,34 @@ ALIGNMENT, ITEM_SIZE,  ITEM_SIZE_ALIGN, CONFIG_NAME_LEN,  VALUE, SIZE,  TYPE,   
 # sub-keys like "value", "size" etc. are helper attributes for each field to process input
 
 # XBLConfig v1 layout
-cfg_item_json_v1    = """{ "attributes": 
-                                      { "value" : "0x0", "size" : "0x4", "type" : "number" }, 
-                        "offset_from_meta_start": 
-                                      { "value" : "0x0", "size" : "0x4", "type" : "number" }, 
-                        "item_size": 
+cfg_item_json_v1    = """{ "attributes":
                                       { "value" : "0x0", "size" : "0x4", "type" : "number" },
-                        "config_name_len": 
-                                      { "value" : "0x0", "size" : "0x4", "type" : "number" }, 
-                        "config_name": 
+                        "offset_from_meta_start":
+                                      { "value" : "0x0", "size" : "0x4", "type" : "number" },
+                        "item_size":
+                                      { "value" : "0x0", "size" : "0x4", "type" : "number" },
+                        "config_name_len":
+                                      { "value" : "0x0", "size" : "0x4", "type" : "number" },
+                        "config_name":
                                       { "value" : "0x0", "size" : "0x0", "type" : "string" },
                         "align_bytes":
                                       { "value" : "0x0", "size" : "0x0", "type" : "number" }
                    }"""
 
 # XBLConfig v2 layout
-cfg_item_json_v2    = """{ "attributes": 
-                                      { "value" : "0x0", "size" : "0x4", "type" : "number" }, 
-                        "offset_from_meta_start": 
-                                      { "value" : "0x0", "size" : "0x4", "type" : "number" }, 
-                        "item_size": 
+cfg_item_json_v2    = """{ "attributes":
+                                      { "value" : "0x0", "size" : "0x4", "type" : "number" },
+                        "offset_from_meta_start":
+                                      { "value" : "0x0", "size" : "0x4", "type" : "number" },
+                        "item_size":
                                       { "value" : "0x0", "size" : "0x4", "type" : "number" },
                         "chipinfo":
                                       { "value" : "0x0", "size" : "0x8", "type" : "number" },
                         "platforminfo":
-                                      { "value" : "0x0", "size" : "0x8", "type" : "number" }, 
-                        "config_name_len": 
-                                      { "value" : "0x0", "size" : "0x4", "type" : "number" }, 
-                        "config_name": 
+                                      { "value" : "0x0", "size" : "0x8", "type" : "number" },
+                        "config_name_len":
+                                      { "value" : "0x0", "size" : "0x4", "type" : "number" },
+                        "config_name":
                                       { "value" : "0x0", "size" : "0x0", "type" : "string" },
                         "align_bytes":
                                       { "value" : "0x0", "size" : "0x0", "type" : "number" }
@@ -125,9 +125,9 @@ def print_meta_data_table(meta_header, meta_cfg_entries):
       print(('{:>10} {:>26} {:>12} {:>18} {:>26} {:>18}'.format(*print_string)))
     else:
       print(('{:>10} {:>26} {:>12} {:>18} {:>18} {:>18} {:>26} {:>18}'.format(*print_string)))
-      
+
   print("--------------------------------------------------------------------------------------------------------------------------------")
-    
+
 # This is a utility function to write to hex string data in binary to binary file.
 def write_num_little_endian(wt_size, bin_fp, data):
   data = int(data,16)
@@ -138,7 +138,7 @@ def write_num_little_endian(wt_size, bin_fp, data):
     else:
       temp = chr(temp)
     bin_fp.write(temp)
- 
+
 def write_string(length, bin_fp, data):
   if sys.version_info >= (3, 0, 0):
     if isinstance(data,str):
@@ -171,17 +171,17 @@ def read_num_little_endian(rd_size, bin_fp):
 
   num = hex(num)
   return str(num)
-  
+
 def read_string(rd_size, bin_fp):
   data = bin_fp.read(rd_size)
   if data == "":
     print_error_exit("\nERROR: Binary file:" + bin_fp.name + " reached EOF, can't read " + str(rd_size) + " bytes.")
-  
+
   if isinstance(data,bytes):
     data = data.decode()
 
   return data
-    
+
 # Utility function to read meta_data_config_file and create meta_header.
 def read_meta_header(bin_fp):
   global version_dict
@@ -222,7 +222,7 @@ def read_meta_cfg_entries(meta_header, bin_fp):
     cfg_entry = json.loads(cfg_item_json, object_pairs_hook=OrderedDict)
     for item_field in cfg_entry:
       if cfg_entry[item_field][TYPE] == STRING:
-        #if string has end mark, delete the string end mark.  
+        #if string has end mark, delete the string end mark.
         cfg_entry[item_field][VALUE] = read_string(int(cfg_entry[item_field][SIZE],16), bin_fp).rstrip('\0')
       else:
         cfg_entry[item_field][VALUE] = read_num_little_endian(int(cfg_entry[item_field][SIZE],16), bin_fp)
@@ -232,7 +232,7 @@ def read_meta_cfg_entries(meta_header, bin_fp):
           cfg_entry[ALIGN_BYTES][SIZE] = hex( int(ALIGNMENT,16) - (int(cfg_entry[CONFIG_NAME_LEN][VALUE],16) % int(ALIGNMENT,16)) )
     meta_cfg_entries.append(cfg_entry)
   return meta_cfg_entries
-  
+
 # Utility function to write the meta_header and meta_cfg_entries to file.
 def write_bin_file(bin_fp, meta_header, meta_cfg_entries):
   #write meta-header blob.
@@ -252,7 +252,7 @@ def write_bin_file(bin_fp, meta_header, meta_cfg_entries):
 def calc_and_fill_cfg_entry_offset_and_meta_data_size(meta_cfg_entries, meta_header, align_bytes=0x1):
   # traverse through each meta_cfg_entry to calculate meta_header size
   for cfg_entry in meta_cfg_entries:
-    # calculate meta_data_size by adding current meta-cfg-entry's each field's(key) size 
+    # calculate meta_data_size by adding current meta-cfg-entry's each field's(key) size
     for item_key in cfg_entry:
       meta_header[META_DATA_SIZE][VALUE] = hex(int(meta_header[META_DATA_SIZE][VALUE],16) + int(cfg_entry[item_key][SIZE],16))
   meta_header[META_DATA_SIZE][VALUE] = hex(align_to_alignsize(meta_header[META_DATA_SIZE][VALUE],align_bytes))
@@ -275,7 +275,7 @@ def create_new_cfg_item(input_cfg_item, base_directory, align, store_original_si
   # populate ATTRIBUTES using input from .json if it exists
   if ATTRIBUTES in input_cfg_item:
     cfg_entry[ATTRIBUTES][VALUE] = input_cfg_item[ATTRIBUTES]
-  if major_version >= INFO_VERSION: 
+  if major_version >= INFO_VERSION:
   # populate CHIPINFO using input from .json if it exists
     if CHIPINFO in input_cfg_item:
       cfg_entry[CHIPINFO][VALUE] = input_cfg_item[CHIPINFO].rstrip("L")
@@ -300,7 +300,7 @@ def create_new_cfg_item(input_cfg_item, base_directory, align, store_original_si
   # populate config_name and config-name length using input from .json
   if CONFIG_NAME in input_cfg_item:
     #if CFG version >2.0, adding string terminator.
-    if (major_version*10 + minor_version) > 20: 
+    if (major_version*10 + minor_version) > 20:
       cfg_name = input_cfg_item[CONFIG_NAME]+'\0'
     else:
       cfg_name = input_cfg_item[CONFIG_NAME]
@@ -323,7 +323,7 @@ def create_new_cfg_item(input_cfg_item, base_directory, align, store_original_si
             file.close()
       except:
         print_error_exit("/nERROR: Input file:\"" + config_file + "\" is not " + align + " aligned and RO. Please update input file size to be " + align + " bytes aligned")
-      
+
       #Update the item size after padding
       if store_original_size == False:
         cfg_entry[ITEM_SIZE][VALUE] = hex(os.path.getsize(config_file)).rstrip("L")
@@ -361,7 +361,7 @@ def create_meta_data_table(json_input_cfg_items, xbl_cfg_value, fp_cfg_meta_file
   else:
     cfg_item_json = cfg_item_json_v2
 
-  meta_header = fill_meta_header(json_input_cfg_items, xbl_cfg_value, major_version, minor_version)  
+  meta_header = fill_meta_header(json_input_cfg_items, xbl_cfg_value, major_version, minor_version)
   #fill meta-data-table's config item entries
   meta_cfg_entries = []
   # For each config-item in input .json file, create config_item_entry and append/insert it in meta_cfg_entries.
@@ -391,11 +391,11 @@ def generate_xbl_config_metadata(json_config_path, base_directory, output_direct
   # Read JSON config data
   try:
     # check for duplicate keys in input json config file
-    with open(json_config_path) as json_config_file:    
+    with open(json_config_path) as json_config_file:
       input_json_xbl_cfgs = json.load(json_config_file, object_pairs_hook=check_duplicate_keys)
       json_config_file.close()
     # load valid input json as with input dictionary order preserved.
-    with open(json_config_path) as json_config_file:    
+    with open(json_config_path) as json_config_file:
       input_json_xbl_cfgs = json.load(json_config_file, object_pairs_hook=OrderedDict)
       json_config_file.close()
   except:
@@ -428,7 +428,7 @@ def generate_xbl_config_metadata(json_config_path, base_directory, output_direct
 
 def create_xcfg_json(cfg_meta_key,
                      cfg_meta_info_key,
-                     meta_cfg_entries, 
+                     meta_cfg_entries,
                      disassembled_bins_info,
                      disassembled_xcfg_dict,
                      output_directory,
@@ -462,7 +462,7 @@ def create_xcfg_json(cfg_meta_key,
     # create empty cfg_entry:"file1" dictionary if it doesn't exist in overall disassembled_xcfg_dict
     if (ITEM_KEY+str(item_num)) not in xcfg_dict[cfg_meta_key]:
       xcfg_dict[cfg_meta_key][ITEM_KEY+str(item_num)] = OrderedDict({})
-    # populate disassembled_xcfg_dict's cfg_item's("file1") fields like "attributes", "filename", "configname" 
+    # populate disassembled_xcfg_dict's cfg_item's("file1") fields like "attributes", "filename", "configname"
     if major_version >= INFO_VERSION:
       xcfg_dict[cfg_meta_key][ITEM_KEY+str(item_num)][CHIPINFO] = cfg_entry[CHIPINFO][VALUE]
       xcfg_dict[cfg_meta_key][ITEM_KEY+str(item_num)][PLATFORMINFO] = cfg_entry[PLATFORMINFO][VALUE]
@@ -525,15 +525,15 @@ def read_populate_cfg_meta_if_exist(cfg_meta_key,
                                     meta_cfg_entries,
                                     disassembled_bins_path):
   cfg_meta_key_found, meta_header, meta_cfg_entries = None, None, None
-  # read first len(cfg_meta_key) worth of bytes  
+  # read first len(cfg_meta_key) worth of bytes
   bin_fp = open(seg_bin_file, 'rb')
   rd_cfg_meta_identifier = read_string(len(cfg_meta_key), bin_fp)
   # if read bytes match cfg_meta_key (signature like CFGL) then cfg_meta binary is found
   if (rd_cfg_meta_identifier == cfg_meta_key):
     cfg_meta_key_found = True
     bin_fp.seek(0) #move file pointer to beginning of binary file.
-    # copy cfg_meta_item's binary file "segment_[n].bin" to  
-    #          [cfg_meta_key.bin] like CFGL.bin for readability 
+    # copy cfg_meta_item's binary file "segment_[n].bin" to
+    #          [cfg_meta_key.bin] like CFGL.bin for readability
     #          and easily identify cfg_meta_item binary.
     shutil.copyfile(seg_bin_file,
                     os.path.join(disassembled_bins_path,
@@ -541,19 +541,19 @@ def read_populate_cfg_meta_if_exist(cfg_meta_key,
     # read/parse found cfg_meta_key binary and create xcfg meta_data_table
     meta_header = read_meta_header(bin_fp)
     meta_cfg_entries = read_meta_cfg_entries(meta_header, bin_fp)
-    print("\nDisassembled XBL Config Meta table.")    
+    print("\nDisassembled XBL Config Meta table.")
     print_meta_data_table(meta_header, meta_cfg_entries)
   bin_fp.close()
   return [cfg_meta_key_found, meta_header, meta_cfg_entries]
 
-def parse_cfg_meta_create_xcfg_dict(cfg_meta_key, 
-                                    disassembled_xcfg_info_json, 
-                                    disassembled_xcfg_dict, 
-                                    output_directory, 
+def parse_cfg_meta_create_xcfg_dict(cfg_meta_key,
+                                    disassembled_xcfg_info_json,
+                                    disassembled_xcfg_dict,
+                                    output_directory,
                                     out_create_xcfg_json):
   # Read disassembled xcfg info json
   try:
-    with open(disassembled_xcfg_info_json) as disassembled_xcfg_info_json_file:    
+    with open(disassembled_xcfg_info_json) as disassembled_xcfg_info_json_file:
       disassembled_bins_info = json.load(disassembled_xcfg_info_json_file, object_pairs_hook=OrderedDict)
   except:
     print("\nERROR: An error occured while reading " + str(xcfg_info_json_file) + " file. Please check the contents.")
@@ -561,7 +561,7 @@ def parse_cfg_meta_create_xcfg_dict(cfg_meta_key,
   cfg_meta_key_found, meta_header, meta_cfg_entries = False, None, None
   if not DISASSEMBLE_PATH in disassembled_bins_info:
     print_error_exit("\nERROR Disassemble path with binaries not provided in input .json.")
-  # For each "segment_*" key is found in input disassembled_bins_info, process it. 
+  # For each "segment_*" key is found in input disassembled_bins_info, process it.
   for info_key in disassembled_bins_info:
     if ((str(info_key)).find(SEGMENT)) == -1:
       continue
@@ -574,7 +574,7 @@ def parse_cfg_meta_create_xcfg_dict(cfg_meta_key,
       continue
 
     # Check if key's value("segment_[n].bin") is cfg_meta_data_table binary then
-    # populate meta_data_header and meta_cfg_entries data-structures. 
+    # populate meta_data_header and meta_cfg_entries data-structures.
     if (not cfg_meta_key_found):
       [cfg_meta_key_found, meta_header, meta_cfg_entries] \
                          = read_populate_cfg_meta_if_exist(cfg_meta_key,
@@ -582,7 +582,7 @@ def parse_cfg_meta_create_xcfg_dict(cfg_meta_key,
                                                            meta_header,
                                                            meta_cfg_entries,
                                                            disassembled_bins_info[DISASSEMBLE_PATH])
-      # if cfg_meta_key is found then create out_create_xcfg_json 
+      # if cfg_meta_key is found then create out_create_xcfg_json
       # capturing disassembled cfg items info which can be used to create xbl_config again.
       if cfg_meta_key_found == True:
         if cfg_meta_key not in disassembled_xcfg_dict:
@@ -590,7 +590,7 @@ def parse_cfg_meta_create_xcfg_dict(cfg_meta_key,
         # CFG_META already found, next (key) in input .json would be first config-item binary info.
         create_xcfg_json(cfg_meta_key,
                          info_key,
-                         meta_cfg_entries, 
+                         meta_cfg_entries,
                          disassembled_bins_info,
                          disassembled_xcfg_dict,
                          output_directory,
@@ -603,7 +603,7 @@ def parse_cfg_meta_create_xcfg_dict(cfg_meta_key,
       if E_ENTRY in disassembled_bins_info:
         disassembled_xcfg_dict[cfg_meta_key][FIRST_CFG_FILE_KEY][ELF_ADDRESS] = str(disassembled_bins_info[E_ENTRY])
   return
-  
+
 def parse_disassemble_xbl_config(disassembled_xcfg_info_json,
                                  output_directory,
                                  out_create_xcfg_json):
@@ -629,7 +629,7 @@ def parse_disassemble_xbl_config(disassembled_xcfg_info_json,
   else: # input disassembled binaries didn't have any xbl_config items.
     print("\n" + XBL_CONFIG_METADATA_SCRIPT + ": Couldn't find XBL config items from binaries listed in \"" + disassembled_xcfg_info_json + "\"")
     exit(1)
-  
+
 if __name__ == "__main__":
   error_count = 0
   parser = OptionParser()
@@ -653,7 +653,7 @@ if __name__ == "__main__":
   parser.add_option("-c", "--output-create-xcfg-json",
                     action="store", type="string", dest="out_create_xcfg_json",
                     help="Output filename including path to create .json post disassembling process.")
-  
+
   parser.add_option("-a", "--align",
                     action="store", dest="align",
                     help="alignment requirement for config items in hex.")
@@ -664,7 +664,7 @@ if __name__ == "__main__":
   (options, args) = parser.parse_args()
 
   # XBL config output directory must be supplied and exist
-  options.output_directory = get_abspath_if_exist(options.output_directory, parser, 
+  options.output_directory = get_abspath_if_exist(options.output_directory, parser,
                                                   "XBL Config output directory must be supplied and exist.")
   # if XBL config disassemble option is not passed. (xbl_config elf generation option is selected)
   if not options.disassembled_xcfg_info_json:

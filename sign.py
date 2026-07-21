@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 """
 @file sign.py
-This file contains the interface of signature. it will call sectools v2 for signing. 
+This file contains the interface of signature. it will call sectools v2 for signing.
 """
 #from asyncio import exceptions
 from dis import disassemble
@@ -21,8 +21,8 @@ import time
 import dtlogger
 
 class st:
-    
-    
+
+
     def sign_config_image(self):
         errlines = []
         hints = []
@@ -37,12 +37,12 @@ class st:
             dtlogger.info('Error of reading signing mode command json file.')
             dtlogger.info(e)
             return  False
-        # If signing command doesn't contain  --image-id option, fetch it from origninal DTB elf. If the orginal DTB elf is unsigned DTB elf. 
+        # If signing command doesn't contain  --image-id option, fetch it from origninal DTB elf. If the orginal DTB elf is unsigned DTB elf.
         # If the orginal DTB elf is unsigned DTB elf, it will popout a warning windows and termined signing process.
         if '--image-id' not in data.keys():
             # fetch Software ID from DTB elfs by sectools inspect command
             sign_id_cmd = r'%s secure-image --inspect %s' % (os.path.join(gf['sectoolsDir'],self.sectool_name), gf['inputFile'])
-            proc = subprocess.Popen(sign_id_cmd, 
+            proc = subprocess.Popen(sign_id_cmd,
                                 stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True,shell=True)
@@ -51,14 +51,14 @@ class st:
                 out, err= proc.communicate()
                 dtlogger.info (out)
                 dtlogger.info (err)
-                
+
                 for line in out.split('\n'):
                     dtlogger.info(line)
                     if 'Software ID' in line:
                         sign_id_pattern = re.compile(r'0x\d+')
                         sign_id_num = sign_id_pattern.findall(line)[0]
                         break
-                    if 'Error:' in line or 'ERROR' in line or 'Errno' in line: 
+                    if 'Error:' in line or 'ERROR' in line or 'Errno' in line:
                         errlines.append(line)
                         dtlogger.info("{} err".format(line))
                         return False
@@ -79,7 +79,7 @@ class st:
                 gf['sign_id'] = image_all[idx].getAttribute('id')
             if gf['sign_id']== '':
                 raise Exception('ERROR:Signed DTB elf failed', 'Please provide sign ID for the DTB elf\n')
-                   
+
         # excute sign command seperately
         # Debugged so signing works
         outfile = ""
@@ -88,7 +88,7 @@ class st:
             outfile = gf['outputFile']
         else:
             outfile = os.path.join(gf['outputPath'], os.path.basename(gf['outputFile']))
-      
+
         cmd = [
                 os.path.join( gf['sectoolsDir'], self.sectool_name),
                 'secure-image', os.path.join(self.outdir, 'auto_gen', 'elf_files', 'create_cli',
@@ -108,12 +108,12 @@ class st:
                     cmd.append(data["SigningCommand"][command])
 
         dtlogger.info('Excute Signing Command:\n{}'.format(cmd))
-  
+
 
         proc = subprocess.Popen(cmd, stdout=subprocess.PIPE,
                                 stderr=subprocess.STDOUT,
                                 universal_newlines=True)
-        
+
        # proc.wait()
         while True:
             line = proc.stdout.readline()
@@ -121,14 +121,14 @@ class st:
             if not line:
                 # execution done
                 break
-            if 'Error:' in line or 'ERROR' in line or 'Errno' in line: 
+            if 'Error:' in line or 'ERROR' in line or 'Errno' in line:
                 Err_flag = True
-                
-                
+
+
             if Err_flag:
                 errlines.append(line)
             else:
-                dtlogger.info(line)  
+                dtlogger.info(line)
 
         if errlines != []:
             dtlogger.info(' '.join(errlines))

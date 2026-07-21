@@ -94,7 +94,7 @@ class QutsClientObject:
                 mdmProtocol=protocol.protocolHandle
                 return mdmProtocol
         return mdmProtocol
-        
+
     def createMultiService(self, serviceName, deviceHandle):
         ATOM_LOG("Create", serviceName, "from", self.clientName)
         serv=None
@@ -127,7 +127,7 @@ class QutsClientObject:
             serv=QmiService.QmiService.Client(self.client.createService(serviceName, deviceHandle))
         else:
             ATOM_LOG("Create", serviceName, "from", self.clientName, "is invalid")
-        
+
         if (serv == None or 0 != serv.initializeService()):
             ATOM_ERROR(self.clientName, serviceName, "init failed")
             return None
@@ -266,11 +266,11 @@ class QutsClientList:
     @staticmethod
     def enableQutsClientMultiThreaded():
         QutsClientList.multithreaded=True
-    
+
     @staticmethod
     def enableRemoteMachine(host):
         QutsClientList.hostName=host
-        
+
     @staticmethod
     def getQutsClientObject(qidx):
         QutsClientList.lock.acquire()
