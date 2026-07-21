@@ -63,7 +63,7 @@ from qdte.gui import package
 import qdte.core.dtwrapper as dt
 from qdte.gui import xblcfgint as xbl
 from pyfdt import pyfdt
-from qdte.core import Autocmd as cmd
+from qdte.core.version import QDTE_VERSION
 
 #nhlos parser lib
 #
@@ -112,7 +112,7 @@ if quts_path and os.path.exists(os.path.join(quts_path,'Common','ttypes.py'))\
 
 # title and version
 DTGUI_TITLE = 'QDTE (Qualcomm Device Tree Editor)'
-DTGUI_VERSION = 'V1.5.7'
+DTGUI_VERSION = QDTE_VERSION
 QDTE_ICON = "QDTE.png"
 About_Info="""%s %s
 
@@ -542,8 +542,10 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
                                                      filetypes=[('Device Tree Blob', '*.dtb'),
                                                                 ('All Files', '*.*')])
         if new_filename:
-            # start a new process
-            p = mp.Process(target=run, kwargs={'initial_file': new_filename})
+            # start a new process. app.launch imports this module, so import
+            # it locally to avoid a circular module-scope import.
+            from qdte.gui.app import launch
+            p = mp.Process(target=launch, kwargs={'initial_file': new_filename})
             p.start()
 
     def open_build_dtb_elf(self):
@@ -1662,66 +1664,3 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
             self.treeView.show_path(path)
 
 
-def run(root, **kwargs):
-    """
-
-    :param root:
-    :param kwargs:
-    :return:
-    """
-
-    if gf['nogui']:
-        # load a CR and apply all of the changes in it
-        dtw = dt.DTWrapper()
-
-        autocmd = cmd.autocmd(dtw)
-        autocmd.execute()
-
-        # comment below features
-        """
-        if 'cr' in kwargs:
-            dtw.import_report(kwargs['cr'])
-        else:
-            if 'initial_file' in kwargs:
-                cr = kwargs['initial_file']
-                dtlogger.info('Using Change Report %s' % cr)
-            else:
-                cr = input('Change Report: ')
-
-            try:
-                with open(cr, 'rb') as f:
-                    # import the report
-                    dtw.import_report(f.read())
-            except Exception as ex:
-                if gf['debug']:
-                    traceback.print_exc()
-                dtlogger.info('Failed to import change report: %s' % getattr(ex, 'message', str(ex)))
-                return
-
-        # redo everything
-        try:
-            while dtw.top_redo() is not None:
-                dtlogger.info('Applying', dtw.top_redo())
-                dtw.redo()
-        except dt.UndoRedoExhaustedError:
-            pass
-        except Exception as ex:
-            if gf['debug']:
-                traceback.print_exc()
-            dtlogger.info('Failed to apply change report: %s' % getattr(ex, 'message', str(ex)))
-            return """
-    else:
-        import ctypes
-        # ctypes.windll exists only on Windows; this call hides the console
-        # window behind the GUI there.  Guard it so the GUI also launches on
-        # Linux/macOS, where windll is absent (AttributeError otherwise).
-        if hasattr(ctypes, "windll"):
-            ctypes.windll.user32.ShowWindow(ctypes.windll.kernel32.GetConsoleWindow(), 0)
-        DTGUIController(root, **kwargs)
-        # start processing events
-
-        root.mainloop()
-
-
-if __name__ == '__main__':
-    run(tk.Tk())

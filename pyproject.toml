@@ -27,6 +27,9 @@ gui = [
 [project.urls]
 Homepage = "https://github.com/qualcomm/qdte-lite"
 
+[project.scripts]
+qdte = "qdte.cli.main:main"
+
 [tool.setuptools.packages.find]
 # The qdte package tree introduced by the headless/GUI split, plus the
 # vendored QUTS Atom glue it loads when a QUTS installation is present.

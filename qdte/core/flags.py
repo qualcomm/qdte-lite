@@ -167,3 +167,20 @@ def default_xbl_tools_dir():
     if os.path.exists(here):
         return here
     return os.path.join(global_info['sign_json_path'], 'XBLConfig')
+
+
+def build_parser():
+    """Build the QDTE argument parser from the flag specification above."""
+    from qdte.core.version import QDTE_VERSION
+    parser = argparse.ArgumentParser(description=helpmsg,
+                                     formatter_class=argparse.RawTextHelpFormatter)
+    # initial file
+    parser.add_argument('file', nargs='?', default=None,
+                        help='Path to the file to open upon initial launch of the program.')
+    parser.add_argument('--test_exp', action='store_true', default=False, help=argparse.SUPPRESS)
+    parser.add_argument('-v', '--version', action='version',
+                        version='QDTE {}'.format(QDTE_VERSION))
+    # add all of the global flags
+    for flag in config:
+        parser.add_argument(flag, **config[flag])
+    return parser
