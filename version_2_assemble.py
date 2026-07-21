@@ -8,7 +8,7 @@ from pathlib import Path
 from pyfdt.pyfdt import FdtBlobParse
 
 from XBLConfig.commons import *
-import dtlogger
+from qdte.core import dtlogger
 # ============================================================================
 # DISASSEMBLY HELPER FUNCTIONS
 # ============================================================================

@@ -24,7 +24,7 @@ This file is split up into various different classes. Please see the documentati
 from pyfdt import pyfdt
 
 # configuration
-from flags import flags as gf
+from qdte.core.flags import flags as gf
 
 # python libraries
 from enum import Enum
@@ -32,7 +32,7 @@ import hashlib
 import json
 import traceback
 import re
-import dtlogger
+from qdte.core import dtlogger
 
 """
 misc internal use "helper" functions that perform common tasks on the DeviceTree

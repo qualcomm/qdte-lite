@@ -6,7 +6,7 @@ This file contains some debugging utilities.
 
 Currently, it is only used for memory profiling.
 """
-import dtlogger
+from qdte.core import dtlogger
 
 pympler = False
 

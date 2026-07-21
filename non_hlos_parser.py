@@ -1,7 +1,7 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 from XBLConfig import elf_gen_tools
-from flags import flags as gf
+from qdte.core.flags import flags as gf
 import subprocess
 import os
 import sys
@@ -9,7 +9,7 @@ from fs import open_fs
 import re
 import fs.opener
 from pyfatfs.PyFatFSOpener import PyFatFSOpener
-import dtlogger
+from qdte.core import dtlogger
 
 fs.opener.registry.install(PyFatFSOpener)
 

@@ -49,12 +49,12 @@ from editview import EditDialog
 from hexview import HexWindow
 
 # configuration, debug, etc.
-from flags import flags as gf
-from flags import global_info as gl_info
+from qdte.core.flags import flags as gf
+from qdte.core.flags import global_info as gl_info
 from settings import Json_Operate
 import dbgutil as dbg
 import settings
-import dtlogger
+from qdte.core import dtlogger
 
 # packaging help
 import package

@@ -8,7 +8,7 @@ import os
 import random
 import re
 import traceback
-from flags import global_info
+from qdte.core.flags import global_info
 from datetime import datetime
 import platform
 QUTS_path = ''

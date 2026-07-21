@@ -31,7 +31,7 @@ import os
 import base64
 import bz2
 import zipapp
-from flags import global_info as gl_info
+from qdte.core.flags import global_info as gl_info
 # these files will be available for programs to request when packaged; when not, they will simply be read from the file
 # system. User Manual is copied for the user's convenience, and pyfdt README is copied for compliance with legal stuff.
 # It shouldn't be hard to add some more files here as desired. Directories are not supported, though, unfortunately.

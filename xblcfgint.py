@@ -47,14 +47,14 @@ import xml.dom.minidom
 import re
 import platform
 # gui things
-from flags import flags as gf
-from flags import global_info as gl_info
+from qdte.core.flags import flags as gf
+from qdte.core.flags import global_info as gl_info
 import assemble
 import version_2_assemble
 import sign
 from settings import Json_Operate
 import settings
-import dtlogger
+from qdte.core import dtlogger
 if platform.system().startswith("Windows"):
     sectool_name = "sectools.exe"
 else:

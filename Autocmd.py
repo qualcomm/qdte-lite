@@ -4,7 +4,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 import os
 import sys
-from flags import flags as gf
+from qdte.core.flags import flags as gf
 import dtwrapper as dt
 import time
 import sign

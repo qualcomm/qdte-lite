@@ -8,11 +8,11 @@ This file contains the interface of signature. it will call sectools v2 for sign
 """
 import os
 import subprocess
-from flags import flags as gf
+from qdte.core.flags import flags as gf
 import json
 import xml.dom.minidom
 import re
-import dtlogger
+from qdte.core import dtlogger
 
 class st:
 

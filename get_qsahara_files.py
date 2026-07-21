@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 import os
 import sys
-import dtlogger
+from qdte.core import dtlogger
 import importlib.util
 from xml.etree import ElementTree as et
 # --- 1. Define a simple logger class ---

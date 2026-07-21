@@ -23,7 +23,7 @@ import tkinter.messagebox
 import dtwrapper as dt
 
 # flags
-from flags import flags as gf
+from qdte.core.flags import flags as gf
 
 
 

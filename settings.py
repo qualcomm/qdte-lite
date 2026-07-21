@@ -20,9 +20,9 @@ import xml.dom.minidom
 import re
 import platform
 # gui things
-from flags import flags as gf
-from flags import global_info as gl_info
-import dtlogger
+from qdte.core.flags import flags as gf
+from qdte.core.flags import global_info as gl_info
+from qdte.core import dtlogger
 
 ITEMS_ALL = 0
 ITEMS_SECTOOL = 1

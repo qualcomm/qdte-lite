@@ -42,7 +42,7 @@ import tkinter.colorchooser
 import dtwrapper as dt
 
 # configuration, debug, etc.
-from flags import flags as gf
+from qdte.core.flags import flags as gf
 
 # custom inline editor
 from editview import DtbSmartEntry
