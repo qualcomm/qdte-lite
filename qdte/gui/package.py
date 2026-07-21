@@ -144,12 +144,14 @@ def pkg_app():
     os.mkdir(os.path.join(outdir, 'dtgui', 'pyfdt'))
     print('OK!')
 
-    # copy all python files over
+    # copy all python files over: the launcher, the qdte package tree and
+    # the vendored QutsAtom glue
     print('Copy DTGUI python files... ', end='')
-    with os.scandir('.') as files:
-        for entry in files:
-            if entry.is_file() and entry.name.endswith('.py'):
-                shutil.copyfile(entry.name, os.path.join(outdir, 'dtgui', entry.name))
+    shutil.copyfile('run.py', os.path.join(outdir, 'dtgui', 'run.py'))
+    shutil.copytree('qdte', os.path.join(outdir, 'dtgui', 'qdte'),
+                    ignore=shutil.ignore_patterns('__pycache__'))
+    shutil.copytree('QutsAtom', os.path.join(outdir, 'dtgui', 'QutsAtom'),
+                    ignore=shutil.ignore_patterns('__pycache__'))
 
     # rename the run.py file to __main__
     os.rename(os.path.join(outdir, 'dtgui', 'run.py'), os.path.join(outdir, 'dtgui', '__main__.py'))
