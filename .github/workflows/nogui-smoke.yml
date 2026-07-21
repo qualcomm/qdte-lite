@@ -4,13 +4,20 @@
 # Headless (--nogui) integration smoke tests.
 #
 # These exercise the command-line contract that downstream automation
-# (Yocto, signing pipelines) relies on, by invoking run.py externally on
-# real Qualcomm boot binaries and checking the produced ELF actually
-# contains the edited property:
+# (Yocto, signing pipelines) relies on, by pip-installing QDTE and
+# invoking the qdte entry point on real Qualcomm boot binaries, checking
+# the produced ELF actually contains the edited property:
 #
-#   run.py --nogui --allow_unsigned --input_file <elf>
-#          --output_path <dir> --output_file <name>
-#          --modify "<dtb>/<path>=<value>"
+#   qdte --nogui --allow_unsigned --input_file <elf>
+#        --output_path <dir> --output_file <name>
+#        --modify "<dtb>/<path>=<value>"
+#
+# The job deliberately avoids actions/setup-python: its tool-cache
+# builds bundle Tcl/Tk, while the runner's stock python3 has no tkinter
+# (python3-tk is not preinstalled). Installing QDTE into a venv from
+# that interpreter reproduces the minimal sysroot (e.g. a Yocto native
+# environment) that headless mode must support -- any tkinter import on
+# the --nogui path fails for real, with no stubbing or shadowing.
 #
 # Two containers are covered:
 #   * xbl_config.elf  - reassembled via the unsigned GenXBLConfig path
@@ -56,27 +63,37 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Install dependencies
+      - name: Install QDTE into a venv
         run: |
-          # QDTE headless runtime deps only. With the headless import guards
-          # in place, --nogui needs neither tkinter nor fs/pyfatfs.
-          python -m pip install --upgrade pip
-          python -m pip install pyfdt six
+          python3 -m venv "$RUNNER_TEMP/venv"
+          "$RUNNER_TEMP/venv/bin/pip" install --upgrade pip
+          "$RUNNER_TEMP/venv/bin/pip" install .
+          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
           # fdtdump (verification) lives in device-tree-compiler.
           sudo apt-get update
           sudo apt-get install -y device-tree-compiler
+
+      # Fails fast on import-level regressions even when fixture downloads
+      # are broken.
+      - name: Headless import canary
+        run: |
+          # Premise check: this interpreter really has no tkinter. If the
+          # runner image ever grows python3-tk, fail loudly instead of
+          # silently weakening the headless guarantee.
+          if python -c "import tkinter" 2>/dev/null; then
+            echo "tkinter is unexpectedly importable; the headless guarantee is not being exercised"
+            exit 1
+          fi
+          python -c "import qdte.cli.main, qdte.cli.headless, qdte.core.dtwrapper, \
+          qdte.core.Autocmd, qdte.core.assemble, qdte.core.sign"
+          qdte --nogui --version
 
       - name: Cache test binaries
         id: cache-fixtures
         uses: actions/cache@v4
         with:
           path: ${{ env.FIXTURES_DIR }}
-          key: smoke-fixtures-${{ hashFiles('.github/workflows/qcom-nogui-smoke.yml') }}
+          key: smoke-fixtures-${{ hashFiles('.github/workflows/nogui-smoke.yml') }}
 
       - name: Fetch test binaries
         if: steps.cache-fixtures.outputs.cache-hit != 'true'
@@ -98,10 +115,12 @@ jobs:
           rm -rf "$tmp"
           ls -l "$FIXTURES_DIR"
 
-      # Each smoke test runs run.py --nogui to edit one property, then reads
-      # it back from the produced ELF with `fdtdump --scan`, which locates and
-      # decodes the embedded DTB. The expected value is matched as the 8-digit
-      # hex word fdtdump prints (e.g. <0x00000007>).
+      # Each smoke test runs the installed qdte entry point to edit one
+      # property, then reads it back from the produced ELF with
+      # `fdtdump --scan`, which locates and decodes the embedded DTB. The
+      # expected value is matched as the 8-digit hex word fdtdump prints
+      # (e.g. <0x00000007>). Run from outside the checkout so only the
+      # installed package is exercised.
 
       - name: nogui smoke - xbl_config.elf
         run: |
@@ -109,13 +128,16 @@ jobs:
           # xbl_config.elf reassembles via the unsigned GenXBLConfig path.
           # The hex literal also exercises the int(val, 0) fix.
           out="$(mktemp -d)"
-          python run.py --nogui --allow_unsigned \
+          cd "$RUNNER_TEMP"
+          qdte --nogui --allow_unsigned \
             --input_file "$FIXTURES_DIR/xbl_config.elf" \
             --output_path "$out" --output_file xbl_config.elf \
             --modify "$XBL_DTB_NAME/soc/ddr_common_dt/ddr_log_level_dt=0x7"
           test -f "$out/xbl_config.elf"
+          # No grep -q: under pipefail its early exit can kill fdtdump with
+          # SIGPIPE and fail the pipeline despite a successful match.
           fdtdump --scan "$out/xbl_config.elf" 2>/dev/null \
-            | grep -q "ddr_log_level_dt = <0x00000007>"
+            | grep "ddr_log_level_dt = <0x00000007>" >/dev/null
           echo "PASS: xbl_config.elf ddr_log_level_dt == 0x7"
 
       - name: nogui smoke - uefi_dtbs.elf
@@ -124,13 +146,34 @@ jobs:
           # uefi_dtbs.elf is a pure-DTB (.dtbs) ELF; under --allow_unsigned
           # its wrapper is rebuilt natively, with no sectools involved.
           out="$(mktemp -d)"
-          python run.py --nogui --allow_unsigned \
+          cd "$RUNNER_TEMP"
+          qdte --nogui --allow_unsigned \
             --input_file "$FIXTURES_DIR/uefi_dtbs.elf" \
             --output_path "$out" --output_file uefi_dtbs.elf \
             --modify "$UEFI_DTB_NAME/soc/quantum_dt/enter_quantum=0x1"
           test -f "$out/uefi_dtbs.elf"
           fdtdump --scan "$out/uefi_dtbs.elf" 2>/dev/null \
-            | grep -q "enter_quantum = <0x00000001>"
+            | grep "enter_quantum = <0x00000001>" >/dev/null
           echo "PASS: uefi_dtbs.elf enter_quantum == 0x1"
 
           echo "All nogui smoke tests passed."
+
+  # The flip side of the tkinter-free smoke: the GUI half must still
+  # import cleanly with real tkinter (bundled by setup-python's build)
+  # and the gui extra's dependencies present.
+  gui-import:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Import the GUI stack
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install ".[gui]"
+          python -c "import tkinter, qdte.gui.controller, qdte.gui.app"
