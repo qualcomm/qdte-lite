@@ -13,7 +13,9 @@ DTE is a graphical user interface application for editing Device Trees and modif
 To run this project, you need:
 
 * Python 3
-* Tkinter (usually included with Python)
+* For the Qt GUI: the `qt` extra (PySide6, pip-installable everywhere)
+* For the legacy tkinter GUI: Tkinter (usually included with Python;
+  on Debian/Ubuntu install `python3-tk`, on Fedora/Yocto `python3-tkinter`)
 * Dependencies listed in `requirements.txt`
 
 ## Installation Instructions
@@ -63,6 +65,25 @@ python3 run.py --nogui --allow_unsigned \
 `python3 -m qdte` is equivalent to `run.py`, and installing the package
 (`pip install .`) provides a `qdte` console script.
 
+### GUI flavours
+
+```bash
+pip install "qdte-lite[qt]"     # Qt (PySide6) GUI - the default when installed
+pip install "qdte-lite[gui]"    # tkinter GUI extras (NON-HLOS FAT browser)
+pip install "qdte-lite[all]"    # everything
+
+qdte file.dtb                 # Qt if PySide6 is importable, tkinter otherwise
+qdte --tk file.dtb            # force the legacy tkinter GUI
+```
+
+The Qt frontend currently covers the core editing loop (browse, edit,
+undo/redo, save, unsigned config-ELF reassembly); device operations, the
+NON-HLOS browser and signing dialogs still live in the tkinter GUI, one
+`--tk` away.
+
+Troubleshooting (Linux): if the Qt GUI fails to start under Wayland, try
+`QT_QPA_PLATFORM=xcb qdte ...`.
+
 ## Code layout
 
 ```
@@ -72,6 +93,8 @@ qdte/core/        headless engine: flags, dtwrapper, assemble/version_2_assemble
                   Must never import qdte.gui or tkinter -- CI enforces this by
                   running the --nogui smoke tests with a poisoned tkinter.
 qdte/cli/         argument parsing and dispatch; the --nogui path
+qdte/gui_qt/      the Qt (PySide6) application: item model over dtwrapper,
+                  main window, config-ELF sessions ("qt" extra)
 qdte/gui/         the tkinter application: controller, views, settings,
                   XBLConfig integration, NON-HLOS FAT browser
 QutsAtom/         vendored QUTS Atom glue, loaded only when a QUTS
