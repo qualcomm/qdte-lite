@@ -6,18 +6,12 @@
 @file sign.py
 This file contains the interface of signature. it will call sectools v2 for signing.
 """
-#from asyncio import exceptions
-from dis import disassemble
 import os
-import sys
 import subprocess
-from tkinter import E
 from flags import flags as gf
-import dtwrapper as dt
 import json
 import xml.dom.minidom
 import re
-import time
 import dtlogger
 
 class st:

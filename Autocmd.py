@@ -2,16 +2,11 @@
 
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
-from dis import disassemble
 import os
 import sys
 import subprocess
-from tkinter import E
 from flags import flags as gf
 import dtwrapper as dt
-import json
-import xml.dom.minidom
-import re
 import time
 import sign
 import assemble

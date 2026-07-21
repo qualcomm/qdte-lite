@@ -2,9 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 
 import json
-import assemble
 
-from optparse import OptionParser
 from pathlib import Path
 from pyfdt.pyfdt import FdtBlobParse
 

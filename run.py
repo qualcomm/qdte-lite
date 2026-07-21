@@ -56,7 +56,6 @@ if '--nogui' in sys.argv:
 import argparse
 import tkinter as tk
 import flags as gflags
-import six
 import controller
 
 

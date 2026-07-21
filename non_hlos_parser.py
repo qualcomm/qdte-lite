@@ -1,17 +1,10 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
-from cmath import exp
-from logging import exception
-from operator import ge
-from tkinter import W
 from XBLConfig import elf_gen_tools
 from flags import flags as gf
 import subprocess
 import os
 from fs import open_fs
-import datetime
-import time
-import os
 import re
 import fs.opener
 from pyfatfs.PyFatFSOpener import PyFatFSOpener
