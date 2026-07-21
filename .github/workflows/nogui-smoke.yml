@@ -67,6 +67,9 @@ jobs:
         run: |
           python3 -m venv "$RUNNER_TEMP/venv"
           "$RUNNER_TEMP/venv/bin/pip" install --upgrade pip
+          # swig (as a pip wheel) lets the pylibfdt dependency build from
+          # its sdist.
+          "$RUNNER_TEMP/venv/bin/pip" install swig
           "$RUNNER_TEMP/venv/bin/pip" install .
           echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
           # fdtdump (verification) lives in device-tree-compiler.
@@ -115,15 +118,12 @@ jobs:
           rm -rf "$tmp"
           ls -l "$FIXTURES_DIR"
 
-      # Prove the libfdt backend is a drop-in for pyfdt on real DTBs
-      # (parity), and that its emission is deterministic and lossless
-      # (round-trip). swig comes as a pip wheel; pylibfdt builds from
-      # sdist with it.
-      - name: fdt backend parity and round-trip
+      # Prove the libfdt backend's emission is deterministic and lossless
+      # on real DTBs. (The pyfdt parity mode retired with pyfdt itself;
+      # it passed on these same fixtures before the swap.)
+      - name: fdt backend round-trip
         run: |
           set -euo pipefail
-          pip install swig
-          pip install pylibfdt
           dtbs="$RUNNER_TEMP/selftest-dtbs"
           mkdir -p "$dtbs"
           python - "$FIXTURES_DIR" "$dtbs" <<'EOF'
@@ -141,7 +141,6 @@ jobs:
                       out, elf.split('.')[0] + '__' + disp.replace('/', '_')))
               s.close()
           EOF
-          python -m qdte.core._fdt_selftest --parity "$dtbs"/*
           python -m qdte.core._fdt_selftest --roundtrip "$dtbs"/*
 
       # Each smoke test runs the installed qdte entry point to edit one
@@ -215,6 +214,7 @@ jobs:
       - name: Import the GUI stack
         run: |
           python -m pip install --upgrade pip
+          python -m pip install swig
           python -m pip install ".[gui]"
           python -c "import tkinter, qdte.gui.controller, qdte.gui.app"
 
@@ -244,6 +244,7 @@ jobs:
       - name: Install QDTE with the qt extra
         run: |
           python -m pip install --upgrade pip
+          python -m pip install swig
           python -m pip install ".[qt]"
 
       - name: Qt import canary

@@ -35,7 +35,7 @@ from qdte.core.flags import global_info as gl_info
 # these files will be available for programs to request when packaged; when not, they will simply be read from the file
 # system. User Manual is copied for the user's convenience, and pyfdt README is copied for compliance with legal stuff.
 # It shouldn't be hard to add some more files here as desired. Directories are not supported, though, unfortunately.
-SAVED_RESOURCES = ['UserManual.pdf', 'pyfdt/README.md']
+SAVED_RESOURCES = ['UserManual.pdf']
 
 # name of the file to output to
 AR_NAME = 'dtgui.pyz'
@@ -141,7 +141,6 @@ def pkg_app():
     print('Create temporary directories... ', end='')
     outdir = tempfile.mkdtemp(prefix='dtgui_pkg_')
     os.mkdir(os.path.join(outdir, 'dtgui'))
-    os.mkdir(os.path.join(outdir, 'dtgui', 'pyfdt'))
     print('OK!')
 
     # copy all python files over: the launcher, the qdte package tree and
@@ -155,14 +154,6 @@ def pkg_app():
 
     # rename the run.py file to __main__
     os.rename(os.path.join(outdir, 'dtgui', 'run.py'), os.path.join(outdir, 'dtgui', '__main__.py'))
-    print('OK!')
-
-    # copy pyfdt files over
-    print('Copy pyfdt python files... ', end='')
-    with os.scandir('pyfdt') as files:
-        for entry in files:
-            if entry.is_file() and entry.name.endswith('.py'):
-                shutil.copyfile(os.path.join('pyfdt', entry.name), os.path.join(outdir, 'dtgui', 'pyfdt', entry.name))
     print('OK!')
 
     # generate the embedded resources variable/file

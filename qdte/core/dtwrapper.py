@@ -20,8 +20,9 @@ Important notes:
 This file is split up into various different classes. Please see the documentation for each class for more information.
 """
 
-# fdt library we are using
-from pyfdt import pyfdt
+# fdt library we are using -- libfdt-backed, keeping the historic pyfdt
+# object-tree API surface (see qdte/core/fdt_backend.py)
+import qdte.core.fdt_backend as pyfdt
 
 # configuration
 from qdte.core.flags import flags as gf
@@ -1011,18 +1012,7 @@ class DTWrapper:
     def _update_dtb(self):
         self.dtb_mappings = {}
         if self._fdt is not None:
-            # Upstream PyPI pyfdt (0.3, the only released version) exposes
-            # `to_dtb(self)` with no parameters.  QDTE was developed against
-            # an internal fork whose `to_dtb()` accepts an out-dict that gets
-            # populated with byte-offset mappings for the GUI hex viewer.
-            # Probe both signatures so we work with either: pass the
-            # mappings dict if accepted, otherwise call the zero-arg form
-            # and leave `dtb_mappings` empty (the hex viewer simply will
-            # not highlight node offsets in that case).
-            try:
-                self.dtb = self._fdt.to_dtb(self.dtb_mappings)
-            except TypeError:
-                self.dtb = self._fdt.to_dtb()
+            self.dtb = self._fdt.to_dtb(self.dtb_mappings)
         else:
             self.dtb = None
 

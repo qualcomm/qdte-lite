@@ -62,7 +62,7 @@ from qdte.gui import package
 # fdt interface
 import qdte.core.dtwrapper as dt
 from qdte.gui import xblcfgint as xbl
-from pyfdt import pyfdt
+import qdte.core.fdt_backend as pyfdt
 from qdte.core.version import QDTE_VERSION
 
 #nhlos parser lib

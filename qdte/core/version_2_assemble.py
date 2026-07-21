@@ -5,7 +5,7 @@ import json
 import sys
 
 from pathlib import Path
-from pyfdt.pyfdt import FdtBlobParse
+from qdte.core.fdt_backend import FdtBlobParse
 
 from qdte.core.XBLConfig.commons import *
 from qdte.core import dtlogger
