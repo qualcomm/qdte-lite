@@ -631,7 +631,12 @@ def disassemble_elf_raw(elf_fp, input_elf_filename, elf_info_out_json, output_pa
 
   # store disassembled program-header filename with path.
   elf_info_dict[PHDR] = PHDR_BIN
-  elf_info_dict[ALIGNMENT] = "0x{:x}".format(phdr_table[1].p_align)
+  # Alignment comes from the LOAD segment. Stock config ELFs lead with a
+  # NULL phdr (putting the LOAD at index 1), but natively reassembled DTBS
+  # ELFs carry a single LOAD phdr -- never index past the table blindly.
+  load_phdrs = [p for p in phdr_table if p.p_type == LOAD_TYPE]
+  align_phdr = load_phdrs[0] if load_phdrs else phdr_table[0]
+  elf_info_dict[ALIGNMENT] = "0x{:x}".format(align_phdr.p_align)
   #Copy each 'original' segment into separate files
   seg_start_offset = roundup(elf_header.e_phoff + phdr_size, PAGE_SIZE) #must be on one line, cant += string and int
   for i in range (elf_header.e_phnum):

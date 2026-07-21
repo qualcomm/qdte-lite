@@ -156,6 +156,17 @@ jobs:
             | grep "enter_quantum = <0x00000001>" >/dev/null
           echo "PASS: uefi_dtbs.elf enter_quantum == 0x1"
 
+          # Round-trip: the natively reassembled ELF (single LOAD phdr,
+          # p_align 0) must itself disassemble and re-edit.
+          qdte --nogui --allow_unsigned \
+            --input_file "$out/uefi_dtbs.elf" \
+            --output_path "$out" --output_file uefi_dtbs2.elf \
+            --modify "$UEFI_DTB_NAME/soc/quantum_dt/enter_quantum=0x2"
+          test -f "$out/uefi_dtbs2.elf"
+          fdtdump --scan "$out/uefi_dtbs2.elf" 2>/dev/null \
+            | grep "enter_quantum = <0x00000002>" >/dev/null
+          echo "PASS: round-trip reassembly"
+
           echo "All nogui smoke tests passed."
 
   # The flip side of the tkinter-free smoke: the GUI half must still
