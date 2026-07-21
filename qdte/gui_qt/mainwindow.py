@@ -9,7 +9,8 @@ import os
 
 from PySide6.QtCore import Qt
 from PySide6.QtGui import QAction, QActionGroup, QKeySequence
-from PySide6.QtWidgets import (QFileDialog, QInputDialog, QMainWindow,
+from PySide6.QtWidgets import (QApplication, QDockWidget, QFileDialog,
+                               QInputDialog, QListWidget, QMainWindow,
                                QMenu, QMessageBox, QTreeView)
 
 import qdte.core.dtwrapper as dt
@@ -18,6 +19,7 @@ from qdte.core.dtwrapper import FdtPropertyType
 from qdte.core.flags import flags as gf
 from qdte.core.version import QDTE_VERSION
 from qdte.gui_qt import valueparse
+from qdte.gui_qt.elfsession import ElfSession
 from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
 WINDOW_TITLE = 'QDTE (Qualcomm Device Tree Editor) %s [Qt]' % QDTE_VERSION
@@ -45,6 +47,14 @@ class MainWindow(QMainWindow):
         self.tree.customContextMenuRequested.connect(self._context_menu)
         self.setCentralWidget(self.tree)
 
+        self.session = None
+        self.dtb_list = QListWidget(self)
+        self.dtb_list.itemActivated.connect(self._dtb_chosen)
+        self.dtb_dock = QDockWidget('DTBs in ELF', self)
+        self.dtb_dock.setWidget(self.dtb_list)
+        self.dtb_dock.hide()
+        self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dtb_dock)
+
         self._build_menus()
         self._update_title()
         self._update_undoredo()
@@ -60,6 +70,14 @@ class MainWindow(QMainWindow):
         filem = bar.addMenu('&File')
         self._add_action(filem, '&Open DTB...', self.open_dtb,
                          QKeySequence.StandardKey.Open)
+        self._add_action(filem, 'Open Config &ELF...', self.open_elf)
+        filem.addSeparator()
+        self.act_reasm = self._add_action(
+            filem, '&Reassemble ELF As...', self.reassemble_elf)
+        self.act_close_sess = self._add_action(
+            filem, 'Close ELF &Session', self.close_session)
+        for act in (self.act_reasm, self.act_close_sess):
+            act.setEnabled(False)
         filem.addSeparator()
         self._add_action(filem, '&Save', self.save_dtb,
                          QKeySequence.StandardKey.Save)
@@ -106,7 +124,10 @@ class MainWindow(QMainWindow):
 
     def open_path(self, path):
         """Open a file given on the command line."""
-        self.load_dtb(path)
+        if path.lower().endswith(('.dtb', '.dtbo')):
+            self.load_dtb(path)
+        else:
+            self.load_elf(path)
 
     def open_dtb(self):
         filename, _ = QFileDialog.getOpenFileName(
@@ -124,6 +145,96 @@ class MainWindow(QMainWindow):
                                  getattr(ex, 'message', str(ex)))
             return
         self.tree.expandToDepth(1)
+
+    # ------------------------------------------------------------------
+    # config-ELF sessions
+    # ------------------------------------------------------------------
+
+    def open_elf(self):
+        filename, _ = QFileDialog.getOpenFileName(
+            self, 'Open Config ELF', '',
+            'Config ELF (*.elf);;All Files (*)')
+        if filename:
+            self.load_elf(filename)
+
+    def load_elf(self, filename):
+        self.close_session()
+        session = ElfSession(filename)
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            session.disassemble()
+        except Exception as ex:  # noqa: BLE001
+            session.close()
+            QApplication.restoreOverrideCursor()
+            QMessageBox.critical(self, 'Failed to disassemble',
+                                 getattr(ex, 'message', str(ex)))
+            return
+        QApplication.restoreOverrideCursor()
+        self.session = session
+        self.dtb_list.clear()
+        for display in session.dtbs:
+            self.dtb_list.addItem(display)
+        self.dtb_dock.show()
+        self.act_reasm.setEnabled(True)
+        self.act_close_sess.setEnabled(True)
+        self.statusBar().showMessage(
+            '%d DTBs in %s - double-click one to edit'
+            % (len(session.dtbs), os.path.basename(filename)))
+
+    def _dtb_chosen(self, item):
+        if self.session is None:
+            return
+        self._flush_current_dtb()
+        self.load_dtb(self.session.dtbs[item.text()])
+
+    def _flush_current_dtb(self):
+        """Persist in-memory DTB edits to the session temp dir (tk parity:
+        edits are auto-saved when switching DTBs or reassembling)."""
+        if (self.session is not None and self.dtw.has_file()
+                and self.dtw.fdt_name.startswith(self.session.outdir)):
+            with open(self.dtw.fdt_name, 'wb') as fp:
+                fp.write(self.dtw.dtb)
+
+    def reassemble_elf(self):
+        if self.session is None:
+            return
+        self._flush_current_dtb()
+        suggested = os.path.basename(self.session.elf_path)
+        filename, _ = QFileDialog.getSaveFileName(
+            self, 'Reassemble (unsigned) ELF as', suggested,
+            'Config ELF (*.elf);;All Files (*)')
+        if not filename:
+            return
+        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
+        try:
+            self.session.reassemble_unsigned(filename)
+        except Exception as ex:  # noqa: BLE001
+            QMessageBox.critical(self, 'Failed to reassemble',
+                                 getattr(ex, 'message', str(ex)))
+            return
+        finally:
+            QApplication.restoreOverrideCursor()
+        self.statusBar().showMessage('Reassembled (unsigned) to %s'
+                                     % filename, 10000)
+
+    def close_session(self):
+        if self.session is None:
+            return
+        self._flush_current_dtb()
+        self.session.close()
+        self.session = None
+        self.dtb_list.clear()
+        self.dtb_dock.hide()
+        self.act_reasm.setEnabled(False)
+        self.act_close_sess.setEnabled(False)
+
+    def closeEvent(self, event):
+        self.close_session()
+        super().closeEvent(event)
+
+    # ------------------------------------------------------------------
+    # saving
+    # ------------------------------------------------------------------
 
     def save_dtb(self):
         if not self._require_file():
@@ -182,6 +293,14 @@ class MainWindow(QMainWindow):
         self._do_undoredo(self.model.redo_op)
 
     def _do_undoredo(self, fn):
+        # Never undo past the LOAD of a session DTB (tk parity:
+        # controller blocks it while an XBL session is open).
+        if (fn == self.model.undo_op and self.session is not None):
+            op = self.dtw.top_undo()
+            if op is not None and op.optype == dt.DTOperationType.LOAD:
+                self.statusBar().showMessage(
+                    'Cannot undo the session load', 5000)
+                return
         try:
             fn()
         except dt.UndoRedoExhaustedError:
