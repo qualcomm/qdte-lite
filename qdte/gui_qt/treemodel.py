@@ -14,6 +14,8 @@ boxes) belongs to the window, wired via signals.
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 
 import qdte.core.dtwrapper as dt
+from qdte.core.flags import flags as gf
+from qdte.gui_qt import valueparse
 
 COL_NAME, COL_TYPE, COL_VALUE = 0, 1, 2
 _HEADERS = ('Name', 'Type', 'Value')
@@ -49,6 +51,8 @@ class DtTreeModel(QAbstractItemModel):
     # Emitted after any dtw mutation applied through the model, with the
     # modified path (or None).  The window refreshes titles/menus from it.
     operationApplied = Signal(object)
+    # Emitted when an inline edit could not be parsed/applied: (path, message).
+    editFailed = Signal(str, str)
 
     def __init__(self, dtw, parent=None):
         super().__init__(parent)
@@ -264,3 +268,31 @@ class DtTreeModel(QAbstractItemModel):
 
     def path_for_index(self, index):
         return index.internalPointer().path if index.isValid() else None
+
+    def flags(self, index):
+        base = super().flags(index)
+        if not index.isValid():
+            return base
+        tnode = index.internalPointer()
+        if (index.column() == COL_VALUE and tnode.is_prop
+                and tnode.type_str != 'EMPTY' and not gf['readonly']):
+            return base | Qt.ItemIsEditable
+        return base
+
+    def setData(self, index, value, role=Qt.EditRole):
+        if role != Qt.EditRole or not index.isValid():
+            return False
+        tnode = index.internalPointer()
+        if not tnode.is_prop:
+            return False
+        item = self.dtw.resolve_path(tnode.path)
+        if item is None or not item.is_property():
+            return False
+        try:
+            payload = valueparse.parse_value(item.get_type(), str(value))
+            self.apply_op(dt.DTOperation.make(
+                dt.DTOperationType.EDIT_PROPERTY_VALUE, tnode.path, payload))
+        except Exception as ex:  # noqa: BLE001 -- surfaced to the user
+            self.editFailed.emit(tnode.path, getattr(ex, 'message', str(ex)))
+            return False
+        return True
