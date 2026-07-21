@@ -4,7 +4,6 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 import os
 import sys
-import subprocess
 from flags import flags as gf
 import dtwrapper as dt
 import time
@@ -21,42 +20,9 @@ class autocmd(sign.st,assemble.assemble):
         self.check_python()
 
     def check_python(self):
-        try:
-            proc = subprocess.Popen(["python",
-                                 '--version'
-                                 ],
-                                 stdout=subprocess.PIPE,
-                                 stderr=subprocess.PIPE,
-                                 universal_newlines=True,
-                                 shell=True)
-        except Exception as Error:
-            print("error:",Error)
-            sys.exit(-1)
-        while True:
-            outs, errs = proc.communicate()
-            output=None
-
-            if len(outs) == 0 and len(errs) != 0:
-                output = errs
-            else:
-                output = outs
-            for line in output.split('\n'):
-                if 'Python was not found' in line or r"'python' is not recognized" in line:
-                    print("Python is not installed!\nPlease install python v3.7.4 or later!\n")
-                    sys.exit(-1)
-            return_value = proc.poll()
-            if return_value!=None and return_value!=9009:
-                print("sub process has been terminate:",proc.poll())
-                break
-            elif return_value == 9009:
-                print("Python is not installed!\nPlease install python v3.7.4 or later!\n")
-                sys.exit(-1)
-
-
-
         print("python version ",sys.version_info)
         if sys.version_info < (3, 7, 4):
-            sys.exit("Python Error","Please install python v3.7.4 or later!\n")
+            sys.exit("Python Error: Please install python v3.7.4 or later!\n")
 
         return True
     def execute(self):

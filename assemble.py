@@ -136,7 +136,7 @@ class assemble:
         if gf['inputFile'] == None or not os.path.exists(gf['inputFile']):
             raise Exception("Error: input path {}.{}".format(gf['inputFile'], " is invalid path!!"))
         try:
-            proc = subprocess.Popen(["python",
+            proc = subprocess.Popen([sys.executable,
                                      self.fetch_gendtbelf_script(),
                                      '-t', gf['xbltoolsDir'],
                                      '-a', self.outdir,
@@ -261,7 +261,7 @@ class assemble:
         self.load_disassembled_elf_info()
         # reassemable the dtb elfs
         tool_path = self.fetch_gendtbelf_script()
-        cmd = ["python",
+        cmd = [sys.executable,
                self.fetch_gendtbelf_script(),
                "-t", gf['xbltoolsDir'],
                '-a', self.outdir,

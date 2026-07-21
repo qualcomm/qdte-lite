@@ -2,6 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 
 import json
+import sys
 
 from pathlib import Path
 from pyfdt.pyfdt import FdtBlobParse
@@ -85,7 +86,7 @@ def disassemble_dtbs_elf(config_file_to_be_disassembled, output_xbl_config_direc
     """
     # Disassemble the ELF into a JSON using XBLConfig/elf_gen.py
     disassembled_elf_info_json = os.path.join(output_xbl_config_directory, DISASSEMBLED_ELF_INFO_JSON)
-    call_os_system("python \"" + tools_path + os.path.sep + ELF_GENERATOR_SCRIPT + "\"" +
+    call_os_system("\"" + sys.executable + "\" \"" + tools_path + os.path.sep + ELF_GENERATOR_SCRIPT + "\"" +
                    " -d " + config_file_to_be_disassembled +
                    " -o " + autogen_directory +
                    " -e " + disassembled_elf_info_json)

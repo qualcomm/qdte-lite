@@ -4,6 +4,7 @@ from XBLConfig import elf_gen_tools
 from flags import flags as gf
 import subprocess
 import os
+import sys
 from fs import open_fs
 import re
 import fs.opener
@@ -121,7 +122,7 @@ class nhlos_Operator:
             phdr_num =  elf_header.e_phnum
 
             #call elf_gen script to dissamble dtb elf file
-            subprocess.check_call(["python",os.path.join(gf["xbltoolsDir"],"elf_gen.py"),
+            subprocess.check_call([sys.executable,os.path.join(gf["xbltoolsDir"],"elf_gen.py"),
                                    "-d",dtb_elf,
                                    "-e",os.path.join(output_path,dtb_elf_name),
                                    "-o",output_path])
