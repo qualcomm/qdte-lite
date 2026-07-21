@@ -1,0 +1,33 @@
+# Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
+# SPDX-License-Identifier: BSD-3-Clause-Clear
+
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "qdte-lite"
+version = "1.5.7"
+description = "Device Tree Editor Lite - edit device trees and (dis)assemble the Qualcomm config-ELF containers that hold them"
+readme = "README.md"
+license = {text = "BSD-3-Clause-Clear"}
+requires-python = ">=3.7.4"
+dependencies = [
+    "pyfdt",
+]
+
+[project.optional-dependencies]
+# The NON-HLOS.bin FAT browser in the GUI needs a FAT filesystem backend;
+# the headless (--nogui) flow does not.
+gui = [
+    "fs",
+    "pyfatfs",
+]
+
+[project.urls]
+Homepage = "https://github.com/qualcomm/qdte-lite"
+
+[tool.setuptools.packages.find]
+# The qdte package tree introduced by the headless/GUI split, plus the
+# vendored QUTS Atom glue it loads when a QUTS installation is present.
+include = ["qdte*", "QutsAtom*"]
