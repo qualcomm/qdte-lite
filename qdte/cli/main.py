@@ -8,6 +8,8 @@ the headless flow or the GUI.  The GUI (and with it tkinter and the
 heavier GUI-only dependencies) is imported lazily, only when a GUI run
 was actually requested.
 """
+import importlib.util
+
 from qdte.core import flags as gflags
 
 
@@ -15,11 +17,18 @@ def _dispatch(args):
     if gflags.flags['nogui']:
         from qdte.cli.headless import run_headless
         run_headless()
+        return
+    # Deliberately lazy imports: the ONLY places a GUI toolkit (PySide6 or
+    # tkinter, plus fs/pyfatfs, QutsAtom on the tk side) enters the process.
+    # Qt is the default frontend when PySide6 is installed; --tk forces the
+    # legacy tkinter GUI. The find_spec probe (rather than try/except around
+    # the import) keeps real qdte.gui_qt bugs from being masked as a silent
+    # fallback to tk.
+    if not gflags.flags['tk'] and importlib.util.find_spec('PySide6') is not None:
+        from qdte.gui_qt.app import launch
     else:
-        # Deliberately lazy: the ONLY place qdte.gui (and hence tkinter,
-        # fs/pyfatfs, QutsAtom) enters the process.
         from qdte.gui.app import launch
-        launch(initial_file=args.file)
+    launch(initial_file=args.file)
 
 
 def main(argv=None):

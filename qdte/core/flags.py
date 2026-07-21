@@ -64,6 +64,9 @@ config = {
                                                 #    'help': 'Show detailed output from GenXBLConfig scripts in the '
                                                 #            'console window.'},
     '--nogui': {'action': 'store_true', 'default': False, 'help': 'Do not launch the GUI, run by command line mode '},
+    '--tk': {'action': 'store_true', 'default': False,
+             'help': 'Force the legacy tkinter GUI instead of the Qt (PySide6) frontend.\n'
+                     'The Qt frontend is used by default when PySide6 is installed.'},
     '--dry_run': {'action': 'store_true', 'help':argparse.SUPPRESS},
                                                 #'help': 'Do not actually write to any output file, but instead write out a '
                                                 #'JSON change report that can be used in --nogui mode.'},
