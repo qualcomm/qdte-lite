@@ -5,8 +5,24 @@ from qdte.core.flags import flags as gf
 import subprocess
 import os
 import sys
-from fs import open_fs
 import re
+
+try:
+    import pkg_resources  # noqa: F401
+except ImportError:
+    # setuptools >= 81 no longer ships pkg_resources, but the fs package
+    # (pulled in via pyfatfs) still imports it at module scope -- for a
+    # legacy namespace declaration and for entry-point opener discovery,
+    # neither of which QDTE relies on: the FAT opener is installed
+    # explicitly below.  Provide the minimal surface fs touches.  This
+    # must run before the first fs import.
+    import types
+    _pkg_resources = types.ModuleType("pkg_resources")
+    _pkg_resources.declare_namespace = lambda name: None
+    _pkg_resources.iter_entry_points = lambda group, name=None: iter(())
+    sys.modules["pkg_resources"] = _pkg_resources
+
+from fs import open_fs
 import fs.opener
 from pyfatfs.PyFatFSOpener import PyFatFSOpener
 from qdte.core import dtlogger
