@@ -45,7 +45,7 @@ import qdte.core.dtwrapper as dt
 from qdte.core.flags import flags as gf
 
 # custom inline editor
-from editview import DtbSmartEntry
+from qdte.gui.editview import DtbSmartEntry
 
 
 class TreeView(tk.Frame):

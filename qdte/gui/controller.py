@@ -43,25 +43,25 @@ import tkinter.simpledialog
 
 
 # Windows/Views we use
-from findview import FindWindow
-from treeview import TreeView
-from editview import EditDialog
-from hexview import HexWindow
+from qdte.gui.findview import FindWindow
+from qdte.gui.treeview import TreeView
+from qdte.gui.editview import EditDialog
+from qdte.gui.hexview import HexWindow
 
 # configuration, debug, etc.
 from qdte.core.flags import flags as gf
 from qdte.core.flags import global_info as gl_info
-from settings import Json_Operate
-import dbgutil as dbg
-import settings
+from qdte.gui.settings import Json_Operate
+from qdte.gui import dbgutil as dbg
+from qdte.gui import settings
 from qdte.core import dtlogger
 
 # packaging help
-import package
+from qdte.gui import package
 
 # fdt interface
 import qdte.core.dtwrapper as dt
-import xblcfgint as xbl
+from qdte.gui import xblcfgint as xbl
 from pyfdt import pyfdt
 from qdte.core import Autocmd as cmd
 
@@ -75,13 +75,13 @@ from qdte.core import Autocmd as cmd
 # stub satisfies the DTGUIController class-definition contract without
 # ever being instantiated under --nogui.
 try:
-    import non_hlos_parser
+    from qdte.gui import non_hlos_parser
 except ImportError:
     class non_hlos_parser:  # type: ignore
         class nhlos_Operator:
             pass
 
-import get_qsahara_files
+from qdte.gui import get_qsahara_files
 
 
 QUTS_STATE = None

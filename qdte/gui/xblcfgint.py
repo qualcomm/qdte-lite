@@ -52,8 +52,8 @@ from qdte.core.flags import global_info as gl_info
 from qdte.core import assemble
 from qdte.core import version_2_assemble
 from qdte.core import sign
-from settings import Json_Operate
-import settings
+from qdte.gui.settings import Json_Operate
+from qdte.gui import settings
 from qdte.core import dtlogger
 if platform.system().startswith("Windows"):
     sectool_name = "sectools.exe"

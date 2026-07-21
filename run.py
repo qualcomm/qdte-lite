@@ -56,7 +56,7 @@ if '--nogui' in sys.argv:
 import argparse
 import tkinter as tk
 from qdte.core import flags as gflags
-import controller
+from qdte.gui import controller
 
 
 
