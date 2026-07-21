@@ -56,9 +56,6 @@ from qdte.gui import dbgutil as dbg
 from qdte.gui import settings
 from qdte.core import dtlogger
 
-# packaging help
-from qdte.gui import package
-
 # fdt interface
 import qdte.core.dtwrapper as dt
 from qdte.gui import xblcfgint as xbl
@@ -203,7 +200,6 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
         # help menu items
         help_menu.add_command(label='About...', compound='left', underline=0,
                               command=self.show_about)
-        help_menu.add_command(label='User Manual...', compound='left', underline=0, command=self.open_manual)
 
         # view menu items
         self.hexViewShowing = tk.BooleanVar()
@@ -985,27 +981,6 @@ class DTGUIController(tk.Frame,non_hlos_parser.nhlos_Operator):
         #         '\nMay-Aug 2020 : Extended by Mason Xiao'
         #         )
         tk.messagebox.showinfo('About', About_Info)
-
-    def open_manual(self):
-        """Display the user manual PDF"""
-
-        _ = self
-        user_manual = package.fetch_resource('UserManual.pdf')
-        if user_manual is None:
-            tk.messagebox.showerror('User Manual Not Found', 'The user manual has not been bundled with this version of'
-                                                             ' the QDTE.')
-            return
-        if sys.platform == 'win32':
-            os.startfile(user_manual)
-        elif sys.platform == 'darwin':
-            import subprocess
-            subprocess.Popen(['open', user_manual])
-        else:
-            try:
-                import subprocess
-                subprocess.Popen(['xdg-open', package.fetch_resource('UserManual.pdf')])
-            except OSError:
-                tk.messagebox.showinfo('User Manual', 'Please consult the file %s for more information.' % user_manual)
 
     def change_report(self):
         """Save a JSON report of all of the changes made to a file
