@@ -8,4 +8,4 @@ import sys
 import os
 
 if __name__ == "__main__":
-  subprocess.call(["python",os.path.join(os.path.dirname(os.path.realpath(__file__)),"GenConfigImage.py")]+sys.argv[1:])
+  subprocess.call([sys.executable,os.path.join(os.path.dirname(os.path.realpath(__file__)),"GenConfigImage.py")]+sys.argv[1:])

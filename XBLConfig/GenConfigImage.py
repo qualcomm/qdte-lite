@@ -6,13 +6,11 @@
 
 from __future__  import print_function
 from optparse import OptionParser
-import platform
 import subprocess
 import shutil
 import os
 import sys
 import locale
-import re
 import time
 import datetime
 import json
@@ -26,35 +24,6 @@ if sys.version_info < MINIMUM_SUPPORTED_PYTHON_VERSION:
 
 
 #####################################################################
-# get corresponding python path
-# input python version like 2, 3
-#####################################################################
-def get_python_path(version):
-  python_path=b''
-  if platform.system() == "Windows":
-    python_paths = subprocess.check_output('where python', stderr=subprocess.STDOUT , shell=True)
-    python_list=python_paths.split(b'\r\n')
-
-    python_version_match=b'Python '+str(version).encode()
-    for python_exe in python_list:
-      python_version = b''
-      if python_exe !=b'':
-        try:
-          python_version = subprocess.check_output(python_exe.decode()+' --version',stderr=subprocess.STDOUT , shell=True)
-        except Exception as error:
-          #print (error)
-          continue
-        if re.match(python_version_match,python_version):
-           python_path=python_exe
-
-    if python_path==b'':
-      print('[Buildex.py] Error Can not find python',str(version))
-      sys.exit(1)
-  else:
-     python_path = b'python'+str(version).encode()
-
-  return python_path.decode()+' '
-
 def disassemble_xbl_config_file(config_file_to_be_disassembled,
                                 format,
                                 output_xbl_config_directory,
@@ -105,7 +74,7 @@ def generate_xbl_config_file(json_config_path,
   if store_original_size:
       storeoriginalsize = ' --store-original-size'
   # Call XBL config metadata generator to construct the config headers
-  call_os_system("python \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\""+\
+  call_os_system("\"" + sys.executable + "\" \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\""+\
                  " -i " + json_config_path + \
                  " -b " + base_directory + \
                  " -o " +  autogen_directory + \
@@ -199,7 +168,7 @@ def sign_elf_v1(sectools_directory,
 
       print("************* Sign generated Elf ************\n")
 
-      subprocess.check_call(('python '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
+      subprocess.check_call(('"' + sys.executable + '" '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
                              + " -i " + filepath_to_be_signed
                              + " -o " + autogen_directory + UNSIGNED_FOLDER
                              + " -ta "
@@ -210,7 +179,7 @@ def sign_elf_v1(sectools_directory,
                    + "/" + output_xbl_config_filename)
                   ,output_unsigned_path)
 
-      subprocess.check_call(('python '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
+      subprocess.check_call(('"' + sys.executable + '" '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
                              + " -i " + filepath_to_be_signed
                              + " -o " + autogen_directory + SIGNED_FOLDER
                              + " -sa "
@@ -316,7 +285,7 @@ def disassemble_elf(config_file_to_be_disassembled,
                     tools_path):
   disassembled_elf_info_json = os.path.join(output_xbl_config_directory, DISASSEMBLED_ELF_INFO_JSON)
   # Execute the ELF Generator script to disassemable XBL-config elf
-  call_os_system("python \"" + tools_path + "/" +  ELF_GENERATOR_SCRIPT + "\"" +\
+  call_os_system("\"" + sys.executable + "\" \"" + tools_path + "/" +  ELF_GENERATOR_SCRIPT + "\"" +\
                  " -d " + "\""+config_file_to_be_disassembled+"\"" + \
                  " -o " + autogen_directory + \
                  " -e " + disassembled_elf_info_json)
@@ -325,7 +294,7 @@ def disassemble_elf(config_file_to_be_disassembled,
   # Call XBL config metadata generator to locate and parse xbl-config-metadata from
   #    disassembled elf segments, generate out_create_xcfg_json with
   #    xbl-config-items' file-name, config_name etc details
-  call_os_system("python \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\"" +\
+  call_os_system("\"" + sys.executable + "\" \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\"" +\
                  " -d " + disassembled_elf_info_json + \
                  " -o " + output_xbl_config_directory + \
                  " -c " + out_create_xcfg_json)
@@ -340,7 +309,7 @@ def disassemble_elf(config_file_to_be_disassembled,
     if E_ENTRY in disassembled_bins_info:
       elf_address = str(disassembled_bins_info[E_ENTRY])
     disassembled_elf_info_json_file.close()
-  genxblcfg_command = "python \"" + tools_path + "/" + GEN_XBL_CONFIG_SCRIPT + "\"" \
+  genxblcfg_command = "\"" + sys.executable + "\" \"" + tools_path + "/" + GEN_XBL_CONFIG_SCRIPT + "\"" \
                  " -i " + out_create_xcfg_json + \
                  " -b " + output_xbl_config_directory + \
                  " -f ELF " + \
@@ -555,7 +524,7 @@ def create_elf(base_directory,
 
 
   # Execute the ELF Generator script
-  subprocess.check_call(("python \"" + tools_path + "/" +  ELF_GENERATOR_SCRIPT + "\""\
+  subprocess.check_call(("\"" + sys.executable + "\" \"" + tools_path + "/" +  ELF_GENERATOR_SCRIPT + "\""\
                          " --cfg " + ELF_Generator_JSON_File + \
                          " -a " + alignment),shell=True)
   return
