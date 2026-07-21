@@ -5,10 +5,10 @@
 import os
 import sys
 from qdte.core.flags import flags as gf
-import dtwrapper as dt
+import qdte.core.dtwrapper as dt
 import time
-import sign
-import assemble
+from qdte.core import sign
+from qdte.core import assemble
 import tempfile
 import shutil
 

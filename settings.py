@@ -22,6 +22,7 @@ import platform
 # gui things
 from qdte.core.flags import flags as gf
 from qdte.core.flags import global_info as gl_info
+from qdte.core.flags import default_xbl_tools_dir
 from qdte.core import dtlogger
 
 ITEMS_ALL = 0
@@ -89,10 +90,7 @@ class Json_Operate():
                     self.update_json_cfg_data()
 
         # init global parameters
-        if os.path.exists(os.path.join(os.path.dirname(__file__),'XBLConfig')):
-            gf['xbltoolsDir'] = os.path.join(os.path.dirname(__file__),'XBLConfig')
-        else:
-            gf['xbltoolsDir'] = os.path.join(gl_info['sign_json_path'],'XBLConfig')
+        gf['xbltoolsDir'] = default_xbl_tools_dir()
 
 
 

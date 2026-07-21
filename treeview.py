@@ -39,7 +39,7 @@ from tkinter import ttk
 import tkinter.colorchooser
 
 # fdt interface
-import dtwrapper as dt
+import qdte.core.dtwrapper as dt
 
 # configuration, debug, etc.
 from qdte.core.flags import flags as gf

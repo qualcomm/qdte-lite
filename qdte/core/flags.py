@@ -1,5 +1,6 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
+import os
 import platform
 import argparse
 """
@@ -153,3 +154,16 @@ def store(args):
         flags['debug'] = True
     else:
         flags['debug'] = False
+
+
+def default_xbl_tools_dir():
+    """Locate the XBLConfig tool scripts.
+
+    They ship inside qdte.core next to this module (both in a development
+    checkout and in an installed tree); fall back to the legacy QDTE
+    installation directory otherwise.
+    """
+    here = os.path.join(os.path.dirname(os.path.abspath(__file__)), 'XBLConfig')
+    if os.path.exists(here):
+        return here
+    return os.path.join(global_info['sign_json_path'], 'XBLConfig')

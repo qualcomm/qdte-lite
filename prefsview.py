@@ -20,7 +20,7 @@ import tkinter as tk
 import tkinter.messagebox
 
 # fdt interface
-import dtwrapper as dt
+import qdte.core.dtwrapper as dt
 
 # flags
 from qdte.core.flags import flags as gf

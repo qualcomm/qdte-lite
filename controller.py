@@ -60,10 +60,10 @@ from qdte.core import dtlogger
 import package
 
 # fdt interface
-import dtwrapper as dt
+import qdte.core.dtwrapper as dt
 import xblcfgint as xbl
 from pyfdt import pyfdt
-import Autocmd as cmd
+from qdte.core import Autocmd as cmd
 
 #nhlos parser lib
 #

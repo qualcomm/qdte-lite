@@ -7,7 +7,7 @@ import sys
 from pathlib import Path
 from pyfdt.pyfdt import FdtBlobParse
 
-from XBLConfig.commons import *
+from qdte.core.XBLConfig.commons import *
 from qdte.core import dtlogger
 # ============================================================================
 # DISASSEMBLY HELPER FUNCTIONS
@@ -360,7 +360,7 @@ def generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int, load_addr, align
     :param load_addr:     entry / vaddr / paddr for the LOAD segment
     :param alignment:     segment alignment in bytes (also the data file offset)
     """
-    import XBLConfig.elf_gen_tools as egt
+    import qdte.core.XBLConfig.elf_gen_tools as egt
 
     data = Path(dtbs_path).read_bytes()
     is64 = (elf_class_int == 64)

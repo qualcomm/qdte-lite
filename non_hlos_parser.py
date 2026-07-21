@@ -1,6 +1,6 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
-from XBLConfig import elf_gen_tools
+from qdte.core.XBLConfig import elf_gen_tools
 from qdte.core.flags import flags as gf
 import subprocess
 import os

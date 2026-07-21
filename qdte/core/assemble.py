@@ -3,13 +3,13 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 from qdte.core.flags import flags as gf
-from qdte.core.flags import global_info as gl_info
+from qdte.core.flags import default_xbl_tools_dir
 import subprocess
 import os
 import shutil
 import sys
 import json
-import version_2_assemble
+from qdte.core import version_2_assemble
 import platform
 from qdte.core import dtlogger
 
@@ -24,10 +24,7 @@ class assemble:
     def fetch_gendtbelf_script(self):
         tool_path = ''
         dtlogger.info(os.path.dirname(__file__))
-        if os.path.exists(os.path.join(os.path.dirname(__file__), 'XBLConfig')):
-            gf['xbltoolsDir'] = os.path.join(os.path.dirname(__file__), 'XBLConfig')
-        else:
-            gf['xbltoolsDir'] = os.path.join(gl_info['sign_json_path'], 'XBLConfig')
+        gf['xbltoolsDir'] = default_xbl_tools_dir()
 
         if os.path.exists(os.path.join(gf['xbltoolsDir'], 'GenConfigImage.py')):
             tool_path = os.path.join(gf['xbltoolsDir'], 'GenConfigImage.py')
