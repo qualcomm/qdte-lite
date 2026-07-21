@@ -66,20 +66,7 @@ from pyfdt import pyfdt
 from qdte.core.version import QDTE_VERSION
 
 #nhlos parser lib
-#
-# The NON-HLOS.bin parser is only used by the GUI's FAT image browser
-# (DTGUIController instantiated via the `else` branch in run()).  Its
-# transitive deps (`fs`, `pyfatfs`) are unnecessary for headless
-# --nogui usage such as xbl_config.elf modification, so import lazily
-# and fall back to a stub when those packages are not installed.  The
-# stub satisfies the DTGUIController class-definition contract without
-# ever being instantiated under --nogui.
-try:
-    from qdte.gui import non_hlos_parser
-except ImportError:
-    class non_hlos_parser:  # type: ignore
-        class nhlos_Operator:
-            pass
+from qdte.gui import non_hlos_parser
 
 from qdte.gui import get_qsahara_files
 
