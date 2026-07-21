@@ -115,6 +115,35 @@ jobs:
           rm -rf "$tmp"
           ls -l "$FIXTURES_DIR"
 
+      # Prove the libfdt backend is a drop-in for pyfdt on real DTBs
+      # (parity), and that its emission is deterministic and lossless
+      # (round-trip). swig comes as a pip wheel; pylibfdt builds from
+      # sdist with it.
+      - name: fdt backend parity and round-trip
+        run: |
+          set -euo pipefail
+          pip install swig
+          pip install pylibfdt
+          dtbs="$RUNNER_TEMP/selftest-dtbs"
+          mkdir -p "$dtbs"
+          python - "$FIXTURES_DIR" "$dtbs" <<'EOF'
+          import os, shutil, sys
+          fixtures, out = sys.argv[1], sys.argv[2]
+          from qdte.core import flags as gflags
+          args = gflags.build_parser().parse_args(['--allow_unsigned'])
+          gflags.store(args)
+          gflags.flags['testexp'] = False
+          from qdte.gui_qt.elfsession import ElfSession  # core-only imports
+          for elf in ('uefi_dtbs.elf', 'xbl_config.elf'):
+              s = ElfSession(os.path.join(fixtures, elf))
+              for disp, path in s.disassemble().items():
+                  shutil.copy(path, os.path.join(
+                      out, elf.split('.')[0] + '__' + disp.replace('/', '_')))
+              s.close()
+          EOF
+          python -m qdte.core._fdt_selftest --parity "$dtbs"/*
+          python -m qdte.core._fdt_selftest --roundtrip "$dtbs"/*
+
       # Each smoke test runs the installed qdte entry point to edit one
       # property, then reads it back from the produced ELF with
       # `fdtdump --scan`, which locates and decodes the embedded DTB. The
