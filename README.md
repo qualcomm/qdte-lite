@@ -13,6 +13,10 @@ DTE is a graphical user interface application for editing Device Trees and modif
 To run this project, you need:
 
 * Python 3
+* `pylibfdt` (the dtc project's libfdt bindings). PyPI ships it as a
+  source distribution, so installing via pip needs `swig` at build time
+  (`pip install swig` provides it as a prebuilt wheel; distro packages
+  work too). Yocto ships it ready-made as `python3-dtc`.
 * For the Qt GUI: the `qt` extra (PySide6, pip-installable everywhere)
 * For the legacy tkinter GUI: Tkinter (usually included with Python;
   on Debian/Ubuntu install `python3-tk`, on Fedora/Yocto `python3-tkinter`)
@@ -88,7 +92,8 @@ Troubleshooting (Linux): if the Qt GUI fails to start under Wayland, try
 
 ```
 run.py            thin launcher (kept for compatibility; calls qdte.cli.main)
-qdte/core/        headless engine: flags, dtwrapper, assemble/version_2_assemble,
+qdte/core/        headless engine: flags, dtwrapper, fdt_backend (the
+                  libfdt-based DTB layer), assemble/version_2_assemble,
                   sign, Autocmd, XBLConfig tool scripts.
                   Must never import qdte.gui or tkinter -- CI enforces this by
                   running the --nogui smoke tests with a poisoned tkinter.
