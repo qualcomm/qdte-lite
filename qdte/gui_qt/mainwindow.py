@@ -20,6 +20,7 @@ from qdte.core.flags import flags as gf
 from qdte.core.version import QDTE_VERSION
 from qdte.gui_qt import valueparse
 from qdte.gui_qt.elfsession import ElfSession
+from qdte.gui_qt.finddialog import FindDialog
 from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
 WINDOW_TITLE = 'QDTE (Qualcomm Device Tree Editor) %s [Qt]' % QDTE_VERSION
@@ -48,6 +49,8 @@ class MainWindow(QMainWindow):
         self.setCentralWidget(self.tree)
 
         self.session = None
+        self._find_dialog = None
+        self._last_find = None
         self.dtb_list = QListWidget(self)
         self.dtb_list.itemActivated.connect(self._dtb_chosen)
         self.dtb_dock = QDockWidget('DTBs in ELF', self)
@@ -92,6 +95,12 @@ class MainWindow(QMainWindow):
                                          QKeySequence.StandardKey.Undo)
         self.act_redo = self._add_action(editm, '&Redo', self.redo,
                                          QKeySequence.StandardKey.Redo)
+
+        searchm = bar.addMenu('&Search')
+        self._add_action(searchm, '&Find...', self.open_find,
+                         QKeySequence.StandardKey.Find)
+        self._add_action(searchm, 'Find &Next', self.find_next,
+                         QKeySequence(Qt.Key.Key_F3))
 
         viewm = bar.addMenu('&View')
         group = QActionGroup(self)
@@ -382,6 +391,64 @@ class MainWindow(QMainWindow):
     def _edit_failed(self, path, message):
         QMessageBox.warning(self, 'Invalid value',
                             '%s\n\n%s' % (path, message))
+
+    # ------------------------------------------------------------------
+    # find / search
+    # ------------------------------------------------------------------
+
+    def open_find(self):
+        if self._find_dialog is None:
+            self._find_dialog = FindDialog(self)
+            self._find_dialog.findNext.connect(self.find_next)
+        self._find_dialog.open_for()
+
+    def select_path(self, path):
+        """Select and scroll to a path in the tree, expanding ancestors."""
+        index = self.model.index_for_path(path)
+        if not index.isValid():
+            return
+        self.tree.setCurrentIndex(index)
+        self.tree.scrollTo(index)
+
+    def _current_path(self):
+        index = self.tree.currentIndex()
+        return self.model.path_for_index(index) if index.isValid() else None
+
+    def find_next(self, opts=None):
+        """Port of controller.find_next onto the Qt model: walk the tree in
+        document order from after the current selection, wrapping around."""
+        if isinstance(opts, dict) and 'str' in opts:
+            self._last_find = opts
+        else:
+            opts = self._last_find
+        if opts is None or not self.dtw.has_file():
+            return
+
+        needle = opts['str'] if opts['matchCase'] else opts['str'].lower()
+        prep = (lambda s: s) if opts['matchCase'] else (lambda s: s.lower())
+
+        current = self._current_path()
+        find_idx = 0 if (current is None or current == '/') else -1
+        found = []
+        for path, item in self.dtw.resolve_path('/').walk():
+            if opts['searchNames'] and needle in prep(path):
+                found.append(path)
+                if find_idx >= 0:
+                    break
+            elif (opts['searchValues'] and item.is_property()
+                  and needle in prep(item.to_pretty())):
+                found.append(path)
+                if find_idx >= 0:
+                    break
+            if path == current:
+                find_idx = len(found)
+
+        if not found:
+            QMessageBox.information(self, 'No results found',
+                                    "Cannot find '%s' in the device tree."
+                                    % opts['str'])
+            return
+        self.select_path(found[find_idx % len(found)])
 
     # ------------------------------------------------------------------
     # view state
