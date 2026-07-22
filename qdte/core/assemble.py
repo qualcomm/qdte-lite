@@ -124,12 +124,11 @@ class assemble:
                 os.remove(os.path.join(self.outdir, file))
 
         proc = None
-        tool_path = None
         try:
-            tool_path = self.fetch_gendtbelf_script()
+            self.fetch_gendtbelf_script()
         except Exception as e:
             raise Exception("{}".format(e))
-        if gf['inputFile'] == None or not os.path.exists(gf['inputFile']):
+        if gf['inputFile'] is None or not os.path.exists(gf['inputFile']):
             raise Exception("Error: input path {}.{}".format(gf['inputFile'], " is invalid path!!"))
         try:
             proc = subprocess.Popen([sys.executable,
@@ -160,7 +159,7 @@ class assemble:
                     if 'XBLconfig_metadata_generator.py: Couldn\'t find XBL config' in line:
                         hints.append('Are you sure the XBLConfig file is valid?')
 
-            if proc.poll != None:
+            if proc.poll() is not None:
                 break
         if gf['testexp']:
             raise Exception('test dissamble exception')
@@ -200,7 +199,7 @@ class assemble:
 
     def reassemble_config_elf(self):
         # Check to see whether the legacy version of reassembly should be invoked
-        if not "create_xbl_config.json" in os.listdir(self.outdir):
+        if "create_xbl_config.json" not in os.listdir(self.outdir):
             dtlogger.info(self.outdir)
             # Make directories if needed
             if not os.path.exists(os.path.join(self.outdir, 'auto_gen')):
@@ -242,7 +241,6 @@ class assemble:
         ELF_FORMATS = [None, "ELF32", "ELF"]
         self.load_disassembled_elf_info()
         # reassemable the dtb elfs
-        tool_path = self.fetch_gendtbelf_script()
         cmd = [sys.executable,
                self.fetch_gendtbelf_script(),
                "-t", gf['xbltoolsDir'],
@@ -261,7 +259,6 @@ class assemble:
                                 universal_newlines=True)
         errlines = []
         hints = []
-        unsigned_supp = True
         while True:
             line = proc.stdout.readline()
             if not line:
@@ -273,7 +270,6 @@ class assemble:
                 if 'Signed' in line:
                     # This fork never signs; treat signing errors as warnings.
                     dtlogger.info("{} warn".format(line))
-                    unsigned_supp = True
                 else:
                     errlines.append(line)
                     dtlogger.info("{} err".format(line))

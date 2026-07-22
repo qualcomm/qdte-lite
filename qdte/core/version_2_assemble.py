@@ -2,12 +2,15 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 
 import json
+import os
 import sys
 
 from pathlib import Path
 from qdte.core.fdt_backend import FdtBlobParse
 
-from qdte.core.XBLConfig.commons import *
+from qdte.core.XBLConfig.commons import (call_os_system,
+                                         DISASSEMBLED_ELF_INFO_JSON,
+                                         ELF_GENERATOR_SCRIPT)
 from qdte.core import dtlogger
 # ============================================================================
 # DISASSEMBLY HELPER FUNCTIONS
@@ -193,7 +196,7 @@ def disassemble_version_2_elf(config_file_to_be_disassembled, output_xbl_config_
         dtlogger.info(e)
 
     # Check to see if a signature DOESN'T exist
-    if not "segment_1" in disassembled_elf_info_json:
+    if "segment_1" not in disassembled_elf_info_json:
         signed = False
 
     dtbs_file = autogen_directory + os.path.sep + "segment_1.bin"
@@ -204,7 +207,7 @@ def disassemble_version_2_elf(config_file_to_be_disassembled, output_xbl_config_
         dtlogger.info("The DTBS file to unpack can be found at: " + dtbs_file)
 
     # Then, walk the DTBS file and create two JSONs for each of their directories
-    meta_head_json, meta_entry_json = {}, {}
+    meta_entry_json = {}
 
     meta_entry_json = walk_dtbs(dtbs_file, verbose)
 

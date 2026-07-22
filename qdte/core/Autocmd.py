@@ -72,7 +72,7 @@ class autocmd(assemble.assemble):
                     print("proterty_path:",property_path )
                     print("property_value:",property_value )
                     print("dtb_name:",dtb_name)
-                except Exception as e:
+                except Exception:
                     print("Error: option --modify {} is not correct".format(modify_property))
                     sys.exit(-1)
                 if not os.path.exists(dtb_path):

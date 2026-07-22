@@ -32,7 +32,6 @@ from enum import Enum
 import hashlib
 import json
 import traceback
-import re
 from qdte.core import dtlogger
 
 """
@@ -1039,7 +1038,7 @@ class DTWrapper:
         # add to undo stack
         # if qdte run in command mode, don't clear the undo stack.
         # In order to recoder all the operations.
-        if op.optype == DTOperationType.LOAD and gf['nogui'] == False:
+        if op.optype == DTOperationType.LOAD and not gf['nogui']:
             # clear the undo stack
             self._undoStack = [op]
             # set the filename
