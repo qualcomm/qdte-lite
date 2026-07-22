@@ -3,3 +3,7 @@ __pycache__/
 build/
 *.egg-info/
 dist/
+
+# stray local test artifacts
+*.elf
+/raw/

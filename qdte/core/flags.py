@@ -23,10 +23,6 @@ This tool provides a graphical way to make modifications to DeviceTree Blob file
 if platform.system().startswith("Windows"):
     global_info = {
         "user_cfg": r"C:\ProgramData\Qualcomm\QDTE\user_cfg.json",
-        "quts": r"C:\Program Files (x86)\Qualcomm\QUTS\Support\python",
-        "quts2": r"C:\Program Files\Qualcomm\QUTS\Support\python",
-        "meta_cli_t": r"common\build\app\windows_x86_64\meta_cli.exe",
-        "tmp_xblcfg": r"C:\Qualcomm\QDTE\tmp_cfg",
         "log": r"C:\Qualcomm\QDTE\log",
         "sign_json_path":r"C:\Program Files (x86)\Qualcomm\QDTE"
     }
@@ -34,9 +30,6 @@ else:
     # Linux path
     global_info = {
         "user_cfg": r"/tmp/Qualcomm/QDTE/user_cfg.json",
-        "quts": r"/opt/qcom/QUTS/Support/python",
-        "meta_cli_t": r"common/build/app/windows_x86_64/meta_cli.exe",
-        "tmp_xblcfg": r"/tmp/Qualcomm/QDTE/tmp_xblcfg",
         "log": r"/tmp/Qualcomm/QDTE/log",
         "sign_json_path": r"/opt/qcom/QDTE"
     }
@@ -64,9 +57,6 @@ config = {
                                                 #    'help': 'Show detailed output from GenXBLConfig scripts in the '
                                                 #            'console window.'},
     '--nogui': {'action': 'store_true', 'default': False, 'help': 'Do not launch the GUI, run by command line mode '},
-    '--tk': {'action': 'store_true', 'default': False,
-             'help': 'Force the legacy tkinter GUI instead of the Qt (PySide6) frontend.\n'
-                     'The Qt frontend is used by default when PySide6 is installed.'},
     '--dry_run': {'action': 'store_true', 'help':argparse.SUPPRESS},
                                                 #'help': 'Do not actually write to any output file, but instead write out a '
                                                 #'JSON change report that can be used in --nogui mode.'},

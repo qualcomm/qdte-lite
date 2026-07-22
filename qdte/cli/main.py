@@ -4,28 +4,23 @@
 
 Parses arguments, stores them into the global flags, sets up the
 optional profiling/coverage instrumentation and dispatches to either
-the headless flow or the GUI.  The GUI (and with it tkinter and the
-heavier GUI-only dependencies) is imported lazily, only when a GUI run
-was actually requested.
+the headless flow or the GUI.  The GUI (and with it PySide6) is imported
+lazily, only when a GUI run was actually requested.
 """
-import importlib.util
 import sys
 
 from qdte.core import flags as gflags
 
-# Optional-dependency roots the GUIs may legitimately be missing. An
+# Optional-dependency roots the GUI may legitimately be missing. An
 # ImportError for anything else is a real bug and must not be swallowed.
-_OPTIONAL_GUI_MODULES = ('tkinter', 'fs', 'pyfatfs', 'PySide6')
+_OPTIONAL_GUI_MODULES = ('PySide6',)
 
 _GUI_DEPS_HINT = """\
-QDTE's GUI needs optional dependencies that are not installed (missing: {name}).
+QDTE's GUI needs PySide6, which is not installed:
 
-  Qt frontend:      pip install "qdte-lite[qt]"
-  tkinter frontend: pip install "qdte-lite[gui]", plus the Tcl/Tk bindings
-                    from your Python distribution (Debian/Ubuntu:
-                    python3-tk; Fedora/Yocto: python3-tkinter)
+  pip install "qdte-lite[qt]"
 
-Headless mode needs neither:  qdte --nogui --help"""
+Headless mode needs no GUI toolkit:  qdte --nogui --help"""
 
 
 def _dispatch(args):
@@ -33,17 +28,10 @@ def _dispatch(args):
         from qdte.cli.headless import run_headless
         run_headless()
         return
-    # Deliberately lazy imports: the ONLY places a GUI toolkit (PySide6 or
-    # tkinter, plus fs/pyfatfs, QutsAtom on the tk side) enters the process.
-    # Qt is the default frontend when PySide6 is installed; --tk forces the
-    # legacy tkinter GUI. The find_spec probe (rather than try/except around
-    # the import) keeps real qdte.gui_qt bugs from being masked as a silent
-    # fallback to tk.
+    # Deliberately lazy: the ONLY place a GUI toolkit (PySide6) enters the
+    # process, so --nogui never imports it.
     try:
-        if not gflags.flags['tk'] and importlib.util.find_spec('PySide6') is not None:
-            from qdte.gui_qt.app import launch
-        else:
-            from qdte.gui.app import launch
+        from qdte.gui_qt.app import launch
     except ImportError as ex:
         root = (getattr(ex, 'name', None) or '').split('.')[0]
         if root in _OPTIONAL_GUI_MODULES:

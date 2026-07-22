@@ -2,8 +2,8 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 """Text <-> value helpers for STRINGS-type DT properties.
 
-Shared by every frontend (tkinter, Qt) so a value typed in one GUI parses
-identically in the other.  Historically these lived in the tkinter
+Shared by the GUI and any other caller so a typed value parses the same
+everywhere.  Historically these lived in the tkinter
 editview module.
 """
 import string

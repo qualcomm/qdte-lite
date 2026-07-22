@@ -1,7 +1,8 @@
-# Core dependencies for DTGUI (Qualcomm Device Tree Editor)
+# Core dependency for QDTE (headless and GUI).
 pylibfdt
-pyfatfs>=1.0.5
-fs>=2.4.16
+
+# The GUI frontend needs PySide6 (the `qt` extra):
+#   pip install "qdte-lite[qt]"
 
 # Optional dependencies for development and testing
 # Uncomment the following lines if needed:

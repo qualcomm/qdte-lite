@@ -197,27 +197,6 @@ jobs:
 
           echo "All nogui smoke tests passed."
 
-  # The flip side of the tkinter-free smoke: the GUI half must still
-  # import cleanly with real tkinter (bundled by setup-python's build)
-  # and the gui extra's dependencies present.
-  gui-import:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: Import the GUI stack
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install swig
-          python -m pip install ".[gui]"
-          python -c "import tkinter, qdte.gui.controller, qdte.gui.app"
-
   # The Qt (PySide6) frontend, exercised functionally under the offscreen
   # platform plugin: disassemble a real config ELF, edit a property through
   # the item model, undo/redo, reassemble unsigned, verify with fdtdump.

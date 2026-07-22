@@ -17,9 +17,7 @@ To run this project, you need:
   source distribution, so installing via pip needs `swig` at build time
   (`pip install swig` provides it as a prebuilt wheel; distro packages
   work too). Yocto ships it ready-made as `python3-dtc`.
-* For the Qt GUI: the `qt` extra (PySide6, pip-installable everywhere)
-* For the legacy tkinter GUI: Tkinter (usually included with Python;
-  on Debian/Ubuntu install `python3-tk`, on Fedora/Yocto `python3-tkinter`)
+* For the GUI: the `qt` extra (PySide6, pip-installable everywhere)
 * Dependencies listed in `requirements.txt`
 
 ## Installation Instructions
@@ -56,7 +54,7 @@ For a list of available options and flags:
 python3 run.py --help
 ```
 
-Headless (no GUI, no Tcl/Tk needed), e.g. editing a property inside a
+Headless (no GUI toolkit needed), e.g. editing a property inside a
 config ELF:
 
 ```bash
@@ -69,24 +67,26 @@ python3 run.py --nogui --allow_unsigned \
 `python3 -m qdte` is equivalent to `run.py`, and installing the package
 (`pip install .`) provides a `qdte` console script.
 
-### GUI flavours
+### GUI
+
+The GUI is a Qt (PySide6) application:
 
 ```bash
-pip install "qdte-lite[qt]"     # Qt (PySide6) GUI - the default when installed
-pip install "qdte-lite[gui]"    # tkinter GUI extras (NON-HLOS FAT browser)
-pip install "qdte-lite[all]"    # everything
-
-qdte file.dtb                 # Qt if PySide6 is importable, tkinter otherwise
-qdte --tk file.dtb            # force the legacy tkinter GUI
+pip install "qdte-lite[qt]"     # install the GUI
+qdte file.dtb                 # launch it (a plain `qdte-lite` install is headless-only)
 ```
 
-The Qt frontend currently covers the core editing loop (browse, edit,
-undo/redo, save, unsigned config-ELF reassembly); device operations, the
-NON-HLOS browser and signing dialogs still live in the tkinter GUI, one
-`--tk` away.
+It covers browse/edit/undo-redo, save/save-as/DTS export, find, the raw
+(hex) view with per-node highlighting, and config-ELF sessions with both
+unsigned and signed reassembly. (Signing needs the external `sectools`
+binary, as the headless path does.)
 
 Troubleshooting (Linux): if the Qt GUI fails to start under Wayland, try
 `QT_QPA_PLATFORM=xcb qdte ...`.
+
+Device operations (reading/writing DTB ELFs off a target via QUTS) and
+the NON-HLOS FAT browser are not part of this fork; earlier revisions
+under `qdte/gui` in git history retain the tkinter implementations.
 
 ## Code layout
 
@@ -94,21 +94,16 @@ Troubleshooting (Linux): if the Qt GUI fails to start under Wayland, try
 run.py            thin launcher (kept for compatibility; calls qdte.cli.main)
 qdte/core/        headless engine: flags, dtwrapper, fdt_backend (the
                   libfdt-based DTB layer), assemble/version_2_assemble,
-                  sign, Autocmd, XBLConfig tool scripts.
-                  Must never import qdte.gui or tkinter -- CI enforces this by
-                  running the --nogui smoke tests with a poisoned tkinter.
+                  sign, Autocmd, usercfg, XBLConfig tool scripts.
+                  Never imports the GUI -- CI enforces this by running the
+                  --nogui smoke tests on a PySide6-free interpreter.
 qdte/cli/         argument parsing and dispatch; the --nogui path
 qdte/gui_qt/      the Qt (PySide6) application: item model over dtwrapper,
-                  main window, config-ELF sessions ("qt" extra)
-qdte/gui/         the tkinter application: controller, views, settings,
-                  XBLConfig integration, NON-HLOS FAT browser
-QutsAtom/         vendored QUTS Atom glue, loaded only when a QUTS
-                  installation is present (GUI device operations)
+                  main window, hex view, config-ELF sessions ("qt" extra)
 ```
 
 The `--nogui` flow imports only `qdte.core`/`qdte.cli`, so it runs on
-minimal sysroots (e.g. Yocto native tools) without Tcl/Tk or the GUI's
-fs/pyfatfs dependencies.
+minimal sysroots (e.g. Yocto native tools) with no GUI toolkit installed.
 
 ## Development
 

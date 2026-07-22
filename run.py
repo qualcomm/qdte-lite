@@ -4,8 +4,8 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 """Thin launcher for QDTE.
 
-All logic lives in qdte.cli.main.  --nogui runs never import tkinter or
-any qdte.gui module, so QDTE works headless where Tcl/Tk is absent.
+All logic lives in qdte.cli.main.  --nogui runs never import the GUI
+(PySide6), so QDTE works headless with no GUI toolkit installed.
 """
 import sys
 
