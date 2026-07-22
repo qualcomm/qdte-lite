@@ -23,7 +23,7 @@ init: ## Install all dependencies (base + GUI extra)
 run: ## Launch the qdte GUI
 	uv run --extra qt qdte
 
-check-all: ascii lint type test ## Run every enforced check
+check-all: ascii lint format-check type test ## Run every enforced check
 
 ascii: ## Check that all sources are ASCII-only
 	./scripts/check_unicode_symbols.sh --check --all-files
@@ -37,12 +37,8 @@ lint: ## Lint with ruff
 type: ## Type-check with mypy
 	uv run mypy qdte
 
-# ruff's formatter is not yet adopted (it would reflow the whole tree), so
-# format/format-check are available but not part of check-all. Run
-# `make format` to adopt ruff formatting.
-
 format: ## Auto-format with ruff
 	uv run ruff format .
 
-format-check: ## Check formatting without modifying files
+format-check: ## Check formatting without modifying files (part of check-all)
 	uv run ruff format --check .
