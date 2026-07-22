@@ -24,7 +24,7 @@ from qdte.gui_qt.finddialog import FindDialog
 from qdte.gui_qt.hexview import HexView
 from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
-WINDOW_TITLE = 'QDTE (Qualcomm Device Tree Editor) %s [Qt]' % QDTE_VERSION
+WINDOW_TITLE = 'Qualcomm Device Tree Editor Lite %s' % QDTE_VERSION
 
 # The tk right-click highlight palette, preserved.
 _HIGHLIGHT_PRESETS = (
@@ -593,8 +593,7 @@ class MainWindow(QMainWindow):
 
     def _about(self):
         QMessageBox.about(
-            self, 'About QDTE',
-            'QDTE (Qualcomm Device Tree Editor) %s\n'
-            'Qt frontend\n\n'
+            self, 'About Qualcomm Device Tree Editor Lite',
+            'Qualcomm Device Tree Editor Lite %s\n\n'
             'Copyright (c) Qualcomm Technologies, Inc. '
             'and/or its subsidiaries.' % QDTE_VERSION)
