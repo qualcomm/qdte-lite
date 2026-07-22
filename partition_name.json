@@ -1,5 +1,0 @@
-{
-    "format": " * or (*|*)",
-    "partition": "(xbl_config|dtb)",
-    "partitionBan": ""
-}

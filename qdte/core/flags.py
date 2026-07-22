@@ -89,9 +89,10 @@ config = {
                          '    Multi properties: --modify \"platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp&platform.dtb/model=Qualcomm Technologies, Inc. Kailua cdp\"\n'
                          '    Multi values: --modify  \"platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp\"'},
     '--sign_json': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SIGN_PARAMETER_JSON_LOCATION',
-                 'help': r'Please choose sign parameters json file from C:\Program Files (x86)\Qualcomm\QDTE\\n'
-                         'For internal sign, please choose test_signing_mode.json\n'
-                         'Only avaiable when --allow_unsigned disable'},
+                 'help': 'Path to the signing-parameters JSON.\n'
+                         'See the samples under examples/ (local_signing_mode.json,\n'
+                         'plugin_signing_mode.json).\n'
+                         'Only available when --allow_unsigned is disabled'},
     '--output_path': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_LOCATION',
                  'help': 'output path for storing dissamble files and re-assemble file \n'},
     '--output_file': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_FILENAME',
