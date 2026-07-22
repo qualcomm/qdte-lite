@@ -110,6 +110,24 @@ installed.
 
 ## Development
 
+A `Makefile` is the single entry point for setup and checks (bash-based, so
+it works on Linux and macOS natively and on Windows under Git Bash or WSL):
+
+```bash
+make init          # install dependencies with uv (base + GUI extra)
+make run           # launch the GUI
+make check-all     # run every check (what CI runs)
+
+make ascii         # enforce the ASCII-only rule (scripts/check_unicode_symbols.sh)
+make test          # headless --nogui smoke test against real boot images
+                   # (scripts/nogui-smoketest.sh; fixtures download to .test/)
+make help          # list all targets
+```
+
+`make lint`, `make format`, `make format-check` and `make type` are stubs
+until that tooling is configured. The GitHub `nogui smoketest` workflow runs
+`make test`, so CI and local runs are identical.
+
 See [CONTRIBUTING.md](CONTRIBUTING.md). Contributor and repository
 conventions (commit style, package manager, invariants) are documented in
 [CLAUDE.md](CLAUDE.md).
