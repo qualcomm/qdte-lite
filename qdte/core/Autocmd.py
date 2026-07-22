@@ -19,8 +19,8 @@ class autocmd(assemble.assemble):
 
     def check_python(self):
         print("python version ",sys.version_info)
-        if sys.version_info < (3, 7, 4):
-            sys.exit("Python Error: Please install python v3.7.4 or later!\n")
+        if sys.version_info < (3, 10):
+            sys.exit("Python Error: Please install python v3.10 or later!\n")
 
         return True
     def execute(self):

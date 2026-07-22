@@ -11,7 +11,8 @@ version = "1.5.7"
 description = "Device Tree Editor Lite - edit device trees and (dis)assemble the Qualcomm config-ELF containers that hold them"
 readme = "README.md"
 license = {text = "BSD-3-Clause-Clear"}
-requires-python = ">=3.7.4"
+# Bounded by PySide6 (the qt extra): 6.11 supports CPython 3.10 through 3.14.
+requires-python = ">=3.10,<3.15"
 dependencies = [
     "pylibfdt",
 ]
