@@ -92,7 +92,7 @@ sessions with unsigned reassembly.
 
 ## Code layout
 
-```
+```text
 qdte/__main__.py  console entry point (the `qdte` command; `python -m qdte`)
 qdte/core/        headless engine: flags, dtwrapper, fdt_backend (the
                   libfdt-based DTB layer), assemble/version_2_assemble,

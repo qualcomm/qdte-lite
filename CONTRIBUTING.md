@@ -65,7 +65,6 @@ To maintain the security and integrity of this project, all pull requests from e
 
 By submitting a PR, you agree to participate in this process and help us keep the project secure for everyone.
 
-
 Here are a few things you can do that will increase the likelihood of your pull request to be accepted:
 
 - Follow the existing style where possible. **INSERT LINK TO STYLE, e.g. PEP8 for python**

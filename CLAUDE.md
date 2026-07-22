@@ -29,7 +29,7 @@ Forked from upstream at `7e3e493` under BSD-3-Clause-Clear. Target version
 
 ## Layout
 
-```
+```text
 qdte/__main__.py  console entry point (the qdte command; python -m qdte)
 qdte/core/        headless engine: flags, dtwrapper, fdt_backend (libfdt),
                   assemble/version_2_assemble, Autocmd, dtlogger, strvalues,
