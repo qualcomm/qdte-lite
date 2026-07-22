@@ -32,5 +32,22 @@ Homepage = "https://github.com/qualcomm/qdte-lite"
 [project.scripts]
 qdte = "qdte.cli.main:main"
 
+[dependency-groups]
+dev = [
+    "ruff>=0.15",
+    "mypy>=1.11",
+]
+
 [tool.setuptools.packages.find]
 include = ["qdte*"]
+
+[tool.ruff]
+target-version = "py310"
+# XBLConfig is vendored Qualcomm tooling run as subprocess scripts; it is
+# not maintained here and is not linted or type-checked.
+extend-exclude = ["qdte/core/XBLConfig"]
+
+[tool.mypy]
+python_version = "3.10"
+ignore_missing_imports = true
+exclude = ["qdte/core/XBLConfig"]

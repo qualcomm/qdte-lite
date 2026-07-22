@@ -23,7 +23,7 @@ init: ## Install all dependencies (base + GUI extra)
 run: ## Launch the qdte GUI
 	uv run --extra qt qdte
 
-check-all: ascii lint format-check type test ## Run every check (CI)
+check-all: ascii lint type test ## Run every enforced check
 
 ascii: ## Check that all sources are ASCII-only
 	./scripts/check_unicode_symbols.sh --check --all-files
@@ -31,17 +31,18 @@ ascii: ## Check that all sources are ASCII-only
 test: ## Headless (--nogui) smoke test against real boot images
 	uv run ./scripts/nogui-smoketest.sh
 
-# The lint/format/type targets are stubs until the corresponding tooling is
-# configured; they succeed so check-all stays green in the meantime.
+lint: ## Lint with ruff
+	uv run ruff check .
 
-lint: ## Lint with ruff (stub: not configured yet)
-	@echo "lint: ruff is not configured yet (stub)"
+type: ## Type-check with mypy
+	uv run mypy qdte
 
-format: ## Auto-format with ruff (stub: not configured yet)
-	@echo "format: ruff is not configured yet (stub)"
+# ruff's formatter is not yet adopted (it would reflow the whole tree), so
+# format/format-check are available but not part of check-all. Run
+# `make format` to adopt ruff formatting.
 
-format-check: ## Check formatting in CI mode (stub: not configured yet)
-	@echo "format-check: ruff is not configured yet (stub)"
+format: ## Auto-format with ruff
+	uv run ruff format .
 
-type: ## Type-check with mypy (stub: not configured yet)
-	@echo "type: mypy is not configured yet (stub)"
+format-check: ## Check formatting without modifying files
+	uv run ruff format --check .
