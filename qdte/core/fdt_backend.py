@@ -23,6 +23,7 @@ Consequences relied on by dtwrapper:
 Only the surface QDTE consumes is implemented; this is intentionally not
 a general pyfdt drop-in.
 """
+
 import struct
 
 import libfdt
@@ -39,8 +40,8 @@ def _is_strings(raw):
     for b in raw:
         if b == 0:
             continue
-        if b < 0x20 or b >= 0x7f:
-            if b not in (0x09, 0x0a, 0x0d):
+        if b < 0x20 or b >= 0x7F:
+            if b not in (0x09, 0x0A, 0x0D):
                 return False
     return True
 
@@ -49,6 +50,7 @@ def _is_strings(raw):
 # properties
 # ---------------------------------------------------------------------------
 
+
 class FdtProperty:
     """Empty (value-less) property; base class of the typed variants."""
 
@@ -56,7 +58,7 @@ class FdtProperty:
         self.name = name
 
     def raw_value(self):
-        return b''
+        return b""
 
     def to_raw(self):
         return self.raw_value()
@@ -74,13 +76,15 @@ class FdtPropertyWords(FdtProperty):
         for word in words:
             if not 0 <= word <= 0xFFFFFFFF:
                 raise Exception(
-                    "Invalid value for word %d, requires 0 <= number <= 4294967295" % word)
+                    "Invalid value for word %d, requires 0 <= number <= 4294967295"
+                    % word
+                )
         if not words:
             raise Exception("Invalid Words")
         self.words = words
 
     def raw_value(self):
-        return struct.pack('>%dI' % len(self.words), *self.words)
+        return struct.pack(">%dI" % len(self.words), *self.words)
 
 
 class FdtPropertyStrings(FdtProperty):
@@ -94,7 +98,7 @@ class FdtPropertyStrings(FdtProperty):
         self.strings = strings
 
     def raw_value(self):
-        return b'\0'.join(s.encode('ascii') for s in self.strings) + b'\0'
+        return b"\0".join(s.encode("ascii") for s in self.strings) + b"\0"
 
     def __getitem__(self, idx):
         return self.strings[idx]
@@ -109,7 +113,8 @@ class FdtPropertyBytes(FdtProperty):
         for byte in bytez:
             if not -128 <= byte <= 255:
                 raise Exception(
-                    "Invalid value for byte %d, requires -128 <= number <= 255" % byte)
+                    "Invalid value for byte %d, requires -128 <= number <= 255" % byte
+                )
         if not bytez:
             raise Exception("Invalid Bytes")
         self.bytes = bytez
@@ -126,16 +131,19 @@ def _property_from_raw(name, raw):
         return FdtProperty(name)
     if _is_strings(raw):
         return FdtPropertyStrings(
-            name, [s.decode('ascii') for s in bytes(raw).split(b'\0')[:-1]])
+            name, [s.decode("ascii") for s in bytes(raw).split(b"\0")[:-1]]
+        )
     if len(raw) % 4 == 0:
         return FdtPropertyWords(
-            name, list(struct.unpack('>%dI' % (len(raw) // 4), raw)))
-    return FdtPropertyBytes(name, list(struct.unpack('%db' % len(raw), raw)))
+            name, list(struct.unpack(">%dI" % (len(raw) // 4), raw))
+        )
+    return FdtPropertyBytes(name, list(struct.unpack("%db" % len(raw), raw)))
 
 
 # ---------------------------------------------------------------------------
 # nodes
 # ---------------------------------------------------------------------------
+
 
 class FdtNode:
     """A device-tree node with an ordered children list (properties and
@@ -178,10 +186,10 @@ class FdtNode:
         """Yield (path, item) for every descendant, pre-order, with paths
         relative to this node (leading '/')."""
         for child in self.subdata:
-            yield ('/' + child.name, child)
+            yield ("/" + child.name, child)
             if isinstance(child, FdtNode):
                 for sub_path, sub_item in child.walk():
-                    yield ('/' + child.name + sub_path, sub_item)
+                    yield ("/" + child.name + sub_path, sub_item)
 
     def to_raw(self):
         return self.name
@@ -190,6 +198,7 @@ class FdtNode:
 # ---------------------------------------------------------------------------
 # tree container
 # ---------------------------------------------------------------------------
+
 
 class Fdt:
     """The parsed device tree: root node plus blob-level metadata that must
@@ -203,10 +212,10 @@ class Fdt:
     def resolve_path(self, path):
         """Resolve an absolute path to a node/property, or None. First
         match wins for duplicate sibling names (pyfdt semantics)."""
-        if path in ('', '/'):
+        if path in ("", "/"):
             return self.root
         current = self.root
-        for part in path.split('/'):
+        for part in path.split("/"):
             if not part:
                 continue
             if not isinstance(current, FdtNode):
@@ -241,7 +250,7 @@ class Fdt:
         for addr, size in self.memrsv:
             sw.add_reservemap_entry(addr, size)
         sw.finish_reservemap()
-        sw.begin_node('')
+        sw.begin_node("")
         self._emit_node(sw, self.root)
         sw.end_node()
         fdt = sw.as_fdt()
@@ -250,7 +259,7 @@ class Fdt:
         if self.boot_cpuid:
             # fdt_header.boot_cpuid_phys lives at byte offset 28; FdtSw has
             # no setter for it.
-            struct.pack_into('>I', buf, 28, self.boot_cpuid)
+            struct.pack_into(">I", buf, 28, self.boot_cpuid)
         blob = bytes(buf)
         if mappings is not None:
             self._fill_mappings(blob, mappings)
@@ -264,62 +273,65 @@ class Fdt:
         def visit(offset, path):
             name = fdt.get_name(offset)
             name_padded = (len(name) + 1 + 3) & ~3
-            mappings[path or '/'] = (base + offset, base + offset + 4 + name_padded)
+            mappings[path or "/"] = (base + offset, base + offset + 4 + name_padded)
             poff = fdt.first_property_offset(offset, quiet=_QUIET_NOTFOUND)
             while poff >= 0:
                 prop = fdt.get_property_by_offset(poff)
                 record = 12 + ((len(bytes(prop)) + 3) & ~3)
-                mappings['%s/%s' % (path, prop.name)] = (base + poff,
-                                                         base + poff + record)
+                mappings["%s/%s" % (path, prop.name)] = (
+                    base + poff,
+                    base + poff + record,
+                )
                 poff = fdt.next_property_offset(poff, quiet=_QUIET_NOTFOUND)
             soff = fdt.first_subnode(offset, quiet=_QUIET_NOTFOUND)
             while soff >= 0:
-                visit(soff, '%s/%s' % (path, fdt.get_name(soff)))
+                visit(soff, "%s/%s" % (path, fdt.get_name(soff)))
                 soff = fdt.next_subnode(soff, quiet=_QUIET_NOTFOUND)
 
-        visit(0, '')
+        visit(0, "")
 
     def to_dts(self):
         """Native DTS emitter (libfdt has none)."""
-        lines = ['/dts-v1/;', '']
+        lines = ["/dts-v1/;", ""]
         for addr, size in self.memrsv:
-            lines.append('/memreserve/ 0x%016x 0x%016x;' % (addr, size))
+            lines.append("/memreserve/ 0x%016x 0x%016x;" % (addr, size))
         if self.memrsv:
-            lines.append('')
+            lines.append("")
 
         def escape(s):
-            return s.replace('\\', '\\\\').replace('"', '\\"')
+            return s.replace("\\", "\\\\").replace('"', '\\"')
 
         def emit(node, depth, label):
-            indent = '\t' * depth
-            lines.append('%s%s {' % (indent, label))
+            indent = "\t" * depth
+            lines.append("%s%s {" % (indent, label))
             for child in node.subdata:
-                cindent = '\t' * (depth + 1)
+                cindent = "\t" * (depth + 1)
                 if isinstance(child, FdtNode):
                     continue
                 if isinstance(child, FdtPropertyStrings):
-                    vals = ', '.join('"%s"' % escape(s) for s in child.strings)
-                    lines.append('%s%s = %s;' % (cindent, child.name, vals))
+                    vals = ", ".join('"%s"' % escape(s) for s in child.strings)
+                    lines.append("%s%s = %s;" % (cindent, child.name, vals))
                 elif isinstance(child, FdtPropertyWords):
-                    vals = ' '.join('0x%x' % w for w in child.words)
-                    lines.append('%s%s = <%s>;' % (cindent, child.name, vals))
+                    vals = " ".join("0x%x" % w for w in child.words)
+                    lines.append("%s%s = <%s>;" % (cindent, child.name, vals))
                 elif isinstance(child, FdtPropertyBytes):
-                    vals = ' '.join('%02x' % (b & 0xFF) for b in child.bytes)
-                    lines.append('%s%s = [%s];' % (cindent, child.name, vals))
+                    vals = " ".join("%02x" % (b & 0xFF) for b in child.bytes)
+                    lines.append("%s%s = [%s];" % (cindent, child.name, vals))
                 else:
-                    lines.append('%s%s;' % (cindent, child.name))
+                    lines.append("%s%s;" % (cindent, child.name))
             for child in node.subdata:
                 if isinstance(child, FdtNode):
                     emit(child, depth + 1, child.name)
-            lines.append('%s};' % indent)
+            lines.append("%s};" % indent)
 
-        emit(self.root, 0, '/')
-        return '\n'.join(lines) + '\n'
+        emit(self.root, 0, "/")
+        return "\n".join(lines) + "\n"
 
 
 # ---------------------------------------------------------------------------
 # loader
 # ---------------------------------------------------------------------------
+
 
 class FdtBlobParse:
     """Parse a DTB blob (from an open binary file) into an Fdt tree."""
@@ -343,7 +355,7 @@ class FdtBlobParse:
                 parse_children(soff, child)
                 soff = fdt.next_subnode(soff, quiet=_QUIET_NOTFOUND)
 
-        root = FdtNode('/')
+        root = FdtNode("/")
         parse_children(0, root)
         memrsv = [tuple(fdt.get_mem_rsv(i)) for i in range(fdt.num_mem_rsv())]
         return Fdt(root, memrsv, fdt.boot_cpuid_phys())

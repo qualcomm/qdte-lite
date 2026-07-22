@@ -51,10 +51,10 @@ def _join_path(parent_path, name):
     """
 
     if name is not None:
-        if parent_path[-1] == '/':
+        if parent_path[-1] == "/":
             parent_path += name
         else:
-            parent_path += '/' + name
+            parent_path += "/" + name
 
     return parent_path
 
@@ -77,16 +77,15 @@ def _get_path(fdt, parent_path, name=None, err_if_absent=True):
     # join the two paths if necessary
     fullpath = _join_path(parent_path, name)
 
-
     item = fdt.resolve_path(fullpath)
     if err_if_absent:
-      if isinstance(item, type(None)):
-        if gf['debug']:
-            traceback.print_exc()
-            raise ValueError('Item %s does not exist in DeviceTree!' % fullpath)
-        else:
-            raise ValueError('Item %s does not exist in DeviceTree!' % fullpath)
-            return None
+        if isinstance(item, type(None)):
+            if gf["debug"]:
+                traceback.print_exc()
+                raise ValueError("Item %s does not exist in DeviceTree!" % fullpath)
+            else:
+                raise ValueError("Item %s does not exist in DeviceTree!" % fullpath)
+                return None
 
     return item
 
@@ -98,9 +97,9 @@ def _split_path(full_path):
     :return: An array of two items (first item is the parent path, and the second is the item name)
     """
 
-    parent_name = full_path.rsplit('/', 1)
+    parent_name = full_path.rsplit("/", 1)
     if len(parent_name[0]) == 0:
-        parent_name[0] = '/'
+        parent_name[0] = "/"
 
     return parent_name[0], parent_name[1]
 
@@ -133,18 +132,18 @@ def _add_node(fdt, parent_path, node_name, idx=-1):
     parent_node = fdt.resolve_path(parent_path)
     if not isinstance(parent_node, pyfdt.FdtNode):
         # something has gone wrong here
-        raise ValueError('Given path %s does not point to a node!' % parent_path)
+        raise ValueError("Given path %s does not point to a node!" % parent_path)
 
     # step 2: create the child node
     try:
-        if len(node_name) == 0 or '/' in node_name:
+        if len(node_name) == 0 or "/" in node_name:
             raise Exception()
         child_node = pyfdt.FdtNode(node_name)
         child_node.set_parent_node(parent_node)
     except Exception:
-        if gf['debug']:
+        if gf["debug"]:
             traceback.print_exc()
-        raise ValueError('Invalid node name %s given!' % node_name)
+        raise ValueError("Invalid node name %s given!" % node_name)
 
     # step 3: add the child node to the parent
     try:
@@ -154,11 +153,12 @@ def _add_node(fdt, parent_path, node_name, idx=-1):
         else:
             parent_node.append(child_node)
     except Exception:
-        if gf['debug']:
+        if gf["debug"]:
             traceback.print_exc()
-        raise ValueError('Item named %s already in tree!' % node_name)
+        raise ValueError("Item named %s already in tree!" % node_name)
 
     return fdt
+
 
 def _copy_node(fdt, parent_path, node_path, child_name, child_path):
     # parent_path : Path of parent to new node
@@ -166,64 +166,74 @@ def _copy_node(fdt, parent_path, node_path, child_name, child_path):
     # child_name : Name of new node
     # child_path : Path of new node
     # step 1: Checks
-    #check that new node does not already exist
+    # check that new node does not already exist
     child_node = fdt.resolve_path(child_path)
     if isinstance(child_node, pyfdt.FdtNode):
         # something has gone wrong here
-        raise ValueError('Given path %s points to an existing node!' % child_path)
-    #check if node to be copied exists
+        raise ValueError("Given path %s points to an existing node!" % child_path)
+    # check if node to be copied exists
     existing_node = fdt.resolve_path(node_path)
     if not isinstance(existing_node, pyfdt.FdtNode):
         # something has gone wrong here
-        raise ValueError('Node %s to be copied does not exist' % parent_path)
+        raise ValueError("Node %s to be copied does not exist" % parent_path)
 
     # Step 2 : Create the parent path if needed
     parent_node = fdt.resolve_path(parent_path)
-    current_path="/"
+    current_path = "/"
     if not isinstance(parent_node, pyfdt.FdtNode):
-        nodes_list=parent_path.split("/")
+        nodes_list = parent_path.split("/")
         for i in nodes_list:
-            if current_path[-1]=='/':
-                current_path+=i
+            if current_path[-1] == "/":
+                current_path += i
             else:
-                current_path+='/'+i
+                current_path += "/" + i
             current_node = fdt.resolve_path(current_path)
             if not isinstance(current_node, pyfdt.FdtNode):
-                current_parent_path=current_path.rsplit('/', 1)[0]
-                current_child_name=current_path.rsplit('/', 1)[1]
-                if current_parent_path=='':
-                    current_parent_path='/'
-                _add_node(fdt,current_parent_path,current_child_name)
+                current_parent_path = current_path.rsplit("/", 1)[0]
+                current_child_name = current_path.rsplit("/", 1)[1]
+                if current_parent_path == "":
+                    current_parent_path = "/"
+                _add_node(fdt, current_parent_path, current_child_name)
 
     # step 3: Create the copy node
-    _add_node(fdt,parent_path,child_name)
+    _add_node(fdt, parent_path, child_name)
 
     # step 4 : Traverse fdt and copy nodes
-    for (path, node) in fdt.resolve_path(node_path).walk():
+    for path, node in fdt.resolve_path(node_path).walk():
         # If path is the same as child path, we must break the walk in order to prevent infinite loop
-        if path==child_path:
+        if path == child_path:
             break
         # postfix_node_path = path.rsplit('/', 1)[1]
         remove_prefix_path = path.removeprefix(node_path)
-        copy_node_path = remove_prefix_path.rsplit('/', 1)[0]
-        copy_node_name = remove_prefix_path.rsplit('/', 1)[1]
-        copy_parent_path=''
-        if parent_path=='/':
+        copy_node_path = remove_prefix_path.rsplit("/", 1)[0]
+        copy_node_name = remove_prefix_path.rsplit("/", 1)[1]
+        copy_parent_path = ""
+        if parent_path == "/":
             copy_parent_path = parent_path + child_name + copy_node_path
         else:
-            copy_parent_path = parent_path + '/' + child_name + copy_node_path
+            copy_parent_path = parent_path + "/" + child_name + copy_node_path
 
         # Based on existing node, add accordingly
         if isinstance(node, pyfdt.FdtNode):
-            _add_node(fdt,copy_parent_path,copy_node_name)
+            _add_node(fdt, copy_parent_path, copy_node_name)
         elif isinstance(node, pyfdt.FdtPropertyWords):
-            _add_property(fdt,copy_parent_path,copy_node_name,FdtPropertyType.WORDS,node.words)
+            _add_property(
+                fdt, copy_parent_path, copy_node_name, FdtPropertyType.WORDS, node.words
+            )
         elif isinstance(node, pyfdt.FdtPropertyBytes):
-            _add_property(fdt,copy_parent_path,copy_node_name,FdtPropertyType.BYTES,node.bytes)
+            _add_property(
+                fdt, copy_parent_path, copy_node_name, FdtPropertyType.BYTES, node.bytes
+            )
         elif isinstance(node, pyfdt.FdtPropertyStrings):
-            _add_property(fdt,copy_parent_path,copy_node_name,FdtPropertyType.STRINGS,node.strings)
+            _add_property(
+                fdt,
+                copy_parent_path,
+                copy_node_name,
+                FdtPropertyType.STRINGS,
+                node.strings,
+            )
         elif isinstance(node, pyfdt.FdtProperty):
-            _add_property(fdt,copy_parent_path,copy_node_name)
+            _add_property(fdt, copy_parent_path, copy_node_name)
     return fdt
 
 
@@ -243,12 +253,14 @@ def _add_property(fdt, parent_path, prop_name, prop_type=None, prop_value=None, 
     parent_node = fdt.resolve_path(parent_path)
     if not isinstance(parent_node, pyfdt.FdtNode):
         # something has gone wrong here
-        raise ValueError('Given path %s does not point to a node!' % parent_path)
+        raise ValueError("Given path %s does not point to a node!" % parent_path)
 
     # step 2: create the child node
     try:
-        if len(prop_name) == 0 or '/' in prop_name:
-            raise ValueError('Bad property name')  # will be passed up to the wrapping try/catch
+        if len(prop_name) == 0 or "/" in prop_name:
+            raise ValueError(
+                "Bad property name"
+            )  # will be passed up to the wrapping try/catch
         if not prop_type or prop_type == FdtPropertyType.EMPTY:
             child_prop = pyfdt.FdtProperty(prop_name)
         elif prop_type == FdtPropertyType.BYTES:
@@ -258,11 +270,13 @@ def _add_property(fdt, parent_path, prop_name, prop_type=None, prop_value=None, 
         elif prop_type == FdtPropertyType.STRINGS:
             child_prop = pyfdt.FdtPropertyStrings(prop_name, prop_value)
         else:
-            raise ValueError('Bad property type')  # unrecognized property type
+            raise ValueError("Bad property type")  # unrecognized property type
     except Exception:
-        if gf['debug']:
+        if gf["debug"]:
             traceback.print_exc()
-        raise ValueError('Invalid property name %s or value %s given!' % (prop_name, prop_value))
+        raise ValueError(
+            "Invalid property name %s or value %s given!" % (prop_name, prop_value)
+        )
 
     # step 3: add the child node to the parent
     try:
@@ -272,9 +286,9 @@ def _add_property(fdt, parent_path, prop_name, prop_type=None, prop_value=None, 
         else:
             parent_node.append(child_prop)
     except Exception:
-        if gf['debug']:
+        if gf["debug"]:
             traceback.print_exc()
-        raise ValueError('Item named %s already in tree!' % prop_name)
+        raise ValueError("Item named %s already in tree!" % prop_name)
 
     return fdt
 
@@ -292,15 +306,15 @@ def _delete_item(fdt, parent_path, item_name):
     parent_node = fdt.resolve_path(parent_path)
     if not isinstance(parent_node, pyfdt.FdtNode):
         # something has gone wrong here
-        raise ValueError('Given path %s does not point to a node!' % parent_path)
+        raise ValueError("Given path %s does not point to a node!" % parent_path)
 
     # step 2: remove the item from the parent node
     try:
         parent_node.remove(item_name)
     except ValueError:
-        if gf['debug']:
+        if gf["debug"]:
             traceback.print_exc()
-        raise ValueError('Node %s has no child named %s!' % item_name)
+        raise ValueError("Node %s has no child named %s!" % item_name)
 
     return fdt
 
@@ -311,7 +325,9 @@ class DTOperationType(Enum):
     # all of the possible operations
     NULL = 0
     LOAD = 1  # arg1 = "filename" = path to file. cannot be undone properly.
-    EDIT_PROPERTY_VALUE = 2  # arg1 = "path" = path to property, arg2 = "value" = new value
+    EDIT_PROPERTY_VALUE = (
+        2  # arg1 = "path" = path to property, arg2 = "value" = new value
+    )
     ADD_NODE = 4  # arg1 = "path" = path to parent, arg2 = "name" = new node's name
     ADD_PROPERTY = 5  # arg1 = "path" = path to parent, arg2 = "name" = new name, arg3 = "type" = property type, ...
     # ... arg4 = "value" = value of new property (optional)
@@ -324,10 +340,9 @@ class DTOperationType(Enum):
     SAVE_DTB = 998  # arg1 = "filename" = file name to save to
     BIDRECTIONAL_MSGBOX = 999  # arg1 = "message" = error to throw
 
-
     def to_pretty(self):
         pretty = self.name.lower()
-        return ' '.join(word[0].upper() + word[1:] for word in pretty.split('_'))
+        return " ".join(word[0].upper() + word[1:] for word in pretty.split("_"))
 
 
 class UnknownDTOperationError(Exception):
@@ -369,11 +384,11 @@ class DTOperation:
         self.optype = optype
         self._hash = None
         # not all keys will be reported
-        self._reportkeys = [('optype', 'operation'), ('_hash', 'hash')]
-        if hasattr(self, '_arkeys'):
+        self._reportkeys = [("optype", "operation"), ("_hash", "hash")]
+        if hasattr(self, "_arkeys"):
             self._reportkeys.extend(self._arkeys)
         else:
-            dtlogger.info('Warning: {} has no attr _arkeys!'.format(type(self)))
+            dtlogger.info("Warning: {} has no attr _arkeys!".format(type(self)))
 
     def apply(self, fdt):
         # apply the operation to the given fdt and return the new fdt
@@ -384,15 +399,15 @@ class DTOperation:
         return fdt
 
     def __str__(self):
-        ret = self.optype.name + ':\t'
-        if not hasattr(self, '_arkeys'):
+        ret = self.optype.name + ":\t"
+        if not hasattr(self, "_arkeys"):
             return ret
 
         for rk in self._arkeys:
             if type(rk) is tuple and len(rk) == 2:
-                ret += rk[1] + '(%s)  ' % getattr(self, rk[0])
+                ret += rk[1] + "(%s)  " % getattr(self, rk[0])
             else:
-                ret += rk + '(%s)  ' % getattr(self, rk)
+                ret += rk + "(%s)  " % getattr(self, rk)
         return ret
 
     def report(self):
@@ -406,11 +421,11 @@ class DTOperation:
             else:
                 obj_key = key
             if hasattr(self, key) and getattr(self, key):
-                obj_key = obj_key.replace('?', '')
+                obj_key = obj_key.replace("?", "")
                 repobj[obj_key] = getattr(self, key)
 
                 # tweak to make DTOperationType work
-                repobj[obj_key] = getattr(repobj[obj_key], 'name', repobj[obj_key])
+                repobj[obj_key] = getattr(repobj[obj_key], "name", repobj[obj_key])
 
         return repobj
 
@@ -439,15 +454,14 @@ class DTOperation:
             DTOperationType.RENAME_PROPERTY: DTOperationRenameProperty,
             DTOperationType.SAVE_DTB: DTOperationSaveDtb,
             DTOperationType.BIDRECTIONAL_MSGBOX: DTOperationShowMessageBox,
-
         }
 
         # step 1 is to fetch the correct class that we should be using for this operation
-        if 'operation' not in d or not isinstance(d['operation'], str):
-            raise ValueError('Could not find the operation key in a JSON object!')
-        if not hasattr(DTOperationType, d['operation']):
-            raise ValueError('Unknown operation type %s in report!' % d['operation'])
-        ot = DTOperationType[d['operation']]
+        if "operation" not in d or not isinstance(d["operation"], str):
+            raise ValueError("Could not find the operation key in a JSON object!")
+        if not hasattr(DTOperationType, d["operation"]):
+            raise ValueError("Unknown operation type %s in report!" % d["operation"])
+        ot = DTOperationType[d["operation"]]
         make_cls = typemap[ot]
 
         # next, we fetch the keys that this operation expects
@@ -462,10 +476,10 @@ class DTOperation:
                 # just the key in the object is the same as the variable name in the object
                 cls_key = key
 
-            if '?' in key:
+            if "?" in key:
                 # if there is a ? in the key, that means it is optional, so we don't necessarily have to have it.
                 # if not present, it will default to None
-                key = key.replace('?', '')
+                key = key.replace("?", "")
                 if key in d:
                     # store the key in the translated
                     keys_trans[cls_key] = d[key]
@@ -474,8 +488,15 @@ class DTOperation:
                     keys_trans[cls_key] = None
             else:
                 if key not in d:
-                    raise ValueError('Object%s of type %d (%s) is missing key %s!' %
-                                     ((' number %d' % nbr) if nbr >= 0 else '', ot.value, ot.name, key))
+                    raise ValueError(
+                        "Object%s of type %d (%s) is missing key %s!"
+                        % (
+                            (" number %d" % nbr) if nbr >= 0 else "",
+                            ot.value,
+                            ot.name,
+                            key,
+                        )
+                    )
 
                 # store the key in the translated
                 keys_trans[cls_key] = d[key]
@@ -483,9 +504,9 @@ class DTOperation:
         # call the appropriate constructor to make a new DTOperation with the given kwargs
         cls = make_cls(ot, **keys_trans)
 
-        if 'hash' in d:
+        if "hash" in d:
             # store the hash, if present
-            cls.store_hash(d['hash'])
+            cls.store_hash(d["hash"])
 
         # done
         return cls
@@ -496,12 +517,16 @@ class DTOperation:
 
     def hash_equals(self, cmpHash):
         # check if the given hash equals the one that we are expecting
-        return self._hash == cmpHash if (self._hash is not None and len(self._hash) > 0) else True
+        return (
+            self._hash == cmpHash
+            if (self._hash is not None and len(self._hash) > 0)
+            else True
+        )
 
     def get_modified_path(self):
         # default is to return everything was modified
         _ = self
-        return '/'
+        return "/"
 
     @staticmethod
     def make(optype, *args):
@@ -547,7 +572,7 @@ class DTOperationLoad(DTOperation):
     """
 
     # additional keys we want to include in the report function
-    _arkeys = ['filename']
+    _arkeys = ["filename"]
 
     def __init__(self, optype, filename):
         super().__init__(optype)
@@ -555,14 +580,14 @@ class DTOperationLoad(DTOperation):
 
     def apply(self, fdt):
         # apply the operation to the given fdt and return the new fdt
-        with open(self.filename, 'rb') as infile:
+        with open(self.filename, "rb") as infile:
             try:
                 dtb = pyfdt.FdtBlobParse(infile)
                 fdt = dtb.to_fdt()
             except Exception as ex:
-                if gf['debug']:
+                if gf["debug"]:
                     traceback.print_exc()
-                raise ValueError('Failed to open file: %s ' % ex)
+                raise ValueError("Failed to open file: %s " % ex)
 
         return fdt
 
@@ -575,7 +600,7 @@ class DTOperationEditPropVal(DTOperation):
     """DTOperation representing an edit of an existing property's value"""
 
     # additional keys we want to include in the report function
-    _arkeys = [('prop_path', 'path'), ('val_new', 'value')]
+    _arkeys = [("prop_path", "path"), ("val_new", "value")]
 
     val_old = None
 
@@ -590,17 +615,17 @@ class DTOperationEditPropVal(DTOperation):
         if isinstance(prop, pyfdt.FdtPropertyWords):
             self.val_old = prop.words
             for val in self.val_new:
-                #dtlogger.debug(type(val))
-                if isinstance(val,type('')):
-                   # int(val, 0) auto-detects the base from a literal
-                   # prefix ('0x' hex, '0o' octal, '0b' binary, else
-                   # decimal).  Plain int(val) only accepts decimal and
-                   # rejects '0x...' tokens that callers naturally
-                   # supply when mirroring fdtdump output.
-                   vals.append(int(val, 0))
+                # dtlogger.debug(type(val))
+                if isinstance(val, type("")):
+                    # int(val, 0) auto-detects the base from a literal
+                    # prefix ('0x' hex, '0o' octal, '0b' binary, else
+                    # decimal).  Plain int(val) only accepts decimal and
+                    # rejects '0x...' tokens that callers naturally
+                    # supply when mirroring fdtdump output.
+                    vals.append(int(val, 0))
                 else:
-                   vals.append(val)
-            #dtlogger.debug("new list is %s"%vals)
+                    vals.append(val)
+            # dtlogger.debug("new list is %s"%vals)
             prop.words = vals
         elif isinstance(prop, pyfdt.FdtPropertyBytes):
             self.val_old = prop.bytes
@@ -609,13 +634,13 @@ class DTOperationEditPropVal(DTOperation):
             self.val_old = prop.strings
             prop.strings = self.val_new
         else:
-            self.val_old = b''
+            self.val_old = b""
 
         return fdt
 
     def undo(self, fdt):
         if self.val_old is None:
-            raise ValueError('Cannot undo operation before doing it!')
+            raise ValueError("Cannot undo operation before doing it!")
 
         prop = _get_path(fdt, self.prop_path)
         if isinstance(prop, pyfdt.FdtPropertyWords):
@@ -637,7 +662,7 @@ class DTOperationAddNode(DTOperation):
     """DTOperation representing an addition of a new node to the DeviceTree"""
 
     # additional keys we want to include in the report function
-    _arkeys = [('parent_path', 'path'), ('node_name', 'name')]
+    _arkeys = [("parent_path", "path"), ("node_name", "name")]
 
     def __init__(self, optype, parent_path, node_name):
         super().__init__(optype)
@@ -653,11 +678,17 @@ class DTOperationAddNode(DTOperation):
     def get_modified_path(self):
         return _join_path(self.parent_path, self.node_name)
 
+
 class DTOperationCopyNode(DTOperation):
     """DTOperation representing an addition of a new node to the DeviceTree"""
 
     # additional keys we want to include in the report function
-    _arkeys = [('parent_path', 'path'), ('node_path', 'path'), ('node_name', 'name'),('child_path', 'path')]
+    _arkeys = [
+        ("parent_path", "path"),
+        ("node_path", "path"),
+        ("node_name", "name"),
+        ("child_path", "path"),
+    ]
 
     def __init__(self, optype, parent_path, node_path, node_name, child_path):
         super().__init__(optype)
@@ -667,7 +698,9 @@ class DTOperationCopyNode(DTOperation):
         self.child_path = child_path
 
     def apply(self, fdt):
-        return _copy_node(fdt, self.parent_path, self.node_path, self.node_name, self.child_path)
+        return _copy_node(
+            fdt, self.parent_path, self.node_path, self.node_name, self.child_path
+        )
 
     def undo(self, fdt):
         return _delete_item(fdt, self.parent_path, self.node_name)
@@ -675,11 +708,17 @@ class DTOperationCopyNode(DTOperation):
     def get_modified_path(self):
         return _join_path(self.parent_path, self.node_name)
 
+
 class DTOperationAddProperty(DTOperation):
     """DTOperation representing the addition of a new property to the DeviceTree"""
 
     # additional keys we want to include in the report function
-    _arkeys = [('parent_path', 'path'), ('prop_name', 'name'), ('prop_type', 'type'), ('prop_value', 'value?')]
+    _arkeys = [
+        ("parent_path", "path"),
+        ("prop_name", "name"),
+        ("prop_type", "type"),
+        ("prop_value", "value?"),
+    ]
 
     def __init__(self, optype, parent_path, prop_name, prop_type=None, prop_value=None):
         super().__init__(optype)
@@ -692,7 +731,9 @@ class DTOperationAddProperty(DTOperation):
         self.prop_value = prop_value
 
     def apply(self, fdt):
-        return _add_property(fdt, self.parent_path, self.prop_name, self.prop_type, self.prop_value)
+        return _add_property(
+            fdt, self.parent_path, self.prop_name, self.prop_type, self.prop_value
+        )
 
     def undo(self, fdt):
         return _delete_item(fdt, self.parent_path, self.prop_name)
@@ -709,7 +750,7 @@ class DTOperationDeleteNode(DTOperation):
     """
 
     # additional keys we want to include in the report function
-    _arkeys = [('parent_path', 'path'), ('node_name', 'name')]
+    _arkeys = [("parent_path", "path"), ("node_name", "name")]
 
     children = None
     idx = -1
@@ -729,7 +770,7 @@ class DTOperationDeleteNode(DTOperation):
 
     def undo(self, fdt):
         if self.children is None:
-            raise ValueError('Cannot undo operation before doing it!')
+            raise ValueError("Cannot undo operation before doing it!")
 
         fdt = _add_node(fdt, self.parent_path, self.node_name, self.idx)
         child_node = _get_path(fdt, self.parent_path, self.node_name)
@@ -749,7 +790,7 @@ class DTOperationDeleteProperty(DTOperation):
     """
 
     # additional keys we want to include in the report function
-    _arkeys = [('parent_path', 'path'), ('prop_name', 'name')]
+    _arkeys = [("parent_path", "path"), ("prop_name", "name")]
 
     prop_type = None
     prop_value = None
@@ -773,9 +814,16 @@ class DTOperationDeleteProperty(DTOperation):
 
     def undo(self, fdt):
         if self.prop_type is None or self.prop_value is None:
-            raise ValueError('Cannot undo operation before doing it!')
+            raise ValueError("Cannot undo operation before doing it!")
 
-        fdt = _add_property(fdt, self.parent_path, self.prop_name, self.prop_type, self.prop_value, self.idx)
+        fdt = _add_property(
+            fdt,
+            self.parent_path,
+            self.prop_name,
+            self.prop_type,
+            self.prop_value,
+            self.idx,
+        )
         return fdt
 
     def get_modified_path(self):
@@ -790,7 +838,7 @@ class DTOperationRenameProperty(DTOperation):
     """
 
     # additional keys we want to include in the report function
-    _arkeys = [('parent_path', 'path'), ('old_name', 'from'), ('new_name', 'to')]
+    _arkeys = [("parent_path", "path"), ("old_name", "from"), ("new_name", "to")]
 
     def __init__(self, optype, new_name, parent_path, old_name=None):
         super().__init__(optype)
@@ -806,7 +854,7 @@ class DTOperationRenameProperty(DTOperation):
     def apply(self, fdt):
         ensure = _get_path(fdt, self.parent_path, self.new_name, err_if_absent=False)
         if ensure:
-            raise ValueError('Item with same name already exists in DeviceTree!')
+            raise ValueError("Item with same name already exists in DeviceTree!")
         prop = _get_path(fdt, self.parent_path, self.old_name)
         prop.name = self.new_name
         return fdt
@@ -814,13 +862,16 @@ class DTOperationRenameProperty(DTOperation):
     def undo(self, fdt):
         ensure = _get_path(fdt, self.parent_path, self.old_name, err_if_absent=False)
         if ensure:
-            raise ValueError('Item with same name already exists in DeviceTree!')
+            raise ValueError("Item with same name already exists in DeviceTree!")
         prop = _get_path(fdt, self.parent_path, self.new_name)
         prop.name = self.old_name
         return fdt
 
     def get_modified_path(self):
-        return [_join_path(self.parent_path, self.old_name), _join_path(self.parent_path, self.new_name)]
+        return [
+            _join_path(self.parent_path, self.old_name),
+            _join_path(self.parent_path, self.new_name),
+        ]
 
 
 class DTOperationSaveDtb(DTOperation):
@@ -829,23 +880,23 @@ class DTOperationSaveDtb(DTOperation):
     NB: This operation is not created in normal use of the program.
     """
 
-    _arkeys = ['filename']
+    _arkeys = ["filename"]
 
     def __init__(self, optype, filename):
         super().__init__(optype)
         self.filename = filename
 
     def apply(self, fdt):
-        if gf['dryRun']:
+        if gf["dryRun"]:
             # don't write if we're doing a dry run
             return fdt
 
-        with open(self.filename, 'wb') as f:
+        with open(self.filename, "wb") as f:
             f.write(fdt.to_dtb())
         return fdt
 
     def undo(self, fdt):
-        raise ValueError('Cannot undo save operation')
+        raise ValueError("Cannot undo save operation")
 
 
 class DTOperationShowMessageBox(DTOperation):
@@ -858,7 +909,7 @@ class DTOperationShowMessageBox(DTOperation):
     """
 
     # additional keys we want to include in the report function
-    _arkeys = ['message']
+    _arkeys = ["message"]
 
     def __init__(self, optype, message):
         super().__init__(optype)
@@ -929,19 +980,19 @@ class FdtProperty(FdtItem):
 
     def to_pretty(self):
         if isinstance(self._libProp, pyfdt.FdtPropertyStrings):
-            return '\'' + '\' \''.join(self._libProp.strings) + '\''
+            return "'" + "' '".join(self._libProp.strings) + "'"
         elif isinstance(self._libProp, pyfdt.FdtPropertyWords):
-            if gf['viewAsHex']:
-                return ' '.join(hex(word) for word in self._libProp.words)
+            if gf["viewAsHex"]:
+                return " ".join(hex(word) for word in self._libProp.words)
             else:
-                return ' '.join([str(word) for word in self._libProp.words])
+                return " ".join([str(word) for word in self._libProp.words])
         elif isinstance(self._libProp, pyfdt.FdtPropertyBytes):
-            if gf['viewAsHex']:
-                return ' '.join(hex(byte) for byte in self._libProp.bytes)
+            if gf["viewAsHex"]:
+                return " ".join(hex(byte) for byte in self._libProp.bytes)
             else:
-                return ' '.join([str(word) for word in self._libProp.bytes])
+                return " ".join([str(word) for word in self._libProp.bytes])
         else:
-            return ''
+            return ""
 
     def to_raw(self):
         return self._libProp.to_raw()
@@ -964,7 +1015,7 @@ class FdtProperty(FdtItem):
         elif isinstance(self._libProp, pyfdt.FdtPropertyBytes):
             return list(self._libProp.bytes)
         else:
-            return ''
+            return ""
 
 
 class FdtNode(FdtItem):
@@ -1038,7 +1089,7 @@ class DTWrapper:
         # add to undo stack
         # if qdte run in command mode, don't clear the undo stack.
         # In order to recoder all the operations.
-        if op.optype == DTOperationType.LOAD and not gf['nogui']:
+        if op.optype == DTOperationType.LOAD and not gf["nogui"]:
             # clear the undo stack
             self._undoStack = [op]
             # set the filename
@@ -1051,7 +1102,7 @@ class DTWrapper:
 
     def undo(self):  # undo most recent
         if len(self._undoStack) == 0:
-            raise UndoRedoExhaustedError('No more items left to undo')
+            raise UndoRedoExhaustedError("No more items left to undo")
 
         # pop off the most recently done operation
         op = self._undoStack.pop()
@@ -1061,11 +1112,13 @@ class DTWrapper:
 
         # update the hash
         self._update_dtb()
-        if gf['verifyHash'] and len(self._undoStack) > 0:
+        if gf["verifyHash"] and len(self._undoStack) > 0:
             curr_hash = _dtb_hash(self.dtb)
             # the hash should match the hash of the top of the undo stack
             if not self._undoStack[-1].hash_equals(curr_hash):
-                raise HashMismatchError('Hash of current DTB does not match expected hash %s' % curr_hash)
+                raise HashMismatchError(
+                    "Hash of current DTB does not match expected hash %s" % curr_hash
+                )
 
         # add it to the redo stack
         self._redoStack.append(op)
@@ -1078,7 +1131,7 @@ class DTWrapper:
 
     def redo(self):  # redo most recent operation
         if len(self._redoStack) == 0:
-            raise UndoRedoExhaustedError('No more items left to redo')
+            raise UndoRedoExhaustedError("No more items left to redo")
 
         # pop off the top item of the redo stack
         op = self._redoStack.pop()
@@ -1092,10 +1145,12 @@ class DTWrapper:
 
         # update the hash
         self._update_dtb()
-        if gf['verifyHash']:
+        if gf["verifyHash"]:
             curr_hash = _dtb_hash(self.dtb)
             if not op.hash_equals(curr_hash):
-                raise HashMismatchError('Hash of current DTB does not match expected hash %s' % curr_hash)
+                raise HashMismatchError(
+                    "Hash of current DTB does not match expected hash %s" % curr_hash
+                )
 
         # add it to the undo stack
         self._undoStack.append(op)
@@ -1145,7 +1200,9 @@ class DTWrapper:
     def has_file(self):  # check if there is a file open
         return self._fdt is not None
 
-    def resolve_path(self, path='/', want_parent_idx=False):  # resolve a path in the Fdt
+    def resolve_path(
+        self, path="/", want_parent_idx=False
+    ):  # resolve a path in the Fdt
         # turn the library-returned path into a custom one
         r = FdtItem.make(self._fdt.resolve_path(path))
 

@@ -8,9 +8,11 @@ import sys
 from pathlib import Path
 from qdte.core.fdt_backend import FdtBlobParse
 
-from qdte.core.XBLConfig.commons import (call_os_system,
-                                         DISASSEMBLED_ELF_INFO_JSON,
-                                         ELF_GENERATOR_SCRIPT)
+from qdte.core.XBLConfig.commons import (
+    call_os_system,
+    DISASSEMBLED_ELF_INFO_JSON,
+    ELF_GENERATOR_SCRIPT,
+)
 from qdte.core import dtlogger
 # ============================================================================
 # DISASSEMBLY HELPER FUNCTIONS
@@ -40,9 +42,9 @@ def walk_dtbs(dtbs_file, verbose):
     # The loop will terminate upon EOF or the first non-occurrence of D0 0D FE ED
     while dtb_end < len(data):
         d00d_feed_tag = data[dtb_start:dtb_end]
-        if d00d_feed_tag == b'\x00\x00\x00\x00':
+        if d00d_feed_tag == b"\x00\x00\x00\x00":
             return meta_dtbs_entry_json
-        if d00d_feed_tag != b'\xd0\x0d\xfe\xed':
+        if d00d_feed_tag != b"\xd0\x0d\xfe\xed":
             # Put an error entry symbolizing that 0xD00DFEED was found
             meta_dtbs_entry_json["-1"] = {}
             return meta_dtbs_entry_json
@@ -55,17 +57,23 @@ def walk_dtbs(dtbs_file, verbose):
         # Total size is uint32_t according to DTSpec. These constants can be taken for granted.
         dtb_start += 4
         dtb_end += 4
-        dtb_size = int.from_bytes(data[dtb_start:dtb_end], byteorder='big', signed=False)
+        dtb_size = int.from_bytes(
+            data[dtb_start:dtb_end], byteorder="big", signed=False
+        )
         meta_dtbs_entry_json["dtb_" + str(num_dtbs)]["seg_size"] = dtb_size
 
         # Check that DTB size doesn't go beyond the end of the file
-        if meta_dtbs_entry_json["dtb_" + str(num_dtbs)]["seg_offset"] + dtb_size > len(data):
+        if meta_dtbs_entry_json["dtb_" + str(num_dtbs)]["seg_offset"] + dtb_size > len(
+            data
+        ):
             # Include an error entry
             meta_dtbs_entry_json["-2"] = {}
             return meta_dtbs_entry_json
 
         # Change end to be the size
-        dtb_start = meta_dtbs_entry_json["dtb_" + str(num_dtbs)]["seg_offset"] + dtb_size
+        dtb_start = (
+            meta_dtbs_entry_json["dtb_" + str(num_dtbs)]["seg_offset"] + dtb_size
+        )
         dtb_end = dtb_start + 4
 
         if verbose:
@@ -74,8 +82,13 @@ def walk_dtbs(dtbs_file, verbose):
     return meta_dtbs_entry_json
 
 
-def disassemble_dtbs_elf(config_file_to_be_disassembled, output_xbl_config_directory, autogen_directory,
-                         tools_path, verbose):
+def disassemble_dtbs_elf(
+    config_file_to_be_disassembled,
+    output_xbl_config_directory,
+    autogen_directory,
+    tools_path,
+    verbose,
+):
     """
     Extract a DTBS.elf file
 
@@ -88,11 +101,24 @@ def disassemble_dtbs_elf(config_file_to_be_disassembled, output_xbl_config_direc
     :param verbose: Boolean to turn on verbose mode
     """
     # Disassemble the ELF into a JSON using XBLConfig/elf_gen.py
-    disassembled_elf_info_json = os.path.join(output_xbl_config_directory, DISASSEMBLED_ELF_INFO_JSON)
-    call_os_system("\"" + sys.executable + "\" \"" + tools_path + os.path.sep + ELF_GENERATOR_SCRIPT + "\"" +
-                   " -d " + config_file_to_be_disassembled +
-                   " -o " + autogen_directory +
-                   " -e " + disassembled_elf_info_json)
+    disassembled_elf_info_json = os.path.join(
+        output_xbl_config_directory, DISASSEMBLED_ELF_INFO_JSON
+    )
+    call_os_system(
+        '"'
+        + sys.executable
+        + '" "'
+        + tools_path
+        + os.path.sep
+        + ELF_GENERATOR_SCRIPT
+        + '"'
+        + " -d "
+        + config_file_to_be_disassembled
+        + " -o "
+        + autogen_directory
+        + " -e "
+        + disassembled_elf_info_json
+    )
 
     if verbose:
         dtlogger.info("\nDisassembled ELF into a JSON of the following structure:")
@@ -120,7 +146,9 @@ def disassembled_dtbs_to_separate_files(dtbs_file, dtb_entries, output_directory
         dtb_entry = dtb_entries["dtb_" + str(num_entry)]
 
         # Read in the length of the byte_array
-        byte_array = data[dtb_entry["seg_offset"]: dtb_entry["seg_offset"] + dtb_entry["seg_size"]]
+        byte_array = data[
+            dtb_entry["seg_offset"] : dtb_entry["seg_offset"] + dtb_entry["seg_size"]
+        ]
 
         # Create a new file and write our existing byte array to it
         filename = output_directory + os.path.sep + str(num_entry) + "_dtb.dtb"
@@ -129,7 +157,7 @@ def disassembled_dtbs_to_separate_files(dtbs_file, dtb_entries, output_directory
         new_dtb_file.close()
 
         # Check to see if the file is an overlay file
-        with (open(filename, "rb") as f):
+        with open(filename, "rb") as f:
             dt_parse = FdtBlobParse(f)
             dt = dt_parse.to_fdt()
             # Check to see if the extension is .dtbo
@@ -160,17 +188,27 @@ def disassembled_dtbs_to_separate_files(dtbs_file, dtb_entries, output_directory
                     new_filename = output_directory + os.path.sep + "%s.dtb" % value
                 else:
                     existing_names[value] += 1
-                    new_filename = (output_directory + os.path.sep + "%s_" + str(existing_names[value]) + ".dtb") % value
+                    new_filename = (
+                        output_directory
+                        + os.path.sep
+                        + "%s_"
+                        + str(existing_names[value])
+                        + ".dtb"
+                    ) % value
         # Rename to the proper name
         os.rename(filename, new_filename)
 
         if fixup_flag:
-            os.rename(new_filename,
-                      new_filename + "o")
+            os.rename(new_filename, new_filename + "o")
 
 
-def disassemble_version_2_elf(config_file_to_be_disassembled, output_xbl_config_directory, autogen_directory, tools_path,
-                            verbose):
+def disassemble_version_2_elf(
+    config_file_to_be_disassembled,
+    output_xbl_config_directory,
+    autogen_directory,
+    tools_path,
+    verbose,
+):
     """
     Combines version_2_disassemble methods into one overall function that's called within xblcfgint.py
 
@@ -182,14 +220,19 @@ def disassemble_version_2_elf(config_file_to_be_disassembled, output_xbl_config_
     """
     signed = True
     # First, disassemble the DTBS.elf file using the given ELF generator script
-    disassembled_json_path = disassemble_dtbs_elf(config_file_to_be_disassembled, output_xbl_config_directory, autogen_directory,
-                                             tools_path, verbose)
+    disassembled_json_path = disassemble_dtbs_elf(
+        config_file_to_be_disassembled,
+        output_xbl_config_directory,
+        autogen_directory,
+        tools_path,
+        verbose,
+    )
 
     # After the ELF has been disassembled into binaries, run a DTBS inspector purely on the sole binary
     # This runs on the sole binary, which can be found depending on whether this ELF is signed
     disassembled_elf_info_json = {}
     try:
-        with open(disassembled_json_path, mode='r') as fp:
+        with open(disassembled_json_path, mode="r") as fp:
             disassembled_elf_info_json = json.load(fp)
             fp.close()
     except Exception as e:
@@ -213,13 +256,17 @@ def disassemble_version_2_elf(config_file_to_be_disassembled, output_xbl_config_
 
     if "-1" in meta_entry_json or "-2" in meta_entry_json:
         if "-1" in meta_entry_json:
-            dtlogger.info("ELF file doesn't consist entirely of DTBs. Moving onto legacy disassemble...")
+            dtlogger.info(
+                "ELF file doesn't consist entirely of DTBs. Moving onto legacy disassemble..."
+            )
             return -1
         if "-2" in meta_entry_json:
             dtlogger.info("Misshapen size in a DTB. Returning early.")
             return -2
         # Get rid of all files disassembled from this as long as they're not in the same directory as config
-        if output_xbl_config_directory != os.path.dirname(config_file_to_be_disassembled):
+        if output_xbl_config_directory != os.path.dirname(
+            config_file_to_be_disassembled
+        ):
             for file in os.listdir(output_xbl_config_directory):
                 os.remove(os.path.join(output_xbl_config_directory, file))
 
@@ -228,7 +275,9 @@ def disassemble_version_2_elf(config_file_to_be_disassembled, output_xbl_config_
                 os.remove(os.path.join(autogen_directory, file))
 
     # Turn each DTB within the DTBs into its own separate DTB file
-    disassembled_dtbs_to_separate_files(dtbs_file, meta_entry_json, output_xbl_config_directory)
+    disassembled_dtbs_to_separate_files(
+        dtbs_file, meta_entry_json, output_xbl_config_directory
+    )
 
     # Clean directory of all bin
     for file in os.listdir(output_xbl_config_directory):
@@ -250,21 +299,27 @@ def reassemble_output_dtb_dtbs(dtb_directory, reassemble_dir):
     """
     # Open a new file within the given directory
     absolute_reassemble_path = os.path.abspath(reassemble_dir)
-    new_dtbs_file = open(absolute_reassemble_path + os.path.sep +"reassembled.dtbs", "wb")
+    new_dtbs_file = open(
+        absolute_reassemble_path + os.path.sep + "reassembled.dtbs", "wb"
+    )
 
     # For each file read in from the DTB directory, append it to the new DTBS file
     for file in os.listdir(dtb_directory):
         if file.endswith(".dtb") or file.endswith(".dtbo"):
-            data = Path(os.path.abspath(dtb_directory) + os.path.sep + file).read_bytes()
+            data = Path(
+                os.path.abspath(dtb_directory) + os.path.sep + file
+            ).read_bytes()
             new_dtbs_file.write(data)
 
     new_dtbs_file.close()
 
     # Create a temporary .dtbs file to pass into `reassemble_dtbs_elf`
-    return absolute_reassemble_path + os.path.sep +"reassembled.dtbs"
+    return absolute_reassemble_path + os.path.sep + "reassembled.dtbs"
 
 
-def reassemble_dtbs_elf(dtbs_path, reassemble_dir, disassemble_dir, sectools_path, desired_name, verbose):
+def reassemble_dtbs_elf(
+    dtbs_path, reassemble_dir, disassemble_dir, sectools_path, desired_name, verbose
+):
     """
     Packages a DTBS into an ELF using the given XBL config tool
 
@@ -277,7 +332,11 @@ def reassemble_dtbs_elf(dtbs_path, reassemble_dir, disassemble_dir, sectools_pat
     # Load info about the disassembled ELF
     disassembled_elf_info_json = {}
     try:
-        with open(os.path.join(disassemble_dir, 'disassembled_elf_info.json'), mode='r', encoding="utf-8") as fp:
+        with open(
+            os.path.join(disassemble_dir, "disassembled_elf_info.json"),
+            mode="r",
+            encoding="utf-8",
+        ) as fp:
             disassembled_elf_info_json = json.load(fp)
             fp.close()
     except Exception as e:
@@ -305,16 +364,27 @@ def reassemble_dtbs_elf(dtbs_path, reassemble_dir, disassemble_dir, sectools_pat
     elf_address = disassembled_elf_info_json["E_ENTRY"]
 
     try:
-        if disassembled_elf_info_json['alignment'] is not None and int(disassembled_elf_info_json['alignment'],16)!=0:
-            with open(dtbs_path,"ab") as output_fp:
+        if (
+            disassembled_elf_info_json["alignment"] is not None
+            and int(disassembled_elf_info_json["alignment"], 16) != 0
+        ):
+            with open(dtbs_path, "ab") as output_fp:
                 current_size = os.path.getsize(dtbs_path)
-                alignment_bytes = int(disassembled_elf_info_json['alignment'],16)
-                aligned_size = (current_size + alignment_bytes -1) // alignment_bytes * alignment_bytes
+                alignment_bytes = int(disassembled_elf_info_json["alignment"], 16)
+                aligned_size = (
+                    (current_size + alignment_bytes - 1)
+                    // alignment_bytes
+                    * alignment_bytes
+                )
                 padding_size = aligned_size - current_size
                 if padding_size > 0:
-                    dtlogger.info("Padding {} bytes to align to {}".format(padding_size, alignment_bytes))
+                    dtlogger.info(
+                        "Padding {} bytes to align to {}".format(
+                            padding_size, alignment_bytes
+                        )
+                    )
                     output_fp.seek(current_size)
-                    output_fp.write(b'\x00' * padding_size)
+                    output_fp.write(b"\x00" * padding_size)
     except Exception as error:
         dtlogger.info(error)
         return None
@@ -331,21 +401,36 @@ def reassemble_dtbs_elf(dtbs_path, reassemble_dir, disassemble_dir, sectools_pat
     if sectools_path and os.path.exists(sectools_path):
         dtlogger.info("\nentering sectools...")
         dtlogger.info(reassemble_dir)
-        call_os_system(sectools_path + " elf-tool generate" +
-                       " --elf-class " + str(elf_class_int) +
-                       " --elf-entry " + elf_address +
-                       " --elf-machine-type " + target_arch +
-                       " --vaddr " + elf_address +
-                       " --paddr " + elf_address +
-                       " --align " + disassembled_elf_info_json['alignment'] +
-                       " --data " + dtbs_path +
-                       " --outfile " + outfile)
+        call_os_system(
+            sectools_path
+            + " elf-tool generate"
+            + " --elf-class "
+            + str(elf_class_int)
+            + " --elf-entry "
+            + elf_address
+            + " --elf-machine-type "
+            + target_arch
+            + " --vaddr "
+            + elf_address
+            + " --paddr "
+            + elf_address
+            + " --align "
+            + disassembled_elf_info_json["alignment"]
+            + " --data "
+            + dtbs_path
+            + " --outfile "
+            + outfile
+        )
     else:
         dtlogger.info("\nentering native elf reassembly (no sectools)...")
         dtlogger.info(reassemble_dir)
-        generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int,
-                                 int(elf_address, 16),
-                                 int(disassembled_elf_info_json['alignment'], 16))
+        generate_dtbs_elf_native(
+            dtbs_path,
+            outfile,
+            elf_class_int,
+            int(elf_address, 16),
+            int(disassembled_elf_info_json["alignment"], 16),
+        )
 
     return desired_name
 
@@ -366,7 +451,7 @@ def generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int, load_addr, align
     import qdte.core.XBLConfig.elf_gen_tools as egt
 
     data = Path(dtbs_path).read_bytes()
-    is64 = (elf_class_int == 64)
+    is64 = elf_class_int == 64
 
     ehdr_size = 64 if is64 else 52
     phdr_size = 56 if is64 else 32
@@ -385,10 +470,11 @@ def generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int, load_addr, align
     Phdr = egt.Elf64_Phdr if is64 else egt.Elf32_Phdr
 
     ehdr = Ehdr(bytes(ehdr_size))
-    ehdr.e_ident = (b'\x7fELF' + (b'\x02' if is64 else b'\x01') +
-                    b'\x01\x01' + b'\x00' * 9)
-    ehdr.e_type = 2                                   # ET_EXEC
-    ehdr.e_machine = 0xB7 if is64 else 0x28           # EM_AARCH64 / EM_ARM
+    ehdr.e_ident = (
+        b"\x7fELF" + (b"\x02" if is64 else b"\x01") + b"\x01\x01" + b"\x00" * 9
+    )
+    ehdr.e_type = 2  # ET_EXEC
+    ehdr.e_machine = 0xB7 if is64 else 0x28  # EM_AARCH64 / EM_ARM
     ehdr.e_version = 1
     ehdr.e_entry = load_addr
     ehdr.e_phoff = ehdr_size
@@ -403,7 +489,7 @@ def generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int, load_addr, align
 
     phdr = Phdr(bytes(phdr_size))
     phdr.p_type = egt.LOAD_TYPE
-    phdr.p_flags = 0x7                                # RWX
+    phdr.p_flags = 0x7  # RWX
     phdr.p_offset = data_off
     phdr.p_vaddr = load_addr
     phdr.p_paddr = load_addr
@@ -411,13 +497,16 @@ def generate_dtbs_elf_native(dtbs_path, outfile, elf_class_int, load_addr, align
     phdr.p_memsz = len(data)
     phdr.p_align = alignment
 
-    with open(outfile, 'wb') as fp:
+    with open(outfile, "wb") as fp:
         fp.write(ehdr.getPackedData())
         fp.write(phdr.getPackedData())
-        fp.write(b'\x00' * (data_off - ehdr_size - phdr_size))
+        fp.write(b"\x00" * (data_off - ehdr_size - phdr_size))
         fp.write(data)
 
-def reassemble_version_2_elf(dtb_directory, reassemble_dir, sectools_path, desired_name, verbose):
+
+def reassemble_version_2_elf(
+    dtb_directory, reassemble_dir, sectools_path, desired_name, verbose
+):
     """
     Combines all reassembly helper functions in order.
 
@@ -431,6 +520,8 @@ def reassemble_version_2_elf(dtb_directory, reassemble_dir, sectools_path, desir
     dtbs_path = reassemble_output_dtb_dtbs(dtb_directory, reassemble_dir)
 
     dtlogger.info("\nentering dtbs to elf...")
-    return_name = reassemble_dtbs_elf(dtbs_path, reassemble_dir, dtb_directory, sectools_path, desired_name, verbose)
+    return_name = reassemble_dtbs_elf(
+        dtbs_path, reassemble_dir, dtb_directory, sectools_path, desired_name, verbose
+    )
     dtlogger.info(return_name)
     return return_name

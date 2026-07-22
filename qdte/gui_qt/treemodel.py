@@ -11,6 +11,7 @@ always path strings, never QModelIndex.
 This module must not import QtWidgets; user interaction (dialogs, message
 boxes) belongs to the window, wired via signals.
 """
+
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 
 import qdte.core.dtwrapper as dt
@@ -18,20 +19,28 @@ from qdte.core.flags import flags as gf
 from qdte.gui_qt import valueparse
 
 COL_NAME, COL_TYPE, COL_VALUE = 0, 1, 2
-_HEADERS = ('Name', 'Type', 'Value')
+_HEADERS = ("Name", "Type", "Value")
 
 
 class _TNode:
     """One row of the tree: a DT node or property."""
-    __slots__ = ('name', 'path', 'is_prop', 'type_str', 'value_str',
-                 'parent', 'children')
+
+    __slots__ = (
+        "name",
+        "path",
+        "is_prop",
+        "type_str",
+        "value_str",
+        "parent",
+        "children",
+    )
 
     def __init__(self, name, path, parent):
         self.name = name
         self.path = path
         self.is_prop = False
-        self.type_str = ''
-        self.value_str = ''
+        self.type_str = ""
+        self.value_str = ""
         self.parent = parent
         self.children = []
 
@@ -43,11 +52,10 @@ def _describe(item):
     """(is_prop, type_str, value_str) for an FdtItem wrapper."""
     if item.is_property():
         return True, item.get_type().name, item.to_pretty()
-    return False, 'Node', ''
+    return False, "Node", ""
 
 
 class DtTreeModel(QAbstractItemModel):
-
     # Emitted after any dtw mutation applied through the model, with the
     # modified path (or None).  The window refreshes titles/menus from it.
     operationApplied = Signal(object)
@@ -57,9 +65,9 @@ class DtTreeModel(QAbstractItemModel):
     def __init__(self, dtw, parent=None):
         super().__init__(parent)
         self.dtw = dtw
-        self._root = None       # invisible root above '/'
+        self._root = None  # invisible root above '/'
         self._byPath = {}
-        self._highlights = {}   # path -> QColor row background
+        self._highlights = {}  # path -> QColor row background
         self.rebuild()
 
     # ------------------------------------------------------------------
@@ -112,12 +120,12 @@ class DtTreeModel(QAbstractItemModel):
     def rebuild(self):
         """Full model reset from the current DTWrapper state."""
         self.beginResetModel()
-        self._root = _TNode('', None, None)
+        self._root = _TNode("", None, None)
         self._byPath = {}
         if self.dtw.has_file():
-            top = _TNode('/', '/', self._root)
+            top = _TNode("/", "/", self._root)
             self._root.children.append(top)
-            self._byPath['/'] = top
+            self._byPath["/"] = top
             self._build_subtree(top)
         self.endResetModel()
 
@@ -126,14 +134,14 @@ class DtTreeModel(QAbstractItemModel):
         base = self.dtw.resolve_path(tnode.path)
         if base is None or not base.is_node():
             return
-        prefix = '' if tnode.path == '/' else tnode.path
+        prefix = "" if tnode.path == "/" else tnode.path
         for path, item in base.walk():
             full = prefix + path
-            parent_path = full.rsplit('/', 1)[0] or '/'
+            parent_path = full.rsplit("/", 1)[0] or "/"
             parent = self._byPath.get(parent_path)
             if parent is None:
                 continue
-            child = _TNode(full.rsplit('/', 1)[1], full, parent)
+            child = _TNode(full.rsplit("/", 1)[1], full, parent)
             child.is_prop, child.type_str, child.value_str = _describe(item)
             parent.children.append(child)
             self._byPath[full] = child
@@ -150,7 +158,7 @@ class DtTreeModel(QAbstractItemModel):
             for p in path:
                 self.refresh(p)
             return
-        if path is None or path == '/' or not self.dtw.has_file():
+        if path is None or path == "/" or not self.dtw.has_file():
             self.rebuild()
             return
 
@@ -166,12 +174,13 @@ class DtTreeModel(QAbstractItemModel):
             # value change in place
             known.is_prop, known.type_str, known.value_str = _describe(item)
             idx = self.index_for_path(path)
-            self.dataChanged.emit(idx.siblingAtColumn(COL_TYPE),
-                                  idx.siblingAtColumn(COL_VALUE))
+            self.dataChanged.emit(
+                idx.siblingAtColumn(COL_TYPE), idx.siblingAtColumn(COL_VALUE)
+            )
             return
 
         # node changed / new item: repopulate the parent subtree
-        parent_path = path.rsplit('/', 1)[0] or '/'
+        parent_path = path.rsplit("/", 1)[0] or "/"
         parent = self._byPath.get(parent_path)
         if parent is None:
             self.rebuild()
@@ -188,8 +197,11 @@ class DtTreeModel(QAbstractItemModel):
         self.endRemoveRows()
 
     def _repopulate_children(self, parent_tnode):
-        pidx = (self.index_for_path(parent_tnode.path)
-                if parent_tnode.path else QModelIndex())
+        pidx = (
+            self.index_for_path(parent_tnode.path)
+            if parent_tnode.path
+            else QModelIndex()
+        )
         if parent_tnode.children:
             self.beginRemoveRows(pidx, 0, len(parent_tnode.children) - 1)
             for c in parent_tnode.children:
@@ -220,6 +232,7 @@ class DtTreeModel(QAbstractItemModel):
 
     def refresh_values(self):
         """Hex/dec toggle: recompute every property's display string."""
+
         def visit(tnode):
             changed_rows = []
             for c in tnode.children:
@@ -234,7 +247,9 @@ class DtTreeModel(QAbstractItemModel):
                 first, last = changed_rows[0], changed_rows[-1]
                 self.dataChanged.emit(
                     self.createIndex(first.row(), COL_VALUE, first),
-                    self.createIndex(last.row(), COL_VALUE, last))
+                    self.createIndex(last.row(), COL_VALUE, last),
+                )
+
         if self._root.children:
             visit(self._root.children[0])
 
@@ -294,8 +309,12 @@ class DtTreeModel(QAbstractItemModel):
         if not index.isValid():
             return base
         tnode = index.internalPointer()
-        if (index.column() == COL_VALUE and tnode.is_prop
-                and tnode.type_str != 'EMPTY' and not gf['readonly']):
+        if (
+            index.column() == COL_VALUE
+            and tnode.is_prop
+            and tnode.type_str != "EMPTY"
+            and not gf["readonly"]
+        ):
             return base | Qt.ItemIsEditable
         return base
 
@@ -310,9 +329,12 @@ class DtTreeModel(QAbstractItemModel):
             return False
         try:
             payload = valueparse.parse_value(item.get_type(), str(value))
-            self.apply_op(dt.DTOperation.make(
-                dt.DTOperationType.EDIT_PROPERTY_VALUE, tnode.path, payload))
+            self.apply_op(
+                dt.DTOperation.make(
+                    dt.DTOperationType.EDIT_PROPERTY_VALUE, tnode.path, payload
+                )
+            )
         except Exception as ex:  # noqa: BLE001 -- surfaced to the user
-            self.editFailed.emit(tnode.path, getattr(ex, 'message', str(ex)))
+            self.editFailed.emit(tnode.path, getattr(ex, "message", str(ex)))
             return False
         return True

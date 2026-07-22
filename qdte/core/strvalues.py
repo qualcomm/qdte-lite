@@ -6,6 +6,7 @@ Shared by the GUI and any other caller so a typed value parses the same
 everywhere.  Historically these lived in the tkinter
 editview module.
 """
+
 import string
 
 
@@ -45,16 +46,16 @@ def strarray_to_string(arr):
         """helper function to escape the characters that need escaping"""
 
         # things that need to be escaped (use this order so that we don't replace \t into \\\\t)
-        mystr = mystr.replace('\\', '\\\\')
-        mystr = mystr.replace('\'', '\\\'')
-        mystr = mystr.replace('\t', '\\t')
+        mystr = mystr.replace("\\", "\\\\")
+        mystr = mystr.replace("'", "\\'")
+        mystr = mystr.replace("\t", "\\t")
         return mystr
 
     # escape each string and add the single quotes around it
-    ret = ['\'' + escape_helper(elem) + '\'' for elem in arr]
+    ret = ["'" + escape_helper(elem) + "'" for elem in arr]
 
     # the output of this function is a string in the format 'str\t1\'' 'str\n2' '\\str_3'
-    return ' '.join(ret)
+    return " ".join(ret)
 
 
 def string_to_strarray(mystr):
@@ -74,49 +75,54 @@ def string_to_strarray(mystr):
     for i in range(0, len(mystr)):
         if seek_string_start:
             # only three characters are allowed in here: ', (last one is a space)
-            if mystr[i] == ',' or mystr[i] == ' ':
+            if mystr[i] == "," or mystr[i] == " ":
                 continue
-            elif mystr[i] == '\'':
+            elif mystr[i] == "'":
                 # found the start of a string, so store it, and switch to looking for the end of a string instead
                 seek_string_start = False
                 str_start_pos = i + 1
             else:
                 # parse error
-                raise ValueError('string_to_strarray() Parse error: expected double-quote, comma, or space, but got '
-                                 '%s instead!' % mystr[i])
+                raise ValueError(
+                    "string_to_strarray() Parse error: expected double-quote, comma, or space, but got "
+                    "%s instead!" % mystr[i]
+                )
         else:
             if escape_next:
                 # wanted to escape the last character, so we escape it and continue
                 # note that we don't actually replace in the input string yet - we do this later
                 escape_next = False
                 continue
-            if mystr[i] == '\\':
+            if mystr[i] == "\\":
                 # backslash = escaping the next character
                 escape_next = True
-            elif mystr[i] == '\'':
+            elif mystr[i] == "'":
                 # found the end of a string; it goes from str_start_pos to i (inclusive)
                 str_dat = mystr[str_start_pos:i]
 
                 # parse out the representation
                 # again, order matters! otherwise we could accidentally introduce escape sequences
-                str_dat = str_dat.replace('\\\\', '\\')
-                str_dat = str_dat.replace('\\\'', '\'')
-                str_dat = str_dat.replace('\\t', '\t')
+                str_dat = str_dat.replace("\\\\", "\\")
+                str_dat = str_dat.replace("\\'", "'")
+                str_dat = str_dat.replace("\\t", "\t")
 
                 # all good
                 ret.append(str_dat)
                 seek_string_start = True
-            elif mystr[i] not in string.printable or mystr[i] in ('\r', '\n'):
+            elif mystr[i] not in string.printable or mystr[i] in ("\r", "\n"):
                 # check that this character is valid
-                raise ValueError('string_to_strarray() error: Illegal character at position %d: %s' % (i, mystr[i]))
+                raise ValueError(
+                    "string_to_strarray() error: Illegal character at position %d: %s"
+                    % (i, mystr[i])
+                )
 
     if escape_next or (not seek_string_start):
         # still looking to escape something or for the end of a string, so something has gone wrong
-        raise ValueError('Unexpected end of input when parsing')
+        raise ValueError("Unexpected end of input when parsing")
 
     if len(ret) == 0 or any([True for mystr in ret if len(mystr) == 0]):
         # one of the strings was empty
-        raise ValueError('STRINGS values are not permitted to be empty!')
+        raise ValueError("STRINGS values are not permitted to be empty!")
 
     # all good!
     return ret

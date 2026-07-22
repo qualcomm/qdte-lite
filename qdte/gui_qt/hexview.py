@@ -8,7 +8,8 @@ the libfdt backend populates on every to_dtb().  Lives in a dock so it
 can sit beside the tree; the window keeps its content in sync via the
 model's operationApplied signal.
 """
-from PySide6.QtGui import (QColor, QFont, QTextCharFormat, QTextCursor)
+
+from PySide6.QtGui import QColor, QFont, QTextCharFormat, QTextCursor
 from PySide6.QtWidgets import QPlainTextEdit, QTextEdit
 
 _BYTES_PER_ROW = 16
@@ -25,26 +26,25 @@ class HexView(QPlainTextEdit):
         super().__init__(parent)
         self.setReadOnly(True)
         self.setLineWrapMode(QPlainTextEdit.LineWrapMode.NoWrap)
-        font = QFont('monospace')
+        font = QFont("monospace")
         font.setStyleHint(QFont.StyleHint.TypeWriter)
         self.setFont(font)
-        self._data = b''
+        self._data = b""
 
     def set_data(self, data):
-        self._data = bytes(data or b'')
+        self._data = bytes(data or b"")
         self._render()
 
     def _render(self):
         lines = []
         data = self._data
         for base in range(0, len(data), _BYTES_PER_ROW):
-            chunk = data[base:base + _BYTES_PER_ROW]
-            hex_part = ' '.join('%02x' % b for b in chunk)
+            chunk = data[base : base + _BYTES_PER_ROW]
+            hex_part = " ".join("%02x" % b for b in chunk)
             hex_part = hex_part.ljust(_HEX_COLS - 1)
-            ascii_part = ''.join(chr(b) if 0x20 <= b < 0x7f else '.'
-                                 for b in chunk)
-            lines.append('%08x  %s %s' % (base, hex_part, ascii_part))
-        self.setPlainText('\n'.join(lines))
+            ascii_part = "".join(chr(b) if 0x20 <= b < 0x7F else "." for b in chunk)
+            lines.append("%08x  %s %s" % (base, hex_part, ascii_part))
+        self.setPlainText("\n".join(lines))
 
     def _row_col(self, offset, in_ascii):
         """(block, column) of byte ``offset`` in the rendered text."""
@@ -75,15 +75,19 @@ class HexView(QPlainTextEdit):
                 # last highlighted byte on this row
                 _, c1 = self._row_col(row_end - 1, in_ascii)
                 cursor = QTextCursor(doc.findBlockByNumber(r0))
-                cursor.movePosition(QTextCursor.MoveOperation.Right,
-                                    QTextCursor.MoveMode.MoveAnchor, c0)
+                cursor.movePosition(
+                    QTextCursor.MoveOperation.Right, QTextCursor.MoveMode.MoveAnchor, c0
+                )
                 span = (c1 + (1 if in_ascii else 2)) - c0
-                cursor.movePosition(QTextCursor.MoveOperation.Right,
-                                    QTextCursor.MoveMode.KeepAnchor, span)
+                cursor.movePosition(
+                    QTextCursor.MoveOperation.Right,
+                    QTextCursor.MoveMode.KeepAnchor,
+                    span,
+                )
                 sel = QTextEdit.ExtraSelection()
                 fmt = QTextCharFormat()
                 fmt.setBackground(highlight)
-                fmt.setForeground(QColor('white'))
+                fmt.setForeground(QColor("white"))
                 sel.format = fmt
                 sel.cursor = cursor
                 selections.append(sel)
