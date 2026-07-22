@@ -57,7 +57,9 @@ uv pip install .          # headless only
 ```
 
 `pip` works too. The install provides the `qdte` console script; `python -m
-qdte` and `python run.py` are equivalent entry points.
+qdte` is an equivalent entry point. Install the package rather than running
+from a source checkout, so the `qdte` command and its dependencies resolve
+correctly.
 
 ## Usage
 
@@ -91,7 +93,7 @@ sessions with unsigned reassembly.
 ## Code layout
 
 ```
-run.py            thin launcher; calls qdte.cli.main
+qdte/__main__.py  console entry point (the `qdte` command; `python -m qdte`)
 qdte/core/        headless engine: flags, dtwrapper, fdt_backend (the
                   libfdt-based DTB layer), assemble/version_2_assemble,
                   Autocmd, XBLConfig tool scripts.

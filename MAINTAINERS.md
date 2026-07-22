@@ -32,7 +32,6 @@ and some documentation may be stubs.
 * `flags.py` - Specification of various runtime flags that may be specified by the user.
 * `hexview.py` - GUI elements of the DeviceTree hex viewer (raw view) window.
 * `package.py` - Tool to package the DTGUI application into a single executable (pyz file) and also provides a helper function to extract resources from.
-* `run.py` - Main entry point to the DTGUI application.
 * `treeview.py` - GUI elements of the DeviceTree tree viewer/editor application.
 * `settings.py` - GUI of all settings.
 * `sign.py` - signature functions.
