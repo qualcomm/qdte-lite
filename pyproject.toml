@@ -36,6 +36,7 @@ qdte = "qdte.cli.main:main"
 dev = [
     "ruff>=0.15",
     "mypy>=1.11",
+    "pymarkdownlnt>=0.9",
 ]
 
 [tool.setuptools.packages.find]
@@ -51,3 +52,9 @@ extend-exclude = ["qdte/core/XBLConfig"]
 python_version = "3.10"
 ignore_missing_imports = true
 exclude = ["qdte/core/XBLConfig"]
+
+[tool.pymarkdown]
+# Line length (MD013) is noise for prose and tables that wrap by design;
+# every other rule stays on. Scope is set by scripts/check_markdown.sh,
+# which lints the tracked root docs and leaves .github/ boilerplate alone.
+plugins.md013.enabled = false
