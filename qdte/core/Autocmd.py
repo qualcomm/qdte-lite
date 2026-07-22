@@ -7,15 +7,13 @@ import sys
 from qdte.core.flags import flags as gf
 import qdte.core.dtwrapper as dt
 import time
-from qdte.core import sign
 from qdte.core import assemble
 import tempfile
 import shutil
 
-class autocmd(sign.st,assemble.assemble):
+class autocmd(assemble.assemble):
     def __init__(self,dtw):
         self.dtw = dtw
-        self.sectool_name = 'sectools'
         self.outdir = ''
         self.check_python()
 
@@ -40,22 +38,6 @@ class autocmd(sign.st,assemble.assemble):
         modify_properties = []
         property_value = None
         property_path = None
-        if not gf['allowUnsigned']:
-            # Check if all the signing requested parameters are provided correctly.
-            if "sectoolsDir" not in gf.keys() or gf['sectoolsDir'] == None:
-                sys.exit("Error:Please provide --sectools_dir option!\n")
-            elif not os.path.exists(gf['sectoolsDir']):
-                sys.exit("{}{}{}".format("Error:sectoos tool path:",gf['sectoolsDir']," doesn't exist!!!\n Please provide correct sectool path!!"))
-
-            if 'signJson' not in gf.keys() or  gf['signJson'] == None:
-                sys.exit("Error:signing json file not provided!!\n please provide --signjson option!\n")
-            elif not os.path.exists(gf['signJson']):
-                sys.exit("{}{}{}".format("Error:signing command file path:",gf['signJson'],"doesn't exist!!!\n Please provide correct signing commmand file path of --sign_json option!"))
-
-            if "profileXml" not in gf.keys() or gf['profileXml'] == None:
-                sys.exit("Error:Please provide  --profileXml option!")
-            elif not os.path.exists(gf['profileXml']):
-                sys.exit("{}{}{}".format("Error:profileXml  path:",gf['profileXml'],"doesn't exist!!!\n Please provide correct profileXml path!!"))
         ## dissamble elf file
         try:
             self.dissamble_config_elf()
@@ -142,22 +124,9 @@ class autocmd(sign.st,assemble.assemble):
         except Exception as result:
             sys.exit(result)
 
-        if not gf['allowUnsigned']:
-            try:
-                self.sign_config_image()
-            except Exception as result:
-                sys.exit(result)
-
-            outfile = ""
-            if not gf['outputPath']:
-                outfile = gf['outputFile']
-            else:
-                outfile = os.path.join(gf['outputPath'],gf['outputFile'])
-            print(outfile," was created and signed successfully")
-        else:
-            try:
-                shutil.copy(os.path.join(self.outdir, 'auto_gen', 'elf_files', 'create_cli',
-                                         gf['outputFile']), os.path.join(gf['outputPath'],gf['outputFile']))
-            except Exception as e:
-                sys.exit(e)
-            print(os.path.join(gf['outputPath'],gf['outputFile'])," was created successfully")
+        try:
+            shutil.copy(os.path.join(self.outdir, 'auto_gen', 'elf_files', 'create_cli',
+                                     gf['outputFile']), os.path.join(gf['outputPath'],gf['outputFile']))
+        except Exception as e:
+            sys.exit(e)
+        print(os.path.join(gf['outputPath'],gf['outputFile'])," was created successfully")

@@ -10,7 +10,6 @@ import shutil
 import sys
 import json
 from qdte.core import version_2_assemble
-import platform
 from qdte.core import dtlogger
 
 #Using magic to detect the compress image
@@ -200,23 +199,8 @@ class assemble:
             os.remove(dtbs_file)
 
     def reassemble_config_elf(self):
-        sectool_name = ''
-        if platform.system().startswith("Windows"):
-            sectool_name = "sectools.exe"
-        else:
-            sectool_name = "sectools"
         # Check to see whether the legacy version of reassembly should be invoked
         if not "create_xbl_config.json" in os.listdir(self.outdir):
-            sectool_path = ''
-            if gf['sectoolsDir'] and os.path.exists(os.path.join(gf['sectoolsDir'], sectool_name)):
-                sectool_path = os.path.join(gf['sectoolsDir'], sectool_name)
-            elif not gf['allowUnsigned']:
-                # Only unsigned flows may fall back to the native (sectools-free)
-                # reassembly; a signed flow without a usable sectools binary must
-                # fail here rather than silently emit an unsigned ELF.
-                raise Exception("sectools binary not found under --sectools_dir; "
-                                "it is required unless --allow_unsigned is set")
-
             dtlogger.info(self.outdir)
             # Make directories if needed
             if not os.path.exists(os.path.join(self.outdir, 'auto_gen')):
@@ -228,10 +212,11 @@ class assemble:
             if not os.path.exists(os.path.join(self.outdir, 'auto_gen', 'elf_files', 'create_cli')):
                 os.mkdir(os.path.join(self.outdir, 'auto_gen', 'elf_files', 'create_cli'))
 
+            # No sectools path: this fork always reassembles natively (unsigned).
             desired_name = version_2_assemble.reassemble_version_2_elf(self.outdir,
                                                                        os.path.join(self.outdir, 'auto_gen',
                                                                                     'elf_files', 'create_cli'),
-                                                                       sectool_path,
+                                                                       '',
                                                                        gf['outputFile'][:-4] if gf[
                                                                            'outputFile'].endswith('.elf') else gf[
                                                                            'outputFile'],
@@ -285,8 +270,8 @@ class assemble:
                 break
 
             if 'Error:' in line or 'ERROR' in line or 'Errno' in line:
-                if 'Signed' in line and gf['allowUnsigned']:
-                    # ignore signing errors and treat them as warnings
+                if 'Signed' in line:
+                    # This fork never signs; treat signing errors as warnings.
                     dtlogger.info("{} warn".format(line))
                     unsigned_supp = True
                 else:

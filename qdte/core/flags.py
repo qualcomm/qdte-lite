@@ -61,11 +61,9 @@ config = {
                                                 #'help': 'Do not actually write to any output file, but instead write out a '
                                                 #'JSON change report that can be used in --nogui mode.'},
 
-    '--sectools_dir': {'nargs': '?', 'const': None,  'metavar': 'SECTOOLS_LOCATION',
-                       'help': 'Path of the sectools v2 signature tools, for signing config elfs. \n'
-                               'Only avaiable when --allow_unsigned disable'},
-
-    '--allow_unsigned': {'action': 'store_true', 'help': 'allow to generate unsigned config ELF.'},
+    '--allow_unsigned': {'action': 'store_true',
+                         'help': 'Accepted for compatibility and ignored: this tool only\n'
+                                 'produces unsigned config ELFs.'},
     '--input_file': {'nargs': '?', 'const': None, 'default': '', 'metavar': 'DTB_ELF_FILE',
                      'help': 'input DTB elf file.\n'
                      'Like xbl_config.elf, qdsp6sw_dtbs.elf'
@@ -78,19 +76,10 @@ config = {
                          '    Singal property: --modify \"platform.dtb/sw/boot/vibration=0\"\n'
                          '    Multi properties: --modify \"platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp&platform.dtb/model=Qualcomm Technologies, Inc. Kailua cdp\"\n'
                          '    Multi values: --modify  \"platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp\"'},
-    '--sign_json': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SIGN_PARAMETER_JSON_LOCATION',
-                 'help': 'Path to the signing-parameters JSON.\n'
-                         'See the samples under examples/ (local_signing_mode.json,\n'
-                         'plugin_signing_mode.json).\n'
-                         'Only available when --allow_unsigned is disabled'},
     '--output_path': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_LOCATION',
                  'help': 'output path for storing dissamble files and re-assemble file \n'},
     '--output_file': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'OUTPUT_FILENAME',
                  'help': 'output file name.\nLike xbl_config.elf, qdsp6sw_dtbs.elf\n'},
-    '--profileXml': {'nargs': '?', 'const': None, 'default': None, 'metavar': 'SECTOOL_PROFILEXML',
-                 'help': 'sectool profile xml file for signature!!\n'
-                         'Only avaiable when --allow_unsigned disable\n'
-                         r'Example: Kailua boot profile file kailua_tme_security_profile.xml comes from boot_images\ssg_tmefw\profiles\kailua\n'},
 
 
 
