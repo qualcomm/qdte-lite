@@ -8,10 +8,10 @@ through the model so refresh and undo/redo state stay coherent.
 import os
 
 from PySide6.QtCore import Qt
-from PySide6.QtGui import QAction, QActionGroup, QKeySequence
-from PySide6.QtWidgets import (QApplication, QDockWidget, QFileDialog,
-                               QInputDialog, QListWidget, QMainWindow,
-                               QMenu, QMessageBox, QTreeView)
+from PySide6.QtGui import QAction, QActionGroup, QColor, QKeySequence
+from PySide6.QtWidgets import (QApplication, QColorDialog, QDockWidget,
+                               QFileDialog, QInputDialog, QListWidget,
+                               QMainWindow, QMenu, QMessageBox, QTreeView)
 
 import qdte.core.dtwrapper as dt
 from qdte.core import dtlogger
@@ -25,6 +25,13 @@ from qdte.gui_qt.hexview import HexView
 from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
 WINDOW_TITLE = 'QDTE (Qualcomm Device Tree Editor) %s [Qt]' % QDTE_VERSION
+
+# The tk right-click highlight palette, preserved.
+_HIGHLIGHT_PRESETS = (
+    ('Red', '#ff0000'), ('Orange', '#ff9600'), ('Yellow', '#ffff00'),
+    ('Green', '#00d400'), ('Blue', '#007dd4'), ('Purple', '#7d00ff'),
+    ('Pink', '#ff00ff'), ('White', '#ffffff'),
+)
 
 
 class MainWindow(QMainWindow):
@@ -96,6 +103,7 @@ class MainWindow(QMainWindow):
         self._add_action(filem, 'Save Copy &As...', self.save_dtb_as,
                          QKeySequence.StandardKey.SaveAs)
         self._add_action(filem, 'Export &DTS...', self.export_dts)
+        self._add_action(filem, 'Save Change &Report...', self.save_change_report)
         filem.addSeparator()
         self._add_action(filem, 'E&xit', self.close)
 
@@ -297,6 +305,22 @@ class MainWindow(QMainWindow):
         except (OSError, Exception) as ex:  # noqa: BLE001
             QMessageBox.critical(self, 'Failed to export', str(ex))
 
+    def save_change_report(self):
+        if not self._require_file():
+            return
+        filename, _ = QFileDialog.getSaveFileName(
+            self, 'Save Change Report', 'changes.json',
+            'JSON (*.json);;All Files (*)')
+        if not filename:
+            return
+        try:
+            with open(filename, 'w', encoding='utf-8') as fp:
+                fp.write(self.dtw.report())
+            self.statusBar().showMessage('Saved change report to %s' % filename,
+                                         5000)
+        except OSError as ex:
+            QMessageBox.critical(self, 'Failed to save report', str(ex))
+
     def _require_file(self):
         if not self.dtw.has_file():
             QMessageBox.information(self, 'No file', 'Open a DTB first.')
@@ -359,11 +383,50 @@ class MainWindow(QMainWindow):
                           FdtPropertyType.STRINGS, FdtPropertyType.EMPTY):
                 addp.addAction(ptype.name,
                                lambda pt=ptype: self._add_property(path, pt))
+            menu.addAction('Copy Node...', lambda: self._copy_node(path))
             if path != '/':
                 menu.addAction('Delete', lambda: self._delete_item(path, False))
         menu.addSeparator()
         menu.addAction('Show in Raw View', lambda: self._show_in_raw(path))
+        hl = menu.addMenu('Highlight')
+        for name, color in _HIGHLIGHT_PRESETS:
+            hl.addAction(name,
+                         lambda c=color: self.model.set_highlight(path, QColor(c)))
+        hl.addAction('Custom...', lambda: self._highlight_custom(path))
+        hl.addSeparator()
+        hl.addAction('Clear', lambda: self.model.set_highlight(path, None))
         menu.exec(self.tree.viewport().mapToGlobal(pos))
+
+    def _highlight_custom(self, path):
+        current = self.model.highlight_color(path) or QColor('yellow')
+        color = QColorDialog.getColor(current, self, 'Highlight color')
+        if color.isValid():
+            self.model.set_highlight(path, color)
+
+    def _copy_node(self, node_path):
+        """Port of controller.copy_node: prompt for a destination path,
+        validate it, and apply a COPY_NODE op."""
+        dest, ok = QInputDialog.getText(self, 'Copy Node', 'Path of new node:',
+                                        text=node_path + '_copy')
+        if not ok or dest is None:
+            return
+        if len(dest) <= 1 or '/' not in dest or '//' in dest or '?' in dest:
+            QMessageBox.critical(self, 'Failed to copy node',
+                                 'The given path is not valid.')
+            return
+        dest = dest.rstrip('/')
+        child_name = dest.rsplit('/', 1)[1]
+        parent_path = dest.rsplit('/', 1)[0] or '/'
+        parent = self.dtw.resolve_path(parent_path)
+        if parent is None or not parent.is_node():
+            if QMessageBox.question(
+                    self, 'Create New Path',
+                    'The requested path does not exist. Create it?') \
+                    != QMessageBox.StandardButton.Yes:
+                return
+        self._apply_checked(dt.DTOperation.make(
+            dt.DTOperationType.COPY_NODE, parent_path, node_path,
+            child_name, dest))
 
     def _apply_checked(self, op):
         try:

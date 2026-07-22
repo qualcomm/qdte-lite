@@ -59,7 +59,25 @@ class DtTreeModel(QAbstractItemModel):
         self.dtw = dtw
         self._root = None       # invisible root above '/'
         self._byPath = {}
+        self._highlights = {}   # path -> QColor row background
         self.rebuild()
+
+    # ------------------------------------------------------------------
+    # per-path highlight colours
+    # ------------------------------------------------------------------
+
+    def set_highlight(self, path, color):
+        """Colour (QColor) or clear (None) a path's row background."""
+        if color is None:
+            self._highlights.pop(path, None)
+        else:
+            self._highlights[path] = color
+        idx = self.index_for_path(path)
+        if idx.isValid():
+            self.dataChanged.emit(idx, idx.siblingAtColumn(COL_VALUE))
+
+    def highlight_color(self, path):
+        return self._highlights.get(path)
 
     # ------------------------------------------------------------------
     # mutations: every DTWrapper change goes through these
@@ -262,6 +280,8 @@ class DtTreeModel(QAbstractItemModel):
                 return tnode.type_str
             if index.column() == COL_VALUE:
                 return tnode.value_str
+        if role == Qt.BackgroundRole:
+            return self._highlights.get(tnode.path)
         if role == Qt.ToolTipRole:
             return tnode.path
         return None
