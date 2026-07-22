@@ -11,7 +11,7 @@ import os
 import shutil
 import tempfile
 
-from qdte.core import assemble
+from qdte.core import assemble, sign
 from qdte.core.flags import flags as gf
 
 FDT_MAGIC = b'\xd0\x0d\xfe\xed'
@@ -37,14 +37,19 @@ def scan_disassembly(directory, prefix=''):
     return found
 
 
-class ElfSession(assemble.assemble):
-    """One open config ELF: temp dir, its DTBs, and reassembly."""
+class ElfSession(assemble.assemble, sign.st):
+    """One open config ELF: temp dir, its DTBs, and reassembly.
+
+    Inherits the same assemble/sign core the headless Autocmd flow uses,
+    so both unsigned and signed reassembly run the identical code path.
+    """
 
     def __init__(self, elf_path):
         self.elf_path = os.path.abspath(elf_path)
         self.outdir = tempfile.mkdtemp(prefix='dtgui_')
         self.dtbs = {}
         self.compressed_elf = False
+        self.sectool_name = 'sectools'
         atexit.register(self.close)
 
     def disassemble(self):
@@ -75,6 +80,27 @@ class ElfSession(assemble.assemble):
         built = os.path.join(self.outdir, 'auto_gen', 'elf_files',
                              'create_cli', gf['outputFile'])
         shutil.copy(built, dest_path)
+        return dest_path
+
+    def reassemble_signed(self, dest_path):
+        """Rebuild and sign the ELF into dest_path (mirrors the headless
+        signed path: reassemble_config_elf then sign_config_image, using
+        gf['sectoolsDir'/'profileXml'/'signJson']). sign_config_image
+        writes the signed image straight to outputPath/outputFile."""
+        dest_path = os.path.abspath(dest_path)
+        gf['allowUnsigned'] = False
+        gf['outputFile'] = os.path.basename(dest_path)
+        gf['outputPath'] = os.path.dirname(dest_path)
+        gf['inputFile'] = self.elf_path
+        cwd = os.getcwd()
+        os.chdir(self.outdir)
+        try:
+            self.reassemble_config_elf()
+            if self.sign_config_image() is False:
+                raise RuntimeError(
+                    'Signing failed; check the sectools output in the log.')
+        finally:
+            os.chdir(cwd)
         return dest_path
 
     def close(self):
