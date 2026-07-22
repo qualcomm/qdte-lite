@@ -19,11 +19,9 @@ from qdte.core.dtwrapper import FdtPropertyType
 from qdte.core.flags import flags as gf
 from qdte.core.version import QDTE_VERSION
 from qdte.gui_qt import valueparse
-from qdte.core.usercfg import UserConfig
 from qdte.gui_qt.elfsession import ElfSession
 from qdte.gui_qt.finddialog import FindDialog
 from qdte.gui_qt.hexview import HexView
-from qdte.gui_qt.settingsdialog import SettingsDialog
 from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
 WINDOW_TITLE = 'QDTE (Qualcomm Device Tree Editor) %s [Qt]' % QDTE_VERSION
@@ -42,8 +40,6 @@ class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
         dtlogger.logger_init()
-        self.usercfg = UserConfig()
-        self.usercfg.load_into_flags()
         self.dtw = dt.DTWrapper()
         self.model = DtTreeModel(self.dtw, self)
         self.model.operationApplied.connect(self._after_operation)
@@ -97,11 +93,9 @@ class MainWindow(QMainWindow):
         filem.addSeparator()
         self.act_reasm = self._add_action(
             filem, '&Reassemble ELF As...', self.reassemble_elf)
-        self.act_sign = self._add_action(
-            filem, 'Reassemble and &Sign ELF As...', self.reassemble_signed)
         self.act_close_sess = self._add_action(
             filem, 'Close ELF &Session', self.close_session)
-        for act in (self.act_reasm, self.act_sign, self.act_close_sess):
+        for act in (self.act_reasm, self.act_close_sess):
             act.setEnabled(False)
         filem.addSeparator()
         self._add_action(filem, '&Save', self.save_dtb,
@@ -124,8 +118,6 @@ class MainWindow(QMainWindow):
                          QKeySequence.StandardKey.Find)
         self._add_action(searchm, 'Find &Next', self.find_next,
                          QKeySequence(Qt.Key.Key_F3))
-
-        bar.addAction('Se&ttings', self.open_settings)
 
         viewm = bar.addMenu('&View')
         group = QActionGroup(self)
@@ -213,7 +205,6 @@ class MainWindow(QMainWindow):
             self.dtb_list.addItem(display)
         self.dtb_dock.show()
         self.act_reasm.setEnabled(True)
-        self.act_sign.setEnabled(True)
         self.act_close_sess.setEnabled(True)
         self.statusBar().showMessage(
             '%d DTBs in %s - double-click one to edit'
@@ -255,41 +246,6 @@ class MainWindow(QMainWindow):
         self.statusBar().showMessage('Reassembled (unsigned) to %s'
                                      % filename, 10000)
 
-    def reassemble_signed(self):
-        if self.session is None:
-            return
-        if not self.usercfg.signing_ready():
-            QMessageBox.information(
-                self, 'Signing not configured',
-                'Set the SecTools directory, security profile XML and '
-                'signing command JSON in Settings first.')
-            if not self._run_settings() or not self.usercfg.signing_ready():
-                return
-        self._flush_current_dtb()
-        suggested = os.path.basename(self.session.elf_path)
-        filename, _ = QFileDialog.getSaveFileName(
-            self, 'Reassemble and sign ELF as', suggested,
-            'Config ELF (*.elf);;All Files (*)')
-        if not filename:
-            return
-        QApplication.setOverrideCursor(Qt.CursorShape.WaitCursor)
-        try:
-            self.session.reassemble_signed(filename)
-        except Exception as ex:  # noqa: BLE001
-            QMessageBox.critical(self, 'Failed to reassemble and sign',
-                                 getattr(ex, 'message', str(ex)))
-            return
-        finally:
-            QApplication.restoreOverrideCursor()
-        self.statusBar().showMessage('Reassembled and signed to %s'
-                                     % filename, 10000)
-
-    def open_settings(self):
-        self._run_settings()
-
-    def _run_settings(self):
-        return SettingsDialog(self).exec() == SettingsDialog.DialogCode.Accepted
-
     def close_session(self):
         if self.session is None:
             return
@@ -299,7 +255,6 @@ class MainWindow(QMainWindow):
         self.dtb_list.clear()
         self.dtb_dock.hide()
         self.act_reasm.setEnabled(False)
-        self.act_sign.setEnabled(False)
         self.act_close_sess.setEnabled(False)
 
     def closeEvent(self, event):
