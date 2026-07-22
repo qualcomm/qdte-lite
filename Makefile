@@ -10,7 +10,7 @@ SHELL         := bash
 .ONESHELL:
 .SHELLFLAGS   := -eu -o pipefail -c
 
-.PHONY: help init run check-all ascii test lint format format-check type
+.PHONY: help init run check-all ascii test lint format format-check type markdown
 
 help: ## Show this help message
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) \
@@ -23,7 +23,7 @@ init: ## Install all dependencies (base + GUI extra)
 run: ## Launch the qdte GUI
 	uv run --extra qt qdte
 
-check-all: ascii lint format-check type test ## Run every enforced check
+check-all: ascii lint format-check type markdown test ## Run every enforced check
 
 ascii: ## Check that all sources are ASCII-only
 	./scripts/check_unicode_symbols.sh --check --all-files
@@ -42,3 +42,6 @@ format: ## Auto-format with ruff
 
 format-check: ## Check formatting without modifying files (part of check-all)
 	uv run ruff format --check .
+
+markdown: ## Lint Markdown docs with PyMarkdown (.github/ boilerplate skipped)
+	uv run pymarkdown scan $$(git ls-files '*.md' ':(exclude).github/')
