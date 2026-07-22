@@ -21,6 +21,7 @@ from qdte.core.version import QDTE_VERSION
 from qdte.gui_qt import valueparse
 from qdte.gui_qt.elfsession import ElfSession
 from qdte.gui_qt.finddialog import FindDialog
+from qdte.gui_qt.hexview import HexView
 from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
 WINDOW_TITLE = 'QDTE (Qualcomm Device Tree Editor) %s [Qt]' % QDTE_VERSION
@@ -57,6 +58,14 @@ class MainWindow(QMainWindow):
         self.dtb_dock.setWidget(self.dtb_list)
         self.dtb_dock.hide()
         self.addDockWidget(Qt.DockWidgetArea.LeftDockWidgetArea, self.dtb_dock)
+
+        self.hexview = HexView(self)
+        self.hex_dock = QDockWidget('Raw view', self)
+        self.hex_dock.setWidget(self.hexview)
+        self.hex_dock.hide()
+        self.hex_dock.visibilityChanged.connect(self._hex_visibility_changed)
+        self.addDockWidget(Qt.DockWidgetArea.BottomDockWidgetArea, self.hex_dock)
+        self.tree.selectionModel().currentChanged.connect(self._selection_changed)
 
         self._build_menus()
         self._update_title()
@@ -112,6 +121,9 @@ class MainWindow(QMainWindow):
             act.setCheckable(True)
             group.addAction(act)
         (self.act_hex if gf['viewAsHex'] else self.act_dec).setChecked(True)
+        viewm.addSeparator()
+        self.act_raw = self._add_action(viewm, '&Raw View', self._toggle_raw)
+        self.act_raw.setCheckable(True)
         viewm.addSeparator()
         self._add_action(viewm, '&Expand All', self.tree.expandAll)
         self._add_action(viewm, '&Collapse All', self.tree.collapseAll)
@@ -349,6 +361,8 @@ class MainWindow(QMainWindow):
                                lambda pt=ptype: self._add_property(path, pt))
             if path != '/':
                 menu.addAction('Delete', lambda: self._delete_item(path, False))
+        menu.addSeparator()
+        menu.addAction('Show in Raw View', lambda: self._show_in_raw(path))
         menu.exec(self.tree.viewport().mapToGlobal(pos))
 
     def _apply_checked(self, op):
@@ -458,9 +472,56 @@ class MainWindow(QMainWindow):
         gf['viewAsHex'] = as_hex
         self.model.refresh_values()
 
+    # ------------------------------------------------------------------
+    # raw (hex) view
+    # ------------------------------------------------------------------
+
+    def _toggle_raw(self, checked):
+        self.hex_dock.setVisible(checked)
+        if checked:
+            self._refresh_hex()
+            self._highlight_current_in_hex()
+
+    def _hex_visibility_changed(self, visible):
+        # Keep the menu check in sync when the dock is closed via its own
+        # title-bar button (guard against feedback with the action state).
+        if self.act_raw.isChecked() != visible:
+            self.act_raw.setChecked(visible)
+
+    def _raw_on(self):
+        return self.act_raw.isChecked()
+
+    def _refresh_hex(self):
+        if self._raw_on():
+            self.hexview.set_data(self.dtw.dtb if self.dtw.has_file() else b'')
+
+    def _highlight_current_in_hex(self):
+        if not self._raw_on():
+            return
+        path = self._current_path()
+        span = self.dtw.dtb_mappings.get(path) if path else None
+        if span:
+            self.hexview.highlight_range(span[0], span[1])
+        else:
+            self.hexview.highlight_range(None, None)
+
+    def _show_in_raw(self, path):
+        if not self._raw_on():
+            self.act_raw.setChecked(True)
+            self._toggle_raw(True)
+        self.select_path(path)
+        span = self.dtw.dtb_mappings.get(path)
+        if span:
+            self.hexview.highlight_range(span[0], span[1])
+
+    def _selection_changed(self, _current, _previous):
+        self._highlight_current_in_hex()
+
     def _after_operation(self, _path):
         self._update_title()
         self._update_undoredo()
+        self._refresh_hex()
+        self._highlight_current_in_hex()
 
     def _update_title(self):
         name = os.path.basename(self.dtw.fdt_name) if self.dtw.has_file() else ''
