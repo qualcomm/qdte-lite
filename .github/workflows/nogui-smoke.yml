@@ -1,35 +1,15 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 #
-# Headless (--nogui) integration smoke tests.
+# Headless (--nogui) smoke test and the Qt offscreen functional test.
 #
-# These exercise the command-line contract that downstream automation
-# (Yocto, signing pipelines) relies on, by pip-installing QDTE and
-# invoking the qdte entry point on real Qualcomm boot binaries, checking
-# the produced ELF actually contains the edited property:
-#
-#   qdte --nogui --allow_unsigned --input_file <elf>
-#        --output_path <dir> --output_file <name>
-#        --modify "<dtb>/<path>=<value>"
-#
-# The job deliberately avoids actions/setup-python: its tool-cache
-# builds bundle Tcl/Tk, while the runner's stock python3 has no tkinter
-# (python3-tk is not preinstalled). Installing QDTE into a venv from
-# that interpreter reproduces the minimal sysroot (e.g. a Yocto native
-# environment) that headless mode must support -- any tkinter import on
-# the --nogui path fails for real, with no stubbing or shadowing.
-#
-# Two containers are covered:
-#   * xbl_config.elf  - reassembled via the unsigned GenXBLConfig path
-#   * uefi_dtbs.elf   - a pure-DTB (.dtbs) ELF whose wrapper is rebuilt
-#                       natively under --allow_unsigned
-#
-# Neither path needs the external sectools binary.
-#
-# All binaries are public "test-device" boot images fetched from Qualcomm
-# Software Center; nothing proprietary is committed.
+# The nogui job runs `make test`, which drives scripts/nogui-smoketest.sh:
+# it downloads the public boot-image fixtures into .test/ and verifies that
+# --nogui edits a property inside each real Qualcomm container and can
+# re-open its own reassembled output. Fixtures are public "test-device"
+# boot images from Qualcomm Software Center; nothing proprietary is stored.
 
-name: QDTE nogui smoke
+name: nogui smoketest
 
 on:
   pull_request:
@@ -42,160 +22,45 @@ permissions:
   contents: read
 
 env:
-  # Public boot-binary / tools archives. Bump the build numbers here to
-  # refresh the fixtures; the embedded DTB names below are tied to them.
+  # Public boot-binary archives (used by the qt-offscreen job below; the
+  # nogui job downloads them from within scripts/nogui-smoketest.sh).
   XBL_ZIP_URL: "https://softwarecenter.qualcomm.com/nexus/generic/product/chip/tech-package/QCM6490_bootbinaries.1.0/qcm6490_bootbinaries.1.0-test-device-public/00126/QCM6490_bootbinaries_00126.zip"
   XBL_ELF_IN_ZIP: "QCM6490_bootbinaries/xbl_config.elf"
-  # The first DTB embedded in the reassembled ELF (by file offset); this is
-  # the one `fdtdump --scan` decodes, so the verified edit targets it.
-  XBL_DTB_NAME: "pre-ddr-kodiak-1.0.dtb"
-
   UEFI_ZIP_URL: "https://softwarecenter.qualcomm.com/nexus/generic/product/chip/tech-package/QRB2210_bootbinaries.1.0/qrb2210_bootbinaries.1.0-test-device-public/00010/Agatti_bootbinaries.zip"
   UEFI_ELF_IN_ZIP: "Agatti_bootbinaries/uefi_dtbs.elf"
-  UEFI_DTB_NAME: "qcom,uefi-agatti-1.0.dtb"
-
   FIXTURES_DIR: "${{ github.workspace }}/.smoke-fixtures"
 
 jobs:
-  nogui-smoke:
+  nogui-smoketest:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install QDTE into a venv
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: System build and test dependencies
         run: |
-          python3 -m venv "$RUNNER_TEMP/venv"
-          "$RUNNER_TEMP/venv/bin/pip" install --upgrade pip
-          # swig (as a pip wheel) lets the pylibfdt dependency build from
-          # its sdist.
-          "$RUNNER_TEMP/venv/bin/pip" install swig
-          "$RUNNER_TEMP/venv/bin/pip" install .
-          echo "$RUNNER_TEMP/venv/bin" >> "$GITHUB_PATH"
-          # fdtdump (verification) lives in device-tree-compiler.
+          # swig builds the pylibfdt sdist; device-tree-compiler provides fdtdump.
           sudo apt-get update
-          sudo apt-get install -y device-tree-compiler
+          sudo apt-get install -y swig device-tree-compiler
 
-      # Fails fast on import-level regressions even when fixture downloads
-      # are broken.
-      - name: Headless import canary
-        run: |
-          # Premise check: this interpreter really has no tkinter. If the
-          # runner image ever grows python3-tk, fail loudly instead of
-          # silently weakening the headless guarantee.
-          if python -c "import tkinter" 2>/dev/null; then
-            echo "tkinter is unexpectedly importable; the headless guarantee is not being exercised"
-            exit 1
-          fi
-          python -c "import qdte.cli.main, qdte.cli.headless, qdte.core.dtwrapper, \
-          qdte.core.Autocmd, qdte.core.assemble, qdte.core.sign"
-          qdte --nogui --version
-
-      - name: Cache test binaries
-        id: cache-fixtures
+      - name: Cache downloaded fixtures
         uses: actions/cache@v4
         with:
-          path: ${{ env.FIXTURES_DIR }}
-          key: smoke-fixtures-${{ hashFiles('.github/workflows/nogui-smoke.yml') }}
+          path: .test/fixtures
+          key: nogui-fixtures-${{ hashFiles('scripts/nogui-smoketest.sh') }}
 
-      - name: Fetch test binaries
-        if: steps.cache-fixtures.outputs.cache-hit != 'true'
+      - name: Headless import canary
         run: |
-          set -euo pipefail
-          mkdir -p "$FIXTURES_DIR"
-          tmp="$(mktemp -d)"
+          # qdte.core and qdte.cli must import with no GUI toolkit loaded.
+          # The first uv run also syncs the env and builds pylibfdt.
+          uv run python -c "import qdte.cli.main, qdte.cli.headless, qdte.core.dtwrapper, qdte.core.Autocmd, qdte.core.assemble; import sys; assert 'tkinter' not in sys.modules and 'PySide6' not in sys.modules"
+          uv run qdte --nogui --version
 
-          echo "::group::xbl_config.elf"
-          curl -fsSL -o "$tmp/xbl.zip" "$XBL_ZIP_URL"
-          unzip -o -j "$tmp/xbl.zip" "$XBL_ELF_IN_ZIP" -d "$FIXTURES_DIR"
-          echo "::endgroup::"
-
-          echo "::group::uefi_dtbs.elf"
-          curl -fsSL -o "$tmp/uefi.zip" "$UEFI_ZIP_URL"
-          unzip -o -j "$tmp/uefi.zip" "$UEFI_ELF_IN_ZIP" -d "$FIXTURES_DIR"
-          echo "::endgroup::"
-
-          rm -rf "$tmp"
-          ls -l "$FIXTURES_DIR"
-
-      # Prove the libfdt backend's emission is deterministic and lossless
-      # on real DTBs. (The pyfdt parity mode retired with pyfdt itself;
-      # it passed on these same fixtures before the swap.)
-      - name: fdt backend round-trip
-        run: |
-          set -euo pipefail
-          dtbs="$RUNNER_TEMP/selftest-dtbs"
-          mkdir -p "$dtbs"
-          python - "$FIXTURES_DIR" "$dtbs" <<'EOF'
-          import os, shutil, sys
-          fixtures, out = sys.argv[1], sys.argv[2]
-          from qdte.core import flags as gflags
-          args = gflags.build_parser().parse_args(['--allow_unsigned'])
-          gflags.store(args)
-          gflags.flags['testexp'] = False
-          from qdte.gui_qt.elfsession import ElfSession  # core-only imports
-          for elf in ('uefi_dtbs.elf', 'xbl_config.elf'):
-              s = ElfSession(os.path.join(fixtures, elf))
-              for disp, path in s.disassemble().items():
-                  shutil.copy(path, os.path.join(
-                      out, elf.split('.')[0] + '__' + disp.replace('/', '_')))
-              s.close()
-          EOF
-          python -m qdte.core._fdt_selftest --roundtrip "$dtbs"/*
-
-      # Each smoke test runs the installed qdte entry point to edit one
-      # property, then reads it back from the produced ELF with
-      # `fdtdump --scan`, which locates and decodes the embedded DTB. The
-      # expected value is matched as the 8-digit hex word fdtdump prints
-      # (e.g. <0x00000007>). Run from outside the checkout so only the
-      # installed package is exercised.
-
-      - name: nogui smoke - xbl_config.elf
-        run: |
-          set -euo pipefail
-          # xbl_config.elf reassembles via the unsigned GenXBLConfig path.
-          # The hex literal also exercises the int(val, 0) fix.
-          out="$(mktemp -d)"
-          cd "$RUNNER_TEMP"
-          qdte --nogui --allow_unsigned \
-            --input_file "$FIXTURES_DIR/xbl_config.elf" \
-            --output_path "$out" --output_file xbl_config.elf \
-            --modify "$XBL_DTB_NAME/soc/ddr_common_dt/ddr_log_level_dt=0x7"
-          test -f "$out/xbl_config.elf"
-          # No grep -q: under pipefail its early exit can kill fdtdump with
-          # SIGPIPE and fail the pipeline despite a successful match.
-          fdtdump --scan "$out/xbl_config.elf" 2>/dev/null \
-            | grep "ddr_log_level_dt = <0x00000007>" >/dev/null
-          echo "PASS: xbl_config.elf ddr_log_level_dt == 0x7"
-
-      - name: nogui smoke - uefi_dtbs.elf
-        run: |
-          set -euo pipefail
-          # uefi_dtbs.elf is a pure-DTB (.dtbs) ELF; under --allow_unsigned
-          # its wrapper is rebuilt natively, with no sectools involved.
-          out="$(mktemp -d)"
-          cd "$RUNNER_TEMP"
-          qdte --nogui --allow_unsigned \
-            --input_file "$FIXTURES_DIR/uefi_dtbs.elf" \
-            --output_path "$out" --output_file uefi_dtbs.elf \
-            --modify "$UEFI_DTB_NAME/soc/quantum_dt/enter_quantum=0x1"
-          test -f "$out/uefi_dtbs.elf"
-          fdtdump --scan "$out/uefi_dtbs.elf" 2>/dev/null \
-            | grep "enter_quantum = <0x00000001>" >/dev/null
-          echo "PASS: uefi_dtbs.elf enter_quantum == 0x1"
-
-          # Round-trip: the natively reassembled ELF (single LOAD phdr,
-          # p_align 0) must itself disassemble and re-edit.
-          qdte --nogui --allow_unsigned \
-            --input_file "$out/uefi_dtbs.elf" \
-            --output_path "$out" --output_file uefi_dtbs2.elf \
-            --modify "$UEFI_DTB_NAME/soc/quantum_dt/enter_quantum=0x2"
-          test -f "$out/uefi_dtbs2.elf"
-          fdtdump --scan "$out/uefi_dtbs2.elf" 2>/dev/null \
-            | grep "enter_quantum = <0x00000002>" >/dev/null
-          echo "PASS: round-trip reassembly"
-
-          echo "All nogui smoke tests passed."
+      - name: make test
+        run: make test
 
   # The Qt (PySide6) frontend, exercised functionally under the offscreen
   # platform plugin: disassemble a real config ELF, edit a property through

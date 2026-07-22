@@ -4,9 +4,11 @@ build/
 *.egg-info/
 dist/
 
-# stray local test artifacts
-*.elf
-/raw/
+# uv / virtualenv
+/.venv/
+
+# downloaded test fixtures and smoke-test outputs
+/.test/
 
 # Claude Code local settings (per-developer, not part of the project)
 /.claude/
