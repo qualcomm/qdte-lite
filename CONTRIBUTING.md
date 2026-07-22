@@ -1,7 +1,7 @@
 # Contributing to DTGUI-for-Qualcomm-DTB-ELF-Modification
 
 Hi there!
-We’re thrilled that you’d like to contribute to this project.
+We're thrilled that you'd like to contribute to this project.
 Your help is essential for keeping this project great and for making it better.
 
 ## Branching Strategy

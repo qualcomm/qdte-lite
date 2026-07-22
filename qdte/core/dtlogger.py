@@ -14,12 +14,12 @@ logger = logging.getLogger(__name__)
 
 def logger_init(log_file=None, log_level=logging.DEBUG, max_file_size_mb=1):
     """
-    Initialize dt logger。
+    Initialize dt logger.
 
     Args:
-        log_file (str): log file path。if it is None,only print to console。
-        log_level (int): log level(logging.INFO、logging.DEBUG)。
-        max_file_size_mb (int): Maxmin log file size(MB)。
+        log_file (str): log file path.if it is None,only print to console.
+        log_level (int): log level(logging.INFO,logging.DEBUG).
+        max_file_size_mb (int): Maxmin log file size(MB).
     """
 
     logger.setLevel(log_level)
