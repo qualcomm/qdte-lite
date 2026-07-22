@@ -7,3 +7,6 @@ dist/
 # stray local test artifacts
 *.elf
 /raw/
+
+# Claude Code local settings (per-developer, not part of the project)
+/.claude/
