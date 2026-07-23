@@ -1,6 +1,6 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
-"""Qt main window: device-tree browser over qdte.core.
+"""Qt main window: device-tree browser over qdte_lite.core.
 
 The window owns the DTWrapper and the model; every mutation flows
 through the model so refresh and undo/redo state stay coherent.
@@ -23,16 +23,16 @@ from PySide6.QtWidgets import (
     QTreeView,
 )
 
-import qdte.core.dtwrapper as dt
-from qdte.core import dtlogger
-from qdte.core.dtwrapper import FdtPropertyType
-from qdte.core.flags import flags as gf
-from qdte.core.version import QDTE_VERSION
-from qdte.gui_qt import valueparse
-from qdte.gui_qt.elfsession import ElfSession
-from qdte.gui_qt.finddialog import FindDialog
-from qdte.gui_qt.hexview import HexView
-from qdte.gui_qt.treemodel import COL_VALUE, DtTreeModel
+import qdte_lite.core.dtwrapper as dt
+from qdte_lite.core import dtlogger
+from qdte_lite.core.dtwrapper import FdtPropertyType
+from qdte_lite.core.flags import flags as gf
+from qdte_lite.core.version import QDTE_VERSION
+from qdte_lite.gui_qt import valueparse
+from qdte_lite.gui_qt.elfsession import ElfSession
+from qdte_lite.gui_qt.finddialog import FindDialog
+from qdte_lite.gui_qt.hexview import HexView
+from qdte_lite.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
 WINDOW_TITLE = "Qualcomm Device Tree Editor Lite %s" % QDTE_VERSION
 

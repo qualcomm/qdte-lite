@@ -20,8 +20,8 @@ help: ## Show this help message
 init: ## Install all dependencies (base + GUI extra)
 	uv sync --all-extras
 
-run: ## Launch the qdte GUI
-	uv run --extra qt qdte
+run: ## Launch the qdte-lite GUI
+	uv run --extra qt qdte-lite
 
 check-all: ascii lint format-check type markdown test ## Run every enforced check
 
@@ -35,7 +35,7 @@ lint: ## Lint with ruff
 	uv run ruff check .
 
 type: ## Type-check with mypy
-	uv run mypy qdte
+	uv run mypy qdte_lite
 
 format: ## Auto-format with ruff
 	uv run ruff format .

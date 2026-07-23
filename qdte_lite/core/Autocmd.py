@@ -4,10 +4,10 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 import os
 import sys
-from qdte.core.flags import flags as gf
-import qdte.core.dtwrapper as dt
+from qdte_lite.core.flags import flags as gf
+import qdte_lite.core.dtwrapper as dt
 import time
-from qdte.core import assemble
+from qdte_lite.core import assemble
 import tempfile
 import shutil
 

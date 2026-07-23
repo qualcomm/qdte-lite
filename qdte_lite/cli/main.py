@@ -10,7 +10,7 @@ lazily, only when a GUI run was actually requested.
 
 import sys
 
-from qdte.core import flags as gflags
+from qdte_lite.core import flags as gflags
 
 # Optional-dependency roots the GUI may legitimately be missing. An
 # ImportError for anything else is a real bug and must not be swallowed.
@@ -21,19 +21,19 @@ QDTE's GUI needs PySide6, which is not installed:
 
   pip install "qdte-lite[qt]"
 
-Headless mode needs no GUI toolkit:  qdte --nogui --help"""
+Headless mode needs no GUI toolkit:  qdte-lite --nogui --help"""
 
 
 def _dispatch(args):
     if gflags.flags["nogui"]:
-        from qdte.cli.headless import run_headless
+        from qdte_lite.cli.headless import run_headless
 
         run_headless()
         return
     # Deliberately lazy: the ONLY place a GUI toolkit (PySide6) enters the
     # process, so --nogui never imports it.
     try:
-        from qdte.gui_qt.app import launch
+        from qdte_lite.gui_qt.app import launch
     except ImportError as ex:
         root = (getattr(ex, "name", None) or "").split(".")[0]
         if root in _OPTIONAL_GUI_MODULES:

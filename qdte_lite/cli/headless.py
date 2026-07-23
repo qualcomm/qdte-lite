@@ -2,12 +2,12 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 """The --nogui execution path.
 
-Deliberately imports only qdte.core -- never qdte.gui_qt or PySide6 --
+Deliberately imports only qdte_lite.core -- never qdte_lite.gui_qt or PySide6 --
 so QDTE runs headless on minimal sysroots with no GUI toolkit installed.
 """
 
-import qdte.core.dtwrapper as dt
-from qdte.core import Autocmd as cmd
+import qdte_lite.core.dtwrapper as dt
+from qdte_lite.core import Autocmd as cmd
 
 
 def run_headless():

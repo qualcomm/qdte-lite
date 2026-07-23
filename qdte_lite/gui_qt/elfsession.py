@@ -2,7 +2,7 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 """Config-ELF editing session for the Qt frontend.
 
-Wraps the qdte.core disassemble/reassemble machinery (the same
+Wraps the qdte_lite.core disassemble/reassemble machinery (the same
 assemble.assemble methods the tkinter XblCfgGUI and the --nogui Autocmd
 flow drive) around a temporary working directory, with no UI here.
 """
@@ -12,8 +12,8 @@ import os
 import shutil
 import tempfile
 
-from qdte.core import assemble
-from qdte.core.flags import flags as gf
+from qdte_lite.core import assemble
+from qdte_lite.core.flags import flags as gf
 
 FDT_MAGIC = b"\xd0\x0d\xfe\xed"
 

@@ -6,7 +6,7 @@ Drives the real DtTreeModel and ElfSession (no widgets shown) against a
 config ELF: disassemble, edit one property THROUGH the model, exercise
 undo/redo, reassemble unsigned. Run under QT_QPA_PLATFORM=offscreen:
 
-    python -m qdte.gui_qt._smoke --elf uefi_dtbs.elf \
+    python -m qdte_lite.gui_qt._smoke --elf uefi_dtbs.elf \
         --dtb qcom,uefi-agatti-1.0.dtb \
         --prop /soc/quantum_dt/enter_quantum --value 0x1 \
         --out /tmp/out.elf
@@ -29,9 +29,9 @@ def main(argv=None):
     parser.add_argument("--out", required=True, help="reassembled ELF destination")
     opts = parser.parse_args(argv)
 
-    # Seed the global flags exactly like qdte.cli.main does, so core code
+    # Seed the global flags exactly like qdte_lite.cli.main does, so core code
     # never hits a missing key (verifyHash, dryRun, sectoolsDir, ...).
-    from qdte.core import flags as gflags
+    from qdte_lite.core import flags as gflags
 
     args = gflags.build_parser().parse_args(["--allow_unsigned"])
     gflags.store(args)
@@ -44,9 +44,9 @@ def main(argv=None):
 
     from PySide6.QtGui import QColor
 
-    import qdte.core.dtwrapper as dt
-    from qdte.gui_qt.elfsession import ElfSession
-    from qdte.gui_qt.mainwindow import MainWindow
+    import qdte_lite.core.dtwrapper as dt
+    from qdte_lite.gui_qt.elfsession import ElfSession
+    from qdte_lite.gui_qt.mainwindow import MainWindow
 
     QApplication([])  # validates the (offscreen) platform plugin loads
 

@@ -30,7 +30,7 @@ all = [
 Homepage = "https://github.com/qualcomm/qdte-lite"
 
 [project.scripts]
-qdte = "qdte.cli.main:main"
+qdte-lite = "qdte_lite.cli.main:main"
 
 [dependency-groups]
 dev = [
@@ -40,18 +40,18 @@ dev = [
 ]
 
 [tool.setuptools.packages.find]
-include = ["qdte*"]
+include = ["qdte_lite*"]
 
 [tool.ruff]
 target-version = "py310"
 # XBLConfig is vendored Qualcomm tooling run as subprocess scripts; it is
 # not maintained here and is not linted or type-checked.
-extend-exclude = ["qdte/core/XBLConfig"]
+extend-exclude = ["qdte_lite/core/XBLConfig"]
 
 [tool.mypy]
 python_version = "3.10"
 ignore_missing_imports = true
-exclude = ["qdte/core/XBLConfig"]
+exclude = ["qdte_lite/core/XBLConfig"]
 
 [tool.pymarkdown]
 # Line length (MD013) is noise for prose and tables that wrap by design;

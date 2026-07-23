@@ -54,10 +54,10 @@ jobs:
 
       - name: Headless import canary
         run: |
-          # qdte.core and qdte.cli must import with no GUI toolkit loaded.
+          # qdte_lite.core and qdte_lite.cli must import with no GUI toolkit loaded.
           # The first uv run also syncs the env and builds pylibfdt.
-          uv run python -c "import qdte.cli.main, qdte.cli.headless, qdte.core.dtwrapper, qdte.core.Autocmd, qdte.core.assemble; import sys; assert 'tkinter' not in sys.modules and 'PySide6' not in sys.modules"
-          uv run qdte --nogui --version
+          uv run python -c "import qdte_lite.cli.main, qdte_lite.cli.headless, qdte_lite.core.dtwrapper, qdte_lite.core.Autocmd, qdte_lite.core.assemble; import sys; assert 'tkinter' not in sys.modules and 'PySide6' not in sys.modules"
+          uv run qdte-lite --nogui --version
 
       - name: make test
         run: make test
@@ -93,8 +93,8 @@ jobs:
 
       - name: Qt import canary
         run: |
-          python -c "import PySide6.QtWidgets, qdte.gui_qt.app, \
-          qdte.gui_qt.treemodel, qdte.gui_qt.mainwindow, qdte.gui_qt.elfsession"
+          python -c "import PySide6.QtWidgets, qdte_lite.gui_qt.app, \
+          qdte_lite.gui_qt.treemodel, qdte_lite.gui_qt.mainwindow, qdte_lite.gui_qt.elfsession"
 
       - name: Cache test binaries
         id: cache-fixtures
@@ -120,7 +120,7 @@ jobs:
           set -euo pipefail
           out="$(mktemp -d)"
           cd "$RUNNER_TEMP"   # run outside the checkout; installed package only
-          python -m qdte.gui_qt._smoke \
+          python -m qdte_lite.gui_qt._smoke \
             --elf "$FIXTURES_DIR/uefi_dtbs.elf" \
             --dtb "qcom,uefi-agatti-1.0.dtb" \
             --prop /soc/quantum_dt/enter_quantum --value 0x1 \

@@ -12,14 +12,14 @@ Two modes, both taking DTB files as arguments:
                undo -> byte-identical blob (the undo/redo hash invariant),
                memreserve/boot_cpuid preservation, and mappings sanity.
 
-    python -m qdte.core._fdt_selftest --parity a.dtb b.dtb
-    python -m qdte.core._fdt_selftest --roundtrip a.dtb b.dtb
+    python -m qdte_lite.core._fdt_selftest --parity a.dtb b.dtb
+    python -m qdte_lite.core._fdt_selftest --roundtrip a.dtb b.dtb
 """
 
 import argparse
 import sys
 
-from qdte.core import fdt_backend
+from qdte_lite.core import fdt_backend
 
 
 def _load(backend, path):

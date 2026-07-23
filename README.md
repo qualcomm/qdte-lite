@@ -5,7 +5,8 @@ A focused, lightweight fork of [qualcomm/DTE](https://github.com/qualcomm/DTE)
 trees and assemble/disassemble the Qualcomm config-ELF containers that hold
 them (`xbl_config.elf`, `uefi_dtbs.elf`, and similar).
 
-The CLI tool is invoked as `qdte`; the distribution is `qdte-lite`.
+The CLI command and the distribution are both named `qdte-lite`; the import
+package is `qdte_lite`.
 
 ## Motivation
 
@@ -33,7 +34,7 @@ Changed:
 
 - **libfdt instead of pyfdt** for the device-tree layer (`pylibfdt`, the
   maintained dtc bindings), replacing the unmaintained 2014 `pyfdt`.
-- **Proper packaging** -- a `pyproject.toml` with a `qdte` console script;
+- **Proper packaging** -- a `pyproject.toml` with a `qdte-lite` console script;
   installable with pip/uv/pipx.
 - Child interpreters are spawned via `sys.executable`, so a bare `python`
   is not required on the host.
@@ -56,24 +57,24 @@ uv pip install ".[qt]"    # with the GUI
 uv pip install .          # headless only
 ```
 
-`pip` works too. The install provides the `qdte` console script; `python -m
-qdte` is an equivalent entry point. Install the package rather than running
-from a source checkout, so the `qdte` command and its dependencies resolve
-correctly.
+`pip` works too. The install provides the `qdte-lite` console script;
+`python -m qdte_lite` is an equivalent entry point. Install the package
+rather than running from a source checkout, so the `qdte-lite` command and
+its dependencies resolve correctly.
 
 ## Usage
 
 Launch the GUI on a file:
 
 ```bash
-qdte file.dtb
+qdte-lite file.dtb
 ```
 
 Headless, e.g. editing a property inside a config ELF (no GUI toolkit
 needed):
 
 ```bash
-qdte --nogui \
+qdte-lite --nogui \
     --input_file xbl_config.elf \
     --output_path out --output_file xbl_config.elf \
     --modify "<dtb name>/<node path>/<property>=<value>"
@@ -81,10 +82,10 @@ qdte --nogui \
 
 `--allow_unsigned` is accepted and ignored (this tool only produces
 unsigned ELFs); it is kept so existing command lines keep working. Run
-`qdte --help` for the full flag list.
+`qdte-lite --help` for the full flag list.
 
 Troubleshooting (Linux): if the Qt GUI fails to start under Wayland, try
-`QT_QPA_PLATFORM=xcb qdte ...`.
+`QT_QPA_PLATFORM=xcb qdte-lite ...`.
 
 The GUI covers browse/edit with undo/redo, save / save-as / DTS export,
 find, the raw (hex) view with per-node highlighting, and config-ELF
@@ -93,18 +94,18 @@ sessions with unsigned reassembly.
 ## Code layout
 
 ```text
-qdte/__main__.py  console entry point (the `qdte` command; `python -m qdte`)
-qdte/core/        headless engine: flags, dtwrapper, fdt_backend (the
+qdte_lite/__main__.py  console entry point (the `qdte-lite` command; `python -m qdte_lite`)
+qdte_lite/core/        headless engine: flags, dtwrapper, fdt_backend (the
                   libfdt-based DTB layer), assemble/version_2_assemble,
                   Autocmd, XBLConfig tool scripts.
                   Never imports the GUI; CI enforces this by running the
                   --nogui smoke tests on a PySide6-free interpreter.
-qdte/cli/         argument parsing and dispatch; the --nogui path
-qdte/gui_qt/      the Qt (PySide6) application: item model over dtwrapper,
+qdte_lite/cli/         argument parsing and dispatch; the --nogui path
+qdte_lite/gui_qt/      the Qt (PySide6) application: item model over dtwrapper,
                   main window, hex view, config-ELF sessions ("qt" extra)
 ```
 
-The `--nogui` flow imports only `qdte.core` / `qdte.cli`, so it runs on
+The `--nogui` flow imports only `qdte_lite.core` / `qdte_lite.cli`, so it runs on
 minimal sysroots (for example Yocto native tools) with no GUI toolkit
 installed.
 

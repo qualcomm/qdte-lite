@@ -21,18 +21,18 @@ This file is split up into various different classes. Please see the documentati
 """
 
 # fdt library we are using -- libfdt-backed, keeping the historic pyfdt
-# object-tree API surface (see qdte/core/fdt_backend.py)
-import qdte.core.fdt_backend as pyfdt
+# object-tree API surface (see qdte_lite/core/fdt_backend.py)
+import qdte_lite.core.fdt_backend as pyfdt
 
 # configuration
-from qdte.core.flags import flags as gf
+from qdte_lite.core.flags import flags as gf
 
 # python libraries
 from enum import Enum
 import hashlib
 import json
 import traceback
-from qdte.core import dtlogger
+from qdte_lite.core import dtlogger
 
 """
 misc internal use "helper" functions that perform common tasks on the DeviceTree

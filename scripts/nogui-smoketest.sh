@@ -6,11 +6,11 @@
 #
 # Exercises the command-line contract downstream automation relies on:
 # edit a property inside each of two real Qualcomm boot containers and read
-# it back from the rebuilt ELF with fdtdump, then re-edit qdte's own output
+# it back from the rebuilt ELF with fdtdump, then re-edit qdte-lite's own output
 # to prove a reassembled container can be opened again.
 #
 # Public fixtures are downloaded once into .test/fixtures; outputs go to
-# .test/out. Requires: qdte (installed) and fdtdump (device-tree-compiler).
+# .test/out. Requires: qdte-lite (installed) and fdtdump (device-tree-compiler).
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
@@ -50,11 +50,11 @@ fetch "$UEFI_ZIP_URL" "$UEFI_ELF_IN_ZIP" "$FIXTURES/uefi_dtbs.elf"
 # the repo. All paths below are absolute, so cd is safe.
 cd "$WORK"
 
-# Resolve the qdte entry point: the installed console script, else the module.
-if command -v qdte >/dev/null 2>&1; then
-    QDTE=(qdte)
+# Resolve the qdte-lite entry point: the installed console script, else the module.
+if command -v qdte-lite >/dev/null 2>&1; then
+    QDTE=(qdte-lite)
 else
-    QDTE=(python -m qdte)
+    QDTE=(python -m qdte_lite)
 fi
 
 edit() {  # input-elf  output-name  modify-spec
@@ -82,7 +82,7 @@ edit "$FIXTURES/uefi_dtbs.elf" uefi_dtbs.elf \
     "$UEFI_DTB/soc/quantum_dt/enter_quantum=0x1"
 verify "$OUT/uefi_dtbs.elf" "enter_quantum = <0x00000001>" "uefi_dtbs.elf"
 
-# Round-trip: qdte's own natively reassembled output (single LOAD phdr,
+# Round-trip: qdte-lite's own natively reassembled output (single LOAD phdr,
 # p_align 0) must itself open and re-edit.
 edit "$OUT/uefi_dtbs.elf" uefi_dtbs2.elf \
     "$UEFI_DTB/soc/quantum_dt/enter_quantum=0x2"

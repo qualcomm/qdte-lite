@@ -2,18 +2,18 @@
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 """Parse user-typed property text into DTOperation value payloads.
 
-Per-type contracts (matching what qdte.core.dtwrapper accepts):
+Per-type contracts (matching what qdte_lite.core.dtwrapper accepts):
   WORDS   -> list of raw token strings; core coerces each via int(tok, 0),
              so 0x.../0o.../0b.../decimal all work.  Tokens are
              pre-validated here to give immediate feedback.
   BYTES   -> list[int] in [0, 255].
   STRINGS -> list[str], parsed from the single-quoted space-delimited
-             form shared with the tkinter editor (qdte.core.strvalues).
+             form shared with the tkinter editor (qdte_lite.core.strvalues).
   EMPTY   -> no value; empty properties are not editable.
 """
 
-from qdte.core.dtwrapper import FdtPropertyType
-from qdte.core.strvalues import string_to_strarray
+from qdte_lite.core.dtwrapper import FdtPropertyType
+from qdte_lite.core.strvalues import string_to_strarray
 
 UINT32_MAX = 0xFFFFFFFF
 BYTE_MAX = 0xFF

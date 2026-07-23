@@ -6,7 +6,7 @@ import sys
 
 from PySide6.QtWidgets import QApplication
 
-from qdte.gui_qt.mainwindow import MainWindow
+from qdte_lite.gui_qt.mainwindow import MainWindow
 
 
 def launch(initial_file=None):

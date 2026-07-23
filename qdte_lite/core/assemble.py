@@ -2,15 +2,15 @@
 
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
-from qdte.core.flags import flags as gf
-from qdte.core.flags import default_xbl_tools_dir
+from qdte_lite.core.flags import flags as gf
+from qdte_lite.core.flags import default_xbl_tools_dir
 import subprocess
 import os
 import shutil
 import sys
 import json
-from qdte.core import version_2_assemble
-from qdte.core import dtlogger
+from qdte_lite.core import version_2_assemble
+from qdte_lite.core import dtlogger
 
 # Using magic to detect the compress image
 import lzma

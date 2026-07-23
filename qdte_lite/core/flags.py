@@ -184,7 +184,7 @@ def store(args):
 def default_xbl_tools_dir():
     """Locate the XBLConfig tool scripts.
 
-    They ship inside qdte.core next to this module (both in a development
+    They ship inside qdte_lite.core next to this module (both in a development
     checkout and in an installed tree); fall back to the legacy QDTE
     installation directory otherwise.
     """
@@ -196,7 +196,7 @@ def default_xbl_tools_dir():
 
 def build_parser():
     """Build the QDTE argument parser from the flag specification above."""
-    from qdte.core.version import QDTE_VERSION
+    from qdte_lite.core.version import QDTE_VERSION
 
     parser = argparse.ArgumentParser(
         description=helpmsg, formatter_class=argparse.RawTextHelpFormatter

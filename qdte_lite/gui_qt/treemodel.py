@@ -14,9 +14,9 @@ boxes) belongs to the window, wired via signals.
 
 from PySide6.QtCore import QAbstractItemModel, QModelIndex, Qt, Signal
 
-import qdte.core.dtwrapper as dt
-from qdte.core.flags import flags as gf
-from qdte.gui_qt import valueparse
+import qdte_lite.core.dtwrapper as dt
+from qdte_lite.core.flags import flags as gf
+from qdte_lite.gui_qt import valueparse
 
 COL_NAME, COL_TYPE, COL_VALUE = 0, 1, 2
 _HEADERS = ("Name", "Type", "Value")

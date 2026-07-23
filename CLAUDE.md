@@ -7,13 +7,13 @@ default behavior.
 
 Device Tree Editor Lite: a focused fork of
 [qualcomm/DTE](https://github.com/qualcomm/DTE) (the Qualcomm Device Tree
-Editor). Distribution name `qdte-lite`; the import package and the console
-tool are both `qdte`.
+Editor). Distribution name and console command are `qdte-lite`; the import
+package is `qdte_lite`.
 
 It does one thing well: edit device trees and assemble/disassemble the
 Qualcomm config-ELF containers that hold them (`xbl_config.elf`,
 `uefi_dtbs.elf`, and similar). Two frontends: a headless CLI
-(`qdte --nogui`) and a Qt GUI.
+(`qdte-lite --nogui`) and a Qt GUI.
 
 Deliberately out of scope (do not re-add or extend):
 
@@ -30,22 +30,22 @@ Forked from upstream at `7e3e493` under BSD-3-Clause-Clear. Target version
 ## Layout
 
 ```text
-qdte/__main__.py  console entry point (the qdte command; python -m qdte)
-qdte/core/        headless engine: flags, dtwrapper, fdt_backend (libfdt),
+qdte_lite/__main__.py  console entry point (the qdte-lite command; python -m qdte_lite)
+qdte_lite/core/        headless engine: flags, dtwrapper, fdt_backend (libfdt),
                   assemble/version_2_assemble, Autocmd, dtlogger, strvalues,
                   XBLConfig/ tool scripts. MUST NOT import any GUI toolkit.
-qdte/cli/         argparse and dispatch; headless.py is the --nogui path
-qdte/gui_qt/      Qt (PySide6) app: DtTreeModel over dtwrapper, mainwindow,
+qdte_lite/cli/         argparse and dispatch; headless.py is the --nogui path
+qdte_lite/gui_qt/      Qt (PySide6) app: DtTreeModel over dtwrapper, mainwindow,
                   hexview, finddialog, elfsession, valueparse  ("qt" extra)
 ```
 
 ## Invariants, do not break these
 
-- Headless never imports a GUI toolkit. `qdte.core` and `qdte.cli` must
+- Headless never imports a GUI toolkit. `qdte_lite.core` and `qdte_lite.cli` must
   import with no PySide6 present; CI enforces this by running the nogui
   smoke on a PySide6-free interpreter. The GUI enters the process at exactly
-  one lazy import in `qdte/cli/main.py:_dispatch`.
-- The DTB layer is libfdt (`qdte/core/fdt_backend.py`), not pyfdt: a
+  one lazy import in `qdte_lite/cli/main.py:_dispatch`.
+- The DTB layer is libfdt (`qdte_lite/core/fdt_backend.py`), not pyfdt: a
   materialized tree plus `FdtSw` sequential-write emission, so output bytes
   are deterministic and undo/redo's SHA-256-of-bytes check holds. Do not
   reintroduce pyfdt.
@@ -62,19 +62,19 @@ qdte/gui_qt/      Qt (PySide6) app: DtTreeModel over dtwrapper, mainwindow,
   Yocto ships it prebuilt as `python3-dtc`.
 - Extras: `qt` (PySide6, the GUI) and `all`. A plain install is
   headless-only.
-- Entry points: the `qdte` console script or `python -m qdte`. There is no
+- Entry points: the `qdte-lite` console script or `python -m qdte_lite`. There is no
   run-from-checkout launcher; install the package.
 - (The CI workflow still installs with pip; it may be migrated to uv.)
 
 ## Testing
 
 - Headless smoke, as CI runs it:
-  `qdte --nogui --input_file <elf> --output_path <dir> --output_file <name>
+  `qdte-lite --nogui --input_file <elf> --output_path <dir> --output_file <name>
   --modify "<dtb>/<node>/<prop>=<val>"`, verified with `fdtdump --scan`.
-- fdt backend selftest: `python -m qdte.core._fdt_selftest --roundtrip
+- fdt backend selftest: `python -m qdte_lite.core._fdt_selftest --roundtrip
   <dtb...>`.
 - Qt is offscreen-testable:
-  `QT_QPA_PLATFORM=offscreen python -m qdte.gui_qt._smoke ...`.
+  `QT_QPA_PLATFORM=offscreen python -m qdte_lite.gui_qt._smoke ...`.
 - CI is `.github/workflows/nogui-smoke.yml`: a `nogui-smoke` job (installed
   package, PySide6-free interpreter, real boot-image fixtures) and a
   `qt-offscreen` job (functional GUI exercise under the offscreen plugin).
