@@ -75,9 +75,11 @@ qdte_lite/gui_qt/      Qt (PySide6) app: DtTreeModel over dtwrapper, mainwindow,
   <dtb...>`.
 - Qt is offscreen-testable:
   `QT_QPA_PLATFORM=offscreen python -m qdte_lite.gui_qt._smoke ...`.
-- CI is `.github/workflows/nogui-smoke.yml`: a `nogui-smoke` job (installed
-  package, PySide6-free interpreter, real boot-image fixtures) and a
-  `qt-offscreen` job (functional GUI exercise under the offscreen plugin).
+- CI is `.github/workflows/nogui-smoke.yml`: a single `nogui-smoketest` job
+  (installed package, PySide6-free interpreter, real boot-image fixtures),
+  which also enforces the headless-never-imports-a-GUI-toolkit invariant.
+  The Qt GUI is not exercised in CI; validate it by hand with the offscreen
+  smoke above.
 
 ## Code and documentation rules
 

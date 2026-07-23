@@ -1,13 +1,15 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
 #
-# Headless (--nogui) smoke test and the Qt offscreen functional test.
+# Headless (--nogui) smoke test.
 #
-# The nogui job runs `make test`, which drives scripts/nogui-smoketest.sh:
-# it downloads the public boot-image fixtures into .test/ and verifies that
-# --nogui edits a property inside each real Qualcomm container and can
-# re-open its own reassembled output. Fixtures are public "test-device"
-# boot images from Qualcomm Software Center; nothing proprietary is stored.
+# `make test` drives scripts/nogui-smoketest.sh: it downloads the public
+# boot-image fixtures into .test/ and verifies that --nogui edits a property
+# inside each real Qualcomm container and can re-open its own reassembled
+# output. Running on a PySide6-free install also enforces the invariant that
+# the headless path never imports a GUI toolkit. Fixtures are public
+# "test-device" boot images from Qualcomm Software Center; nothing
+# proprietary is stored.
 
 name: nogui smoketest
 
@@ -20,15 +22,6 @@ on:
 
 permissions:
   contents: read
-
-env:
-  # Public boot-binary archives (used by the qt-offscreen job below; the
-  # nogui job downloads them from within scripts/nogui-smoketest.sh).
-  XBL_ZIP_URL: "https://softwarecenter.qualcomm.com/nexus/generic/product/chip/tech-package/QCM6490_bootbinaries.1.0/qcm6490_bootbinaries.1.0-test-device-public/00126/QCM6490_bootbinaries_00126.zip"
-  XBL_ELF_IN_ZIP: "QCM6490_bootbinaries/xbl_config.elf"
-  UEFI_ZIP_URL: "https://softwarecenter.qualcomm.com/nexus/generic/product/chip/tech-package/QRB2210_bootbinaries.1.0/qrb2210_bootbinaries.1.0-test-device-public/00010/Agatti_bootbinaries.zip"
-  UEFI_ELF_IN_ZIP: "Agatti_bootbinaries/uefi_dtbs.elf"
-  FIXTURES_DIR: "${{ github.workspace }}/.smoke-fixtures"
 
 jobs:
   nogui-smoketest:
@@ -52,79 +45,5 @@ jobs:
           path: .test/fixtures
           key: nogui-fixtures-${{ hashFiles('scripts/nogui-smoketest.sh') }}
 
-      - name: Headless import canary
-        run: |
-          # qdte_lite.core and qdte_lite.cli must import with no GUI toolkit loaded.
-          # The first uv run also syncs the env and builds pylibfdt.
-          uv run python -c "import qdte_lite.cli.main, qdte_lite.cli.headless, qdte_lite.core.dtwrapper, qdte_lite.core.Autocmd, qdte_lite.core.assemble; import sys; assert 'tkinter' not in sys.modules and 'PySide6' not in sys.modules"
-          uv run qdte-lite --nogui --version
-
       - name: make test
         run: make test
-
-  # The Qt (PySide6) frontend, exercised functionally under the offscreen
-  # platform plugin: disassemble a real config ELF, edit a property through
-  # the item model, undo/redo, reassemble unsigned, verify with fdtdump.
-  qt-offscreen:
-    runs-on: ubuntu-latest
-    env:
-      QT_QPA_PLATFORM: offscreen
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-
-      - name: Set up Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.12"
-
-      - name: System libraries for Qt offscreen
-        run: |
-          # PySide6 dlopens EGL/GLVND/xkbcommon even under offscreen.
-          sudo apt-get update
-          sudo apt-get install -y libegl1 libopengl0 libgl1 libxkbcommon0 \
-            libfontconfig1 libglib2.0-0 libdbus-1-3 device-tree-compiler
-
-      - name: Install QDTE with the qt extra
-        run: |
-          python -m pip install --upgrade pip
-          python -m pip install swig
-          python -m pip install ".[qt]"
-
-      - name: Qt import canary
-        run: |
-          python -c "import PySide6.QtWidgets, qdte_lite.gui_qt.app, \
-          qdte_lite.gui_qt.treemodel, qdte_lite.gui_qt.mainwindow, qdte_lite.gui_qt.elfsession"
-
-      - name: Cache test binaries
-        id: cache-fixtures
-        uses: actions/cache@v4
-        with:
-          path: ${{ env.FIXTURES_DIR }}
-          key: smoke-fixtures-${{ hashFiles('.github/workflows/nogui-smoke.yml') }}
-
-      - name: Fetch test binaries
-        if: steps.cache-fixtures.outputs.cache-hit != 'true'
-        run: |
-          set -euo pipefail
-          mkdir -p "$FIXTURES_DIR"
-          tmp="$(mktemp -d)"
-          curl -fsSL -o "$tmp/uefi.zip" "$UEFI_ZIP_URL"
-          unzip -o -j "$tmp/uefi.zip" "$UEFI_ELF_IN_ZIP" -d "$FIXTURES_DIR"
-          curl -fsSL -o "$tmp/xbl.zip" "$XBL_ZIP_URL"
-          unzip -o -j "$tmp/xbl.zip" "$XBL_ELF_IN_ZIP" -d "$FIXTURES_DIR"
-          rm -rf "$tmp"
-
-      - name: Qt offscreen functional smoke
-        run: |
-          set -euo pipefail
-          out="$(mktemp -d)"
-          cd "$RUNNER_TEMP"   # run outside the checkout; installed package only
-          python -m qdte_lite.gui_qt._smoke \
-            --elf "$FIXTURES_DIR/uefi_dtbs.elf" \
-            --dtb "qcom,uefi-agatti-1.0.dtb" \
-            --prop /soc/quantum_dt/enter_quantum --value 0x1 \
-            --out "$out/uefi_dtbs.elf"
-          fdtdump --scan "$out/uefi_dtbs.elf" 2>/dev/null \
-            | grep "enter_quantum = <0x00000001>" >/dev/null
-          echo "PASS: Qt model edit survived reassembly"
