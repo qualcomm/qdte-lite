@@ -196,7 +196,7 @@ def default_xbl_tools_dir():
 
 def build_parser():
     """Build the QDTE argument parser from the flag specification above."""
-    from qdte_lite.core.version import QDTE_VERSION
+    from qdte_lite.core.version import __version__
 
     parser = argparse.ArgumentParser(
         description=helpmsg, formatter_class=argparse.RawTextHelpFormatter
@@ -212,7 +212,7 @@ def build_parser():
         "--test_exp", action="store_true", default=False, help=argparse.SUPPRESS
     )
     parser.add_argument(
-        "-v", "--version", action="version", version="QDTE {}".format(QDTE_VERSION)
+        "-v", "--version", action="version", version="qdte-lite {}".format(__version__)
     )
     # add all of the global flags
     for flag in config:

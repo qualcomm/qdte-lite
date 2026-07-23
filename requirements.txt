@@ -1,4 +1,4 @@
-# Core dependency for QDTE (headless and GUI).
+# Core dependency for qdte-lite (headless and GUI).
 pylibfdt
 
 # The GUI frontend needs PySide6 (the `qt` extra):

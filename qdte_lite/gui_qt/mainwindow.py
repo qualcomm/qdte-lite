@@ -27,14 +27,14 @@ import qdte_lite.core.dtwrapper as dt
 from qdte_lite.core import dtlogger
 from qdte_lite.core.dtwrapper import FdtPropertyType
 from qdte_lite.core.flags import flags as gf
-from qdte_lite.core.version import QDTE_VERSION
+from qdte_lite.core.version import __version__
 from qdte_lite.gui_qt import valueparse
 from qdte_lite.gui_qt.elfsession import ElfSession
 from qdte_lite.gui_qt.finddialog import FindDialog
 from qdte_lite.gui_qt.hexview import HexView
 from qdte_lite.gui_qt.treemodel import COL_VALUE, DtTreeModel
 
-WINDOW_TITLE = "Qualcomm Device Tree Editor Lite %s" % QDTE_VERSION
+WINDOW_TITLE = "Qualcomm Device Tree Editor Lite %s" % __version__
 
 # The tk right-click highlight palette, preserved.
 _HIGHLIGHT_PRESETS = (
@@ -669,5 +669,5 @@ class MainWindow(QMainWindow):
             "About Qualcomm Device Tree Editor Lite",
             "Qualcomm Device Tree Editor Lite %s\n\n"
             "Copyright (c) Qualcomm Technologies, Inc. "
-            "and/or its subsidiaries." % QDTE_VERSION,
+            "and/or its subsidiaries." % __version__,
         )
