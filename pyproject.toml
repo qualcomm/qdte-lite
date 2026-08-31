@@ -56,6 +56,13 @@ target-version = "py310"
 # not maintained here and is not linted or type-checked.
 extend-exclude = ["qdte_lite/core/XBLConfig"]
 
+[tool.ruff.lint]
+# Pin the rule set instead of riding ruff's implicit default, which widens
+# between releases and turns an unrelated ruff upgrade into a red CI run.
+# This is the set the tree was cleaned against: pycodestyle imports and
+# statements, syntax errors, and pyflakes.
+select = ["E4", "E7", "E9", "F"]
+
 [tool.mypy]
 python_version = "3.10"
 ignore_missing_imports = true
