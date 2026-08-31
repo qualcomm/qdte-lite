@@ -1,13 +1,15 @@
 # Copyright (c) Qualcomm Technologies, Inc. and/or its subsidiaries.
 # SPDX-License-Identifier: BSD-3-Clause-Clear
-"""Text <-> value helpers for STRINGS-type DT properties.
+"""Text <-> value helpers for DT property values.
 
 Shared by the GUI and any other caller so a typed value parses the same
 everywhere.  Historically these lived in the tkinter
 editview module.
 """
 
+import re
 import string
+from pathlib import Path
 
 
 def int_allow_blank(nbrstr, base=10):
@@ -126,3 +128,63 @@ def string_to_strarray(mystr):
 
     # all good!
     return ret
+
+
+# Prefix marking a --modify value token whose cells are listed in a file.
+LIST_PREFIX = "@list:"
+
+
+def expand_value_tokens(tokens):
+    """Expand file-valued tokens in a list of --modify value tokens.
+
+    A token of the form ``@list:<path>`` is replaced by the cells listed in
+    ``<path>``: whitespace- or comma-separated hexadecimal words, one per
+    32-bit cell, without a ``0x`` prefix.  This is the format
+    cbsp-boot-utilities' ``bin-to-hex`` writes and its ``@list:`` reads, so a
+    blob converted once can be fed to either tool and produce identical
+    bytes -- including how a trailing partial cell is padded, which the two
+    must agree on.
+
+    It exists so a binary blob -- a certificate, a key, a signature -- can be
+    spliced into a words-typed property without hex-encoding it on the
+    command line, and without every caller reimplementing the packing:
+
+        qcom-capsule-tool bin-to-hex root.cer root.inc
+        qdte-lite --nogui --modify "some.dtb/node/QcCapsuleRootCert=@list:root.inc"
+
+    The file supplies the whole value, length prefix included, exactly as it
+    is laid out in the device tree.  Every other token passes through
+    untouched, so the form still composes with literals.
+
+    :param tokens: list of value token strings (the ';'-separated fields)
+    :return: list where listed cells have become ints and the rest are
+             unchanged strings
+    """
+
+    expanded = []
+    for token in tokens:
+        token = token.strip()
+        if not token.startswith(LIST_PREFIX):
+            expanded.append(token)
+            continue
+
+        path = token[len(LIST_PREFIX) :]
+        if not path:
+            raise ValueError("%s requires a file path" % LIST_PREFIX)
+        try:
+            text = Path(path).read_text()
+        except OSError as ex:
+            raise ValueError("%s%s: %s" % (LIST_PREFIX, path, ex))
+
+        cells = [c for c in re.split(r"[\s,]+", text.strip()) if c]
+        if not cells:
+            raise ValueError("%s%s: no cells found" % (LIST_PREFIX, path))
+        for cell in cells:
+            try:
+                expanded.append(int(cell, 16))
+            except ValueError:
+                raise ValueError(
+                    "%s%s: %r is not a hexadecimal cell" % (LIST_PREFIX, path, cell)
+                )
+
+    return expanded

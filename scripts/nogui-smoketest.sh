@@ -82,6 +82,31 @@ edit "$FIXTURES/uefi_dtbs.elf" uefi_dtbs.elf \
     "$UEFI_DTB/soc/quantum_dt/enter_quantum=0x1"
 verify "$OUT/uefi_dtbs.elf" "enter_quantum = <0x00000001>" "uefi_dtbs.elf"
 
+# Listed cells: @list:<path> splices in cells listed in a file rather than
+# spelled out on the command line. This is the capsule flow -- the same shape
+# cbsp-boot-utilities' bin-to-hex writes and its @list: reads, so a blob
+# converted once feeds either tool and yields identical bytes.
+#
+# bin-to-hex emits the blob length as the first cell, then the payload four
+# bytes at a time, padding a trailing partial cell in its HIGH bytes. So a
+# 6-byte blob "de ad be ef 12 34" becomes:
+#
+#     <0x00000006 0xdeadbeef 0x00001234>
+#
+# That padding direction is asserted here rather than left implicit: pad the
+# other end and the trailing bytes fall outside the declared length. The
+# mixed spacing and trailing newline are deliberate too -- the parser has to
+# tolerate whatever bin-to-hex emits.
+#
+# (Verified against uefi_dtbs.elf: fdtdump --scan reaches every DTB in that
+# container, whereas in xbl_config.elf it only reaches the pre-DDR one.)
+printf '00000006 deadbeef\n00001234\n' > "$WORK/root.inc"
+edit "$FIXTURES/uefi_dtbs.elf" uefi_dtbs_list.elf \
+    "$UEFI_DTB/soc/quantum_dt/enter_quantum=@list:$WORK/root.inc"
+verify "$OUT/uefi_dtbs_list.elf" \
+    "enter_quantum = <0x00000006 0xdeadbeef 0x00001234>" \
+    "@list: capsule-shaped value"
+
 # Round-trip: qdte-lite's own natively reassembled output (single LOAD phdr,
 # p_align 0) must itself open and re-edit.
 edit "$OUT/uefi_dtbs.elf" uefi_dtbs2.elf \

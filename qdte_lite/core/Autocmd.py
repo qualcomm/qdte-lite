@@ -8,6 +8,7 @@ from qdte_lite.core.flags import flags as gf
 import qdte_lite.core.dtwrapper as dt
 import time
 from qdte_lite.core import assemble
+from qdte_lite.core import strvalues
 import tempfile
 import shutil
 
@@ -61,7 +62,9 @@ class autocmd(assemble.assemble):
                 try:
                     if modify_property.split("/")[0].endswith(".dtbs"):
                         dtb_name = modify_property.split("/")[1]
-                        property_value = modify_property.split("=")[1].split(";")
+                        property_value = strvalues.expand_value_tokens(
+                            modify_property.split("=")[1].split(";")
+                        )
                         property_path = modify_property.split("=")[0]
                         index = property_path.find(".dtb/") + len(".dtb")
                         dtb_path = os.path.join(self.outdir, property_path[:index])
@@ -69,7 +72,9 @@ class autocmd(assemble.assemble):
 
                     else:
                         dtb_name = modify_property.split("/")[0]
-                        property_value = modify_property.split("=")[1].split(";")
+                        property_value = strvalues.expand_value_tokens(
+                            modify_property.split("=")[1].split(";")
+                        )
                         property_path = modify_property.split("=")[0]
                         property_path = property_path[
                             len(modify_property.split("/")[0]) :
