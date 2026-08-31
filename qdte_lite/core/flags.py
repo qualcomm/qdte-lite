@@ -109,6 +109,12 @@ config = {
         "bin-to-hex writes.\n"
         '    From a file: --modify "platform.dtb/sw/uefi/uefiplat/QcCapsuleRootCert=@list:root.inc"',
     },
+    "--list": {
+        "action": "store_true",
+        "default": False,
+        "help": "List the DTBs inside --input_file, one name per line, and\n"
+        "exit. The names are what --modify expects.",
+    },
     "--find_property": {
         "nargs": "?",
         "const": None,

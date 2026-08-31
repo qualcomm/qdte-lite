@@ -107,6 +107,18 @@ verify "$OUT/uefi_dtbs_list.elf" \
     "enter_quantum = <0x00000006 0xdeadbeef 0x00001234>" \
     "@list: capsule-shaped value"
 
+# Listing: --list names the DTBs in a container, one per line and nothing
+# else, so the output can be iterated. The two fixtures also show why the
+# names cannot be assumed -- xbl_config.elf takes them from container
+# metadata, uefi_dtbs.elf derives them from each DTB's /compatible.
+listed="$("${QDTE[@]}" --nogui --input_file "$FIXTURES/xbl_config.elf" --list 2>/dev/null)"
+if grep -qx "$XBL_DTB" <<<"$listed" && grep -qx "post-ddr-kodiak-1.0.dtb" <<<"$listed"; then
+    echo "PASS: --list"
+else
+    echo "FAIL: --list - got '$listed'"
+    exit 1
+fi
+
 # Locating a property: --find_property prints where it lives, one
 # "<dtb>/<node path>/<property>" line per match, and nothing else on stdout
 # so the line can be captured and reused as a --modify target.
