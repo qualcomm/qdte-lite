@@ -99,9 +99,18 @@ $ qdte-lite --nogui \
 The file supplies the whole value, length prefix included. It composes with
 literals, so a value may still mix the two forms.
 
-Addressing a property requires knowing which DTB inside the container holds
-it, and those names are assigned during disassembly rather than being
-visible in the container itself. `--find_property` reports them:
+`--list` prints the DTBs a container holds, one name per line and nothing
+else, so the output can be iterated:
+
+```bash
+$ qdte-lite --nogui --input_file xbl_config.elf --list
+post-ddr-kodiak-1.0.dtb
+pre-ddr-kodiak-1.0.dtb
+```
+
+Addressing a property also requires knowing which of those DTBs holds it,
+and the names are assigned during disassembly rather than being visible in
+the container itself. `--find_property` reports the whole target at once:
 
 ```bash
 $ qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert
