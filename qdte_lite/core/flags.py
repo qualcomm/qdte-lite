@@ -109,6 +109,16 @@ config = {
         "bin-to-hex writes.\n"
         '    From a file: --modify "platform.dtb/sw/uefi/uefiplat/QcCapsuleRootCert=@list:root.inc"',
     },
+    "--find_property": {
+        "nargs": "?",
+        "const": None,
+        "default": None,
+        "metavar": "PROPERTY_NAME",
+        "help": "Print where PROPERTY_NAME lives inside --input_file, one\n"
+        "'<dtb>/<node path>/<property>' line per match, and exit.\n"
+        "Each line can be used as a --modify target verbatim.\n"
+        "Exits non-zero if the property is not found.",
+    },
     "--output_path": {
         "nargs": "?",
         "const": None,
