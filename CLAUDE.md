@@ -24,8 +24,10 @@ Deliberately out of scope (do not re-add or extend):
   kept as an accepted no-op so the existing CLI contract (CI, the meta-qcom
   capsule bbclass) keeps working.
 
-Forked from upstream at `7e3e493` under BSD-3-Clause-Clear. Target version
-`2.0.0`.
+Forked from upstream at `7e3e493` under BSD-3-Clause-Clear. The version
+line is the fork's own and does not track upstream DTE releases; the first
+release is `2.0.0`, whose major bump marks the removals above. Release tags
+are `v<version>` -- `qdte_lite/core/version.py` only considers `v*` tags.
 
 ## Layout
 

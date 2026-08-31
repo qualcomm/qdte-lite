@@ -39,6 +39,14 @@ Changed:
 - Child interpreters are spawned via `sys.executable`, so a bare `python`
   is not required on the host.
 
+Versioning:
+
+- The version line is this fork's own. `qdte-lite` 2.0.0 follows upstream
+  DTE 1.5.x in ancestry only -- the major bump marks the removals and the
+  device-tree backend swap listed above. It does not imply parity with, or
+  succession to, any DTE 1.x release, and upstream releases are not tracked
+  here.
+
 ## Requirements
 
 - Python 3

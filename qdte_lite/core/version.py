@@ -8,11 +8,11 @@ released wheels. When the package is imported from a source checkout (a
 package), a PEP 440 local-version suffix is appended so that ``qdte-lite
 --version`` makes it obvious the running build is not a tagged release:
 
-* exact tag, clean tree            -> ``1.5.7``
-* exact tag, dirty tree            -> ``1.5.7+dirty``
-* past tag, clean tree             -> ``1.5.7+dev.<N>.g<sha>``
-* past tag, dirty tree             -> ``1.5.7+dev.<N>.g<sha>.dirty``
-* no reachable tag, clean / dirty  -> ``1.5.7+dev.<sha>[.dirty]``
+* exact tag, clean tree            -> ``2.0.0``
+* exact tag, dirty tree            -> ``2.0.0+dirty``
+* past tag, clean tree             -> ``2.0.0+dev.<N>.g<sha>``
+* past tag, dirty tree             -> ``2.0.0+dev.<N>.g<sha>.dirty``
+* no reachable tag, clean / dirty  -> ``2.0.0+dev.<sha>[.dirty]``
 
 PyPI / wheel installs never carry the suffix because no ``.git`` directory
 is co-located with the installed package. Only release tags matching ``v*``
@@ -69,7 +69,7 @@ def _git_dev_suffix(base: str) -> str:
     # On the release tag with uncommitted changes.
     if desc == f"{tag_prefix}.dirty":
         return "+dirty"
-    # Past the release tag: "v1.5.7-2-gabc1234[.dirty]" -> "+dev.2.gabc1234[.dirty]".
+    # Past the release tag: "v2.0.0-2-gabc1234[.dirty]" -> "+dev.2.gabc1234[.dirty]".
     if desc.startswith(f"{tag_prefix}-"):
         rest = desc[len(tag_prefix) + 1 :]
         return f"+dev.{rest.replace('-', '.')}"

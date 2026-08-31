@@ -7,7 +7,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "qdte-lite"
-version = "1.5.7"
+version = "2.0.0"
 description = "Device Tree Editor Lite - edit device trees and (dis)assemble the Qualcomm config-ELF containers that hold them"
 readme = "README.md"
 license = {text = "BSD-3-Clause-Clear"}
