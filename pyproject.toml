@@ -42,6 +42,14 @@ dev = [
 [tool.setuptools.packages.find]
 include = ["qdte_lite*"]
 
+[tool.uv]
+# pylibfdt is sdist-only and its libfdt.i still calls PyInt_AsLong, a
+# Python 2 compatibility macro swig dropped in 4.5.0; built with that swig
+# the extension links against a symbol CPython does not export and fails at
+# import. pylibfdt build-requires "swig", so the isolated build environment
+# pulls the newest release unless it is constrained here.
+build-constraint-dependencies = ["swig<4.5"]
+
 [tool.ruff]
 target-version = "py310"
 # XBLConfig is vendored Qualcomm tooling run as subprocess scripts; it is
