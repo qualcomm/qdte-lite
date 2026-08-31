@@ -53,8 +53,8 @@ Changed:
 `uv` is the recommended package manager:
 
 ```bash
-uv pip install ".[qt]"    # with the GUI
-uv pip install .          # headless only
+$ uv pip install ".[qt]"    # with the GUI
+$ uv pip install .          # headless only
 ```
 
 `pip` works too. The install provides the `qdte-lite` console script;
@@ -67,14 +67,14 @@ its dependencies resolve correctly.
 Launch the GUI on a file:
 
 ```bash
-qdte-lite file.dtb
+$ qdte-lite file.dtb
 ```
 
 Headless, e.g. editing a property inside a config ELF (no GUI toolkit
 needed):
 
 ```bash
-qdte-lite --nogui \
+$ qdte-lite --nogui \
     --input_file xbl_config.elf \
     --output_path out --output_file xbl_config.elf \
     --modify "<dtb name>/<node path>/<property>=<value>"
@@ -88,9 +88,9 @@ cbsp-boot-utilities' `bin-to-hex` writes and its own `@list:` reads, so a
 blob converted once feeds either tool and yields identical bytes:
 
 ```bash
-qcom-capsule-tool bin-to-hex root.cer root.inc
+$ qcom-capsule-tool bin-to-hex root.cer root.inc
 
-qdte-lite --nogui \
+$ qdte-lite --nogui \
     --input_file xbl_config.elf \
     --output_path out --output_file xbl_config.elf \
     --modify "<dtb name>/sw/uefi/uefiplat/QcCapsuleRootCert=@list:root.inc"
@@ -104,7 +104,7 @@ it, and those names are assigned during disassembly rather than being
 visible in the container itself. `--find_property` reports them:
 
 ```bash
-qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert
+$ qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert
 post-ddr-kodiak-1.0.dtb/sw/uefi/uefiplat/QcCapsuleRootCert
 ```
 
@@ -113,8 +113,8 @@ exit if the property is absent, so a script can locate a property instead of
 hardcoding names per platform:
 
 ```bash
-target=$(qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert)
-qdte-lite --nogui --input_file xbl_config.elf \
+$ target=$(qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert)
+$ qdte-lite --nogui --input_file xbl_config.elf \
     --output_path out --output_file xbl_config.elf \
     --modify "$target=@list:root.inc"
 ```
@@ -154,14 +154,14 @@ A `Makefile` is the single entry point for setup and checks (bash-based, so
 it works on Linux and macOS natively and on Windows under Git Bash or WSL):
 
 ```bash
-make init          # install dependencies with uv (base + GUI extra)
-make run           # launch the GUI
-make check-all     # run every check (what CI runs)
+$ make init          # install dependencies with uv (base + GUI extra)
+$ make run           # launch the GUI
+$ make check-all     # run every check (what CI runs)
 
-make ascii         # enforce the ASCII-only rule (scripts/check_unicode_symbols.sh)
-make test          # headless --nogui smoke test against real boot images
-                   # (scripts/nogui-smoketest.sh; fixtures download to .test/)
-make help          # list all targets
+$ make ascii         # enforce the ASCII-only rule (scripts/check_unicode_symbols.sh)
+$ make test          # headless --nogui smoke test against real boot images
+                     # (scripts/nogui-smoketest.sh; fixtures download to .test/)
+$ make help          # list all targets
 ```
 
 `make lint`, `make format`, `make format-check` and `make type` are stubs

@@ -69,7 +69,12 @@ ignore_missing_imports = true
 exclude = ["qdte_lite/core/XBLConfig"]
 
 [tool.pymarkdown]
-# Line length (MD013) is noise for prose and tables that wrap by design;
-# every other rule stays on. Scope is set by scripts/check_markdown.sh,
-# which lints the tracked root docs and leaves .github/ boilerplate alone.
+# Line length (MD013) is noise for prose and tables that wrap by design.
+# MD014 objects to a $ prompt on code blocks that show no output, but the
+# Usage examples carry the prompt throughout so it reliably marks what you
+# type; dropping it from the output-free blocks would make its absence
+# meaningless elsewhere. Every other rule stays on. Scope is set by
+# scripts/check_markdown.sh, which lints the tracked root docs and leaves
+# .github/ boilerplate alone.
 plugins.md013.enabled = false
+plugins.md014.enabled = false
