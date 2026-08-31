@@ -3,6 +3,7 @@
 
 from __future__  import print_function
 import os
+import subprocess
 import sys
 import shutil
 import re
@@ -77,13 +78,18 @@ def call_os_system(command, error_msg="missing"):
     error_msg =  "\nERROR: An error occurred while executing \"" + command + "\""
   if command:
     try:
-      os_call_res = os.system(command)
-    except:
-      print(error_msg)
+      # Run through subprocess with the child's stdout folded into stderr.
+      # os.system() let the child write straight to our stdout, which makes
+      # the tool unusable programmatically: a caller capturing stdout to read
+      # a result also captured pages of disassembly narration. The output is
+      # still shown, just on the stream meant for diagnostics.
+      os_call_res = subprocess.call(command, shell=True, stdout=sys.stderr)
+    except Exception:
+      print(error_msg, file=sys.stderr)
       exit(-1)
 
     if os_call_res != 0:
-      print(error_msg)
+      print(error_msg, file=sys.stderr)
       exit(-1)
 
 def get_alpha_numeric_only(input_string):
