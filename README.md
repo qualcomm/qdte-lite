@@ -80,6 +80,25 @@ qdte-lite --nogui \
     --modify "<dtb name>/<node path>/<property>=<value>"
 ```
 
+A value token may also be read from a file, so a binary blob does not have
+to be hex-encoded on the command line. `@list:<path>` is replaced by the
+cells listed in `<path>`: whitespace- or comma-separated hexadecimal words,
+one per 32-bit cell, without a `0x` prefix. That is the format
+cbsp-boot-utilities' `bin-to-hex` writes and its own `@list:` reads, so a
+blob converted once feeds either tool and yields identical bytes:
+
+```bash
+qcom-capsule-tool bin-to-hex root.cer root.inc
+
+qdte-lite --nogui \
+    --input_file xbl_config.elf \
+    --output_path out --output_file xbl_config.elf \
+    --modify "<dtb name>/sw/uefi/uefiplat/QcCapsuleRootCert=@list:root.inc"
+```
+
+The file supplies the whole value, length prefix included. It composes with
+literals, so a value may still mix the two forms.
+
 `--allow_unsigned` is accepted and ignored (this tool only produces
 unsigned ELFs); it is kept so existing command lines keep working. Run
 `qdte-lite --help` for the full flag list.

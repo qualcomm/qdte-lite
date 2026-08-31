@@ -102,7 +102,12 @@ config = {
         "Format:\n"
         '    Singal property: --modify "platform.dtb/sw/boot/vibration=0"\n'
         '    Multi properties: --modify "platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp&platform.dtb/model=Qualcomm Technologies, Inc. Kailua cdp"\n'
-        '    Multi values: --modify  "platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp"',
+        '    Multi values: --modify  "platform.dtb/compatible=Qcom,Kailua;Qcom,Aurora;Qcom,mtp"\n'
+        "A value token of the form @list:<path> is replaced by the cells\n"
+        "listed in <path>: whitespace- or comma-separated hex words, one per\n"
+        "32-bit cell, no 0x prefix -- the format cbsp-boot-utilities'\n"
+        "bin-to-hex writes.\n"
+        '    From a file: --modify "platform.dtb/sw/uefi/uefiplat/QcCapsuleRootCert=@list:root.inc"',
     },
     "--output_path": {
         "nargs": "?",
