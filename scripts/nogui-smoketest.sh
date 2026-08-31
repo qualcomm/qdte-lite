@@ -107,6 +107,26 @@ verify "$OUT/uefi_dtbs_list.elf" \
     "enter_quantum = <0x00000006 0xdeadbeef 0x00001234>" \
     "@list: capsule-shaped value"
 
+# Locating a property: --find_property prints where it lives, one
+# "<dtb>/<node path>/<property>" line per match, and nothing else on stdout
+# so the line can be captured and reused as a --modify target.
+found="$("${QDTE[@]}" --nogui --input_file "$FIXTURES/uefi_dtbs.elf" \
+    --find_property enter_quantum 2>/dev/null)"
+if [[ "$found" == "$UEFI_DTB/soc/quantum_dt/enter_quantum" ]]; then
+    echo "PASS: --find_property"
+else
+    echo "FAIL: --find_property - got '$found'"
+    exit 1
+fi
+
+# An absent property is reported by exit status, not by a message to parse.
+if "${QDTE[@]}" --nogui --input_file "$FIXTURES/uefi_dtbs.elf" \
+        --find_property NoSuchPropertyHere >/dev/null 2>&1; then
+    echo "FAIL: --find_property - absent property should exit non-zero"
+    exit 1
+fi
+echo "PASS: --find_property absent"
+
 # Round-trip: qdte-lite's own natively reassembled output (single LOAD phdr,
 # p_align 0) must itself open and re-edit.
 edit "$OUT/uefi_dtbs.elf" uefi_dtbs2.elf \

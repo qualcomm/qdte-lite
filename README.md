@@ -99,6 +99,26 @@ qdte-lite --nogui \
 The file supplies the whole value, length prefix included. It composes with
 literals, so a value may still mix the two forms.
 
+Addressing a property requires knowing which DTB inside the container holds
+it, and those names are assigned during disassembly rather than being
+visible in the container itself. `--find_property` reports them:
+
+```bash
+qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert
+post-ddr-kodiak-1.0.dtb/sw/uefi/uefiplat/QcCapsuleRootCert
+```
+
+One line per match, usable as a `--modify` target verbatim, and a non-zero
+exit if the property is absent, so a script can locate a property instead of
+hardcoding names per platform:
+
+```bash
+target=$(qdte-lite --nogui --input_file xbl_config.elf --find_property QcCapsuleRootCert)
+qdte-lite --nogui --input_file xbl_config.elf \
+    --output_path out --output_file xbl_config.elf \
+    --modify "$target=@list:root.inc"
+```
+
 `--allow_unsigned` is accepted and ignored (this tool only produces
 unsigned ELFs); it is kept so existing command lines keep working. Run
 `qdte-lite --help` for the full flag list.
