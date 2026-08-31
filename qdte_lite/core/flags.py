@@ -133,6 +133,10 @@ flags = {
     "xblEnabled": True,
     # whether to view values as hex (True) or decimal (False). Toggled by the user in the View -> Values As... menu
     "viewAsHex": False,
+    # set from --test_exp by the CLI. Defaulted here so the core is usable
+    # without going through cli.main: assemble.dissamble_config_elf() reads
+    # it, so any other entry point would otherwise raise KeyError.
+    "testexp": False,
 }
 
 
