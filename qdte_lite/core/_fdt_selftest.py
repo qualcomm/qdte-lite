@@ -139,15 +139,61 @@ def check_roundtrip(paths):
         print("ROUNDTRIP OK: %s (%d bytes)" % (path, len(blob_a)))
 
 
+def check_emit_sizes():
+    """Emit trees whose serialized size lands on every offset across an
+    FdtSw growth boundary.
+
+    FdtSw grows its buffer in INC_SIZE steps and every write method retries
+    through check_space(), but as_fdt() calls fdt_finish() once with no
+    retry. A tree that serializes to an exact multiple of INC_SIZE leaves no
+    slack for the strings block, so emission used to fail with
+    FDT_ERR_NOSPACE -- for that size only, which made it a lottery rather
+    than a limit. Sweep a padding property in 4-byte steps so several
+    emissions land exactly on a boundary.
+    """
+
+    import libfdt
+
+    inc = libfdt.FdtSw.INC_SIZE
+    sizes, failures = set(), []
+    for pad_cells in range(1, (inc * 3) // 4):
+        root = fdt_backend.FdtNode("/")
+        root.append(fdt_backend.FdtPropertyWords("pad", [0xDEADBEEF] * pad_cells))
+        try:
+            blob = fdt_backend.Fdt(root).to_dtb()
+        except Exception as ex:
+            failures.append((pad_cells, ex))
+            continue
+        sizes.add(len(blob))
+
+    on_boundary = sorted(n for n in sizes if n % inc == 0)
+    assert on_boundary, (
+        "sweep never produced a blob on an INC_SIZE (%d) boundary, so this "
+        "would not have caught the bug it exists for" % inc
+    )
+    assert not failures, "emission failed at %d size(s), first: pad=%d %s" % (
+        len(failures),
+        failures[0][0],
+        failures[0][1],
+    )
+    print(
+        "emit sizes: %d blobs, %d exactly on a %d-byte boundary, no failures"
+        % (len(sizes), len(on_boundary), inc)
+    )
+
+
 def main(argv=None):
     parser = argparse.ArgumentParser(description=__doc__)
     mode = parser.add_mutually_exclusive_group(required=True)
     mode.add_argument("--parity", action="store_true")
     mode.add_argument("--roundtrip", action="store_true")
-    parser.add_argument("dtbs", nargs="+", help="DTB files to test")
+    mode.add_argument("--emit-sizes", action="store_true")
+    parser.add_argument("dtbs", nargs="*", help="DTB files to test")
     opts = parser.parse_args(argv)
 
-    if opts.parity:
+    if opts.emit_sizes:
+        check_emit_sizes()
+    elif opts.parity:
         check_parity(opts.dtbs)
     else:
         check_roundtrip(opts.dtbs)
