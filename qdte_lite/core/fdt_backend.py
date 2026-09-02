@@ -246,14 +246,33 @@ class Fdt:
         """Serialize deterministically via libfdt's sequential writer.
         When ``mappings`` is a dict, fill it with {path: (start, end)}
         byte ranges of each node header / property record in the blob."""
-        sw = libfdt.FdtSw()
-        for addr, size in self.memrsv:
-            sw.add_reservemap_entry(addr, size)
-        sw.finish_reservemap()
-        sw.begin_node("")
-        self._emit_node(sw, self.root)
-        sw.end_node()
-        fdt = sw.as_fdt()
+        # FdtSw grows its buffer in INC_SIZE steps, and every write method
+        # retries through check_space() when it runs out.  as_fdt() does not:
+        # it calls fdt_finish() once and raises FDT_ERR_NOSPACE if the strings
+        # block and header fixups do not fit in what is left.  A tree whose
+        # serialized size lands on a multiple of INC_SIZE leaves zero slack
+        # and fails, which makes this a size lottery rather than a real limit.
+        #
+        # Seed the buffer past the point where that can happen and retry with
+        # more room if it still does.
+        size_hint = libfdt.FdtSw.INC_SIZE
+        while True:
+            sw = libfdt.FdtSw(size_hint)
+            for addr, size in self.memrsv:
+                sw.add_reservemap_entry(addr, size)
+            sw.finish_reservemap()
+            sw.begin_node("")
+            self._emit_node(sw, self.root)
+            sw.end_node()
+            try:
+                fdt = sw.as_fdt()
+                break
+            except libfdt.FdtException as ex:
+                if ex.err != -libfdt.NOSPACE:
+                    raise
+                # len(sw) is the grown buffer; ask for meaningfully more than
+                # the increment so this terminates in one further attempt.
+                size_hint = len(sw.as_bytearray()) + libfdt.FdtSw.INC_SIZE * 16
         fdt.pack()
         buf = bytearray(fdt.as_bytearray())
         if self.boot_cpuid:
