@@ -105,19 +105,16 @@ def disassemble_dtbs_elf(
         output_xbl_config_directory, DISASSEMBLED_ELF_INFO_JSON
     )
     call_os_system(
-        '"'
-        + sys.executable
-        + '" "'
-        + tools_path
-        + os.path.sep
-        + ELF_GENERATOR_SCRIPT
-        + '"'
-        + " -d "
-        + config_file_to_be_disassembled
-        + " -o "
-        + autogen_directory
-        + " -e "
-        + disassembled_elf_info_json
+        [
+            sys.executable,
+            os.path.join(tools_path, ELF_GENERATOR_SCRIPT),
+            "-d",
+            config_file_to_be_disassembled,
+            "-o",
+            autogen_directory,
+            "-e",
+            disassembled_elf_info_json,
+        ]
     )
 
     if verbose:
@@ -402,24 +399,27 @@ def reassemble_dtbs_elf(
         dtlogger.info("\nentering sectools...")
         dtlogger.info(reassemble_dir)
         call_os_system(
-            sectools_path
-            + " elf-tool generate"
-            + " --elf-class "
-            + str(elf_class_int)
-            + " --elf-entry "
-            + elf_address
-            + " --elf-machine-type "
-            + target_arch
-            + " --vaddr "
-            + elf_address
-            + " --paddr "
-            + elf_address
-            + " --align "
-            + disassembled_elf_info_json["alignment"]
-            + " --data "
-            + dtbs_path
-            + " --outfile "
-            + outfile
+            [
+                sectools_path,
+                "elf-tool",
+                "generate",
+                "--elf-class",
+                str(elf_class_int),
+                "--elf-entry",
+                elf_address,
+                "--elf-machine-type",
+                target_arch,
+                "--vaddr",
+                elf_address,
+                "--paddr",
+                elf_address,
+                "--align",
+                disassembled_elf_info_json["alignment"],
+                "--data",
+                dtbs_path,
+                "--outfile",
+                outfile,
+            ]
         )
     else:
         dtlogger.info("\nentering native elf reassembly (no sectools)...")

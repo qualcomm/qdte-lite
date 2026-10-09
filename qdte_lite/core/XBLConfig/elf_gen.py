@@ -769,11 +769,11 @@ if __name__ == "__main__":
     print("\n" + ELF_GENERATOR_SCRIPT + ": Generating elf.........")
     config_parser(options.json_file, False)
   else:
-    command = "python " + options.tools_path + "/" + GUI_ELF_GENERATOR_SCRIPT
+    command = [sys.executable, options.tools_path + "/" + GUI_ELF_GENERATOR_SCRIPT]
     if options.json_file:
-      command = command + " -c " + options.json_file
+      command += ["-c", options.json_file]
     if options.elf_input:
-      command = command + " -f " + options.elf_input
+      command += ["-f", options.elf_input]
     # Call elf_gen_gui script to handle input options with GUI interface.
     call_os_system( command )
   exit(0)
