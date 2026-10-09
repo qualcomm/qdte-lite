@@ -41,7 +41,7 @@ SEGMENTS_COMBINATION_FILE_NAME = "segments_combination.bin"
 
 # Image Signing Info
 SECTOOLS_SCRIPT = "sectools.py"
-SECTOOLS_COMMAND = " secimage "
+SECTOOLS_COMMAND = "secimage"
 SECTOOLS_CONFIG_XML = "/config/integration/secimage_eccv3.xml"
 SIGN_ID = "xbl_config"
 SECTOOLS_IN_USE_SOC_HW_VERSION = "1"
@@ -74,8 +74,12 @@ def create_directory(directory_name):
       exit(-1)
 
 def call_os_system(command, error_msg="missing"):
+  # `command` is an argv list, executed without a shell. The former
+  # shell=True string form required every caller to hand-quote paths and
+  # still broke on shell metacharacters; an argv list needs no quoting and
+  # is what the Semgrep gate in CI (subprocess-shell-true) insists on.
   if error_msg == "missing":
-    error_msg =  "\nERROR: An error occurred while executing \"" + command + "\""
+    error_msg =  "\nERROR: An error occurred while executing \"" + " ".join(command) + "\""
   if command:
     try:
       # Run through subprocess with the child's stdout folded into stderr.
@@ -83,7 +87,7 @@ def call_os_system(command, error_msg="missing"):
       # the tool unusable programmatically: a caller capturing stdout to read
       # a result also captured pages of disassembly narration. The output is
       # still shown, just on the stream meant for diagnostics.
-      os_call_res = subprocess.call(command, shell=True, stdout=sys.stderr)
+      os_call_res = subprocess.call(command, stdout=sys.stderr)
     except Exception:
       print(error_msg, file=sys.stderr)
       exit(-1)

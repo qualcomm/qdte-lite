@@ -6,6 +6,7 @@
 
 from __future__  import print_function
 from optparse import OptionParser
+import shlex
 import subprocess
 import shutil
 import os
@@ -71,15 +72,15 @@ def generate_xbl_config_file(json_config_path,
           "Please check contents.")
     exit(-1)
 
-  if store_original_size:
-      storeoriginalsize = ' --store-original-size'
   # Call XBL config metadata generator to construct the config headers
-  call_os_system("\"" + sys.executable + "\" \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\""+\
-                 " -i " + json_config_path + \
-                 " -b " + base_directory + \
-                 " -o " +  autogen_directory + \
-                 " -a " + alignment +\
-                 storeoriginalsize)
+  metadata_cmd = [sys.executable, tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT,
+                  "-i", json_config_path,
+                  "-b", base_directory,
+                  "-o", autogen_directory,
+                  "-a", alignment]
+  if store_original_size:
+      metadata_cmd.append("--store-original-size")
+  call_os_system(metadata_cmd)
   # Verify that all binary blobs were generated using JSON config entries
   major_version = json_data["CFGL"].pop("major_version", 1)
   minor_version = json_data["CFGL"].pop("minor_version", 0)
@@ -168,27 +169,27 @@ def sign_elf_v1(sectools_directory,
 
       print("************* Sign generated Elf ************\n")
 
-      subprocess.check_call(('"' + sys.executable + '" '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
-                             + " -i " + filepath_to_be_signed
-                             + " -o " + autogen_directory + UNSIGNED_FOLDER
-                             + " -ta "
-                             + " -g " + SIGN_ID
-                             + " -c " + sectools_directory + SECTOOLS_CONFIG_XML ), shell=True )
+      subprocess.check_call([sys.executable, sectools_directory + "/" + SECTOOLS_SCRIPT, SECTOOLS_COMMAND,
+                             "-i", filepath_to_be_signed,
+                             "-o", autogen_directory + UNSIGNED_FOLDER,
+                             "-ta",
+                             "-g", SIGN_ID,
+                             "-c", sectools_directory + SECTOOLS_CONFIG_XML])
 
       shutil.copy((autogen_directory + UNSIGNED_FOLDER + DEFAULT_SIGN_DIR_ROOT + SIGN_ID
                    + "/" + output_xbl_config_filename)
                   ,output_unsigned_path)
 
-      subprocess.check_call(('"' + sys.executable + '" '+ sectools_directory + "/" + SECTOOLS_SCRIPT + SECTOOLS_COMMAND
-                             + " -i " + filepath_to_be_signed
-                             + " -o " + autogen_directory + SIGNED_FOLDER
-                             + " -sa "
-                             + " -g " + SIGN_ID
-                             +" -c " + sectools_directory + SECTOOLS_CONFIG_XML
-                             +" --cfg_segment_hash_algorithm " + "sha384"
-                             +" --cfg_soc_hw_version " + soc_hw_version
-                             +" --cfg_in_use_soc_hw_version " + SECTOOLS_IN_USE_SOC_HW_VERSION
-                             +" --cfg_soc_vers " + "\"" + soc_vers + "\""),  shell=True )
+      subprocess.check_call([sys.executable, sectools_directory + "/" + SECTOOLS_SCRIPT, SECTOOLS_COMMAND,
+                             "-i", filepath_to_be_signed,
+                             "-o", autogen_directory + SIGNED_FOLDER,
+                             "-sa",
+                             "-g", SIGN_ID,
+                             "-c", sectools_directory + SECTOOLS_CONFIG_XML,
+                             "--cfg_segment_hash_algorithm", "sha384",
+                             "--cfg_soc_hw_version", soc_hw_version,
+                             "--cfg_in_use_soc_hw_version", SECTOOLS_IN_USE_SOC_HW_VERSION,
+                             "--cfg_soc_vers", soc_vers])
 
       shutil.copy((autogen_directory + SIGNED_FOLDER + DEFAULT_SIGN_DIR_ROOT + SIGN_ID
                    + "/" + output_xbl_config_filename)
@@ -225,18 +226,18 @@ def sign_elf_v2(sectools_directory,
         print("*************  Generating Unsigned/Integrity Elf  ************\n")
         if os.path.isfile(filepath_to_be_signed):
           out_file = os.path.join(autogen_directory, "unsigned", output_xbl_config_filename)
-          CMD = (os.path.join(sectools_directory, V2_SECTOOLS_SCRIPT)
-            + " secure-image " + filepath_to_be_signed
-            + " --outfile " + out_file
-            + " --image-id " + sign_id
-            + " --security-profile " + security_profile
-            + " --hash")
+          CMD = [os.path.join(sectools_directory, V2_SECTOOLS_SCRIPT),
+                 "secure-image", filepath_to_be_signed,
+                 "--outfile", out_file,
+                 "--image-id", sign_id,
+                 "--security-profile", security_profile,
+                 "--hash"]
 
           if integrity_image_no_metadata:
-            CMD += str(" --platform-binding INDEPENDENT")
+            CMD += ["--platform-binding", "INDEPENDENT"]
 
-          print(CMD)
-          os.system(CMD)
+          print(" ".join(CMD))
+          subprocess.call(CMD)
           os.makedirs(os.path.join(output_xbl_config_directory, "unsigned"), exist_ok=True)
           shutil.copy(out_file, os.path.join(output_xbl_config_directory, "unsigned"))
           print("\n Unsigned/Integrity image: " + os.path.join(output_xbl_config_directory, "unsigned", output_xbl_config_filename) + "\n")
@@ -248,16 +249,18 @@ def sign_elf_v2(sectools_directory,
           out_file = os.path.join(autogen_directory, "sign", output_xbl_config_filename)
         else:
           out_file = os.path.join(autogen_directory, output_xbl_config_filename)
-        CMD = (os.path.join(sectools_directory, V2_SECTOOLS_SCRIPT)
-          + " secure-image " + filepath_to_be_signed
-          + " --outfile " + out_file
-          + " --image-id " + sign_id
-          + " --security-profile " + security_profile
-          + " --sign "
-          + " --signing-mode " + signing_mode
-          + " " + signing_params)
-        print(CMD)
-        os.system(CMD)
+        # signing_params is a free-form string of extra sectools options
+        # passed through from the command line; split it the way the shell
+        # used to so quoted values survive.
+        CMD = [os.path.join(sectools_directory, V2_SECTOOLS_SCRIPT),
+               "secure-image", filepath_to_be_signed,
+               "--outfile", out_file,
+               "--image-id", sign_id,
+               "--security-profile", security_profile,
+               "--sign",
+               "--signing-mode", signing_mode] + shlex.split(signing_params or "")
+        print(" ".join(CMD))
+        subprocess.call(CMD)
         if integrity_image_generation:
           os.makedirs(os.path.join(output_xbl_config_directory, "sign"), exist_ok=True)
           shutil.copy(out_file, os.path.join(output_xbl_config_directory, "sign"))
@@ -285,19 +288,19 @@ def disassemble_elf(config_file_to_be_disassembled,
                     tools_path):
   disassembled_elf_info_json = os.path.join(output_xbl_config_directory, DISASSEMBLED_ELF_INFO_JSON)
   # Execute the ELF Generator script to disassemable XBL-config elf
-  call_os_system("\"" + sys.executable + "\" \"" + tools_path + "/" +  ELF_GENERATOR_SCRIPT + "\"" +\
-                 " -d " + "\""+config_file_to_be_disassembled+"\"" + \
-                 " -o " + autogen_directory + \
-                 " -e " + disassembled_elf_info_json)
+  call_os_system([sys.executable, tools_path + "/" + ELF_GENERATOR_SCRIPT,
+                  "-d", config_file_to_be_disassembled,
+                  "-o", autogen_directory,
+                  "-e", disassembled_elf_info_json])
 
   out_create_xcfg_json = os.path.join(output_xbl_config_directory, OUT_CREATE_XCFG_JSON)
   # Call XBL config metadata generator to locate and parse xbl-config-metadata from
   #    disassembled elf segments, generate out_create_xcfg_json with
   #    xbl-config-items' file-name, config_name etc details
-  call_os_system("\"" + sys.executable + "\" \"" + tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT + "\"" +\
-                 " -d " + disassembled_elf_info_json + \
-                 " -o " + output_xbl_config_directory + \
-                 " -c " + out_create_xcfg_json)
+  call_os_system([sys.executable, tools_path + "/" + XBL_CONFIG_METADATA_SCRIPT,
+                  "-d", disassembled_elf_info_json,
+                  "-o", output_xbl_config_directory,
+                  "-c", out_create_xcfg_json])
 
   # prepare genxblcfg_command to display which can be used by user to re-generate
   #   xbl_config.elf using disassembled info "out_create_xcfg_json" as input
@@ -524,9 +527,9 @@ def create_elf(base_directory,
 
 
   # Execute the ELF Generator script
-  subprocess.check_call(("\"" + sys.executable + "\" \"" + tools_path + "/" +  ELF_GENERATOR_SCRIPT + "\""\
-                         " --cfg " + ELF_Generator_JSON_File + \
-                         " -a " + alignment),shell=True)
+  subprocess.check_call([sys.executable, tools_path + "/" + ELF_GENERATOR_SCRIPT,
+                         "--cfg", ELF_Generator_JSON_File,
+                         "-a", alignment])
   return
 
 ##############################################################################
