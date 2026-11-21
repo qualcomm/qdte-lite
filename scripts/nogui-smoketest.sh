@@ -77,6 +77,12 @@ edit "$FIXTURES/xbl_config.elf" xbl_config.elf \
     "$XBL_DTB/soc/ddr_common_dt/ddr_log_level_dt=0x7"
 verify "$OUT/xbl_config.elf" "ddr_log_level_dt = <0x00000007>" "xbl_config.elf"
 
+# A one-byte property (BYTES, not WORDS): --modify passes its value as a
+# string here too, so the core has to convert it the same way.
+edit "$FIXTURES/xbl_config.elf" xbl_config_bytes.elf \
+    "$XBL_DTB/soc/sdcc@7c4000/MaxSpeedMode=0x4"
+verify "$OUT/xbl_config_bytes.elf" "MaxSpeedMode = \[04\]" "BYTES property"
+
 # uefi_dtbs.elf: a pure-DTB container rebuilt natively.
 edit "$FIXTURES/uefi_dtbs.elf" uefi_dtbs.elf \
     "$UEFI_DTB/soc/quantum_dt/enter_quantum=0x1"

@@ -629,7 +629,18 @@ class DTOperationEditPropVal(DTOperation):
             prop.words = vals
         elif isinstance(prop, pyfdt.FdtPropertyBytes):
             self.val_old = prop.bytes
-            prop.bytes = self.val_new
+            for val in self.val_new:
+                if isinstance(val, type("")):
+                    # Same as for WORDS: --modify passes string tokens,
+                    # the GUI passes ints.
+                    val = int(val, 0)
+                if not -128 <= val <= 255:
+                    raise ValueError(
+                        "Invalid value for byte %d, requires -128 <= number <= 255"
+                        % val
+                    )
+                vals.append(val)
+            prop.bytes = vals
         elif isinstance(prop, pyfdt.FdtPropertyStrings):
             self.val_old = prop.strings
             prop.strings = self.val_new
